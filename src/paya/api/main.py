@@ -158,6 +158,21 @@ def _payment_request_view(pr_id) -> dict:
                                                              "display_status": CUSTOMER_STATUS[live.status]}}
 
 
+@app.get("/v1/payment-requests", tags=["merchant"])
+def list_payment_requests(status: str = "OPEN", p: Principal = Depends(principal)):
+    """Open tills near the customer (demo convenience when a camera scan is not possible)."""
+    if p.role not in ("CUSTOMER", "CASHIER", "MERCHANT_ADMIN") or not get_settings().demo_mode:
+        raise Forbidden("not available")
+    with session_scope() as s:
+        q = select(PaymentRequest.id).where(PaymentRequest.status == status,
+                                            PaymentRequest.expires_at > datetime.now(timezone.utc))
+        if p.merchant_id:
+            q = q.where(PaymentRequest.merchant_id == uuid.UUID(p.merchant_id))
+        ids = s.execute(q.order_by(PaymentRequest.created_at.desc()).limit(20)).scalars().all()
+    return [v for v in (_payment_request_view(i) for i in ids) if v["latest_payment"] is None
+            or v["latest_payment"]["status"] in ("REJECTED", "FAILED", "EXPIRED", "REVERSED")]
+
+
 @app.get("/v1/payment-requests/{pr_id}", tags=["merchant"])
 def get_payment_request(pr_id: uuid.UUID, p: Principal = Depends(principal)):
     view = _payment_request_view(pr_id)

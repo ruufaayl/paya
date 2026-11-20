@@ -54,6 +54,27 @@ Demo logins all use the password `paya-demo-2026` (synthetic, demo mode only):
 | `admin` | System administrator (chaos controls only, no financial actions) |
 | `auditor` | Read-only, verifies the audit hash chain |
 
+## Phone app and Mission Control (`/web`)
+
+`/web` is one React app with two experiences:
+
+- **`/app`** is the phone app, a PWA. It has customer wallets (scan, slide to pay, a live payment tracker) and the cashier till (keypad, Raast QR, a full-screen **PAID** confirmation with a spoken announcement once settlement is confirmed).
+- **`/control`** is Mission Control, a live map of every Paya component. Each payment shows up as a packet moving along the wires. Failures light up the nodes they hit, and human gates pulse until someone with the right role decides. The screen also has a chaos panel, a live event feed and a transaction inspector showing ledger entries, risk decisions, approvals and the audit hash chain. Every animation comes from a real backend event.
+
+```bash
+cd web && npm install && npm run dev      # http://localhost:5173  (API defaults to http://localhost:8000)
+```
+
+### Demo on an iPhone
+
+1. Run the backend on your laptop (`make up`). Expose it over HTTPS with a free tunnel:
+   ```bash
+   cloudflared tunnel --url http://localhost:8000
+   ```
+2. Deploy `/web` to Vercel (free Hobby plan): import the repo, set **Root Directory = `web`**, and optionally set `VITE_API_URL` to the tunnel URL. Alternatively, paste the tunnel URL into the start page. It is saved on each device.
+3. On the iPhone, open the Vercel URL, go to `/app`, then tap **Share → Add to Home Screen**. Open Mission Control on the laptop.
+4. Only ever show synthetic data on a public URL. Close the tunnel after the demo.
+
 ## Test
 
 ```bash
@@ -87,6 +108,7 @@ The suite covers the 10 scenarios the brief requires plus 3 from the Week 9 lect
 | `api` | `openapi.json` (sync contract) and `events/*.schema.json` (async contract) |
 | `docs/architecture` | ADRs, C4, BPMN, sequence diagrams, ERD, threat model |
 | `data` | Synthetic seed data only |
+| `web` | Phone app (PWA) and Mission Control (React, Vite, Tailwind, React Flow) |
 | `infra` | Dockerfile and Compose |
 | `evidence` | Test results, screenshots, recon output |
 | `AI_USE_LOG.md` | How generative AI was used, and how its output was verified |
