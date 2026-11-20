@@ -1,0 +1,28 @@
+# One-command local stack:  docker compose -f infra/docker-compose.yml up --build
+name: paya
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: paya
+      POSTGRES_PASSWORD: ${PAYA_DB_PASSWORD:-paya-local-only}
+      POSTGRES_DB: paya
+    ports: ["5432:5432"]
+    volumes: ["paya-db:/var/lib/postgresql/data"]   # survives restarts: transaction truth is preserved
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paya"]
+      interval: 5s
+      retries: 10
+  api:
+    image: paya-api:local
+    build: { context: .., dockerfile: infra/Dockerfile.api }
+    environment:
+      PAYA_DATABASE_URL: postgresql+psycopg://paya:${PAYA_DB_PASSWORD:-paya-local-only}@db:5432/paya
+      PAYA_JWT_SECRET: ${PAYA_JWT_SECRET:?set PAYA_JWT_SECRET in .env (32+ random characters)}
+      PAYA_DEMO_MODE: ${PAYA_DEMO_MODE:-true}
+    ports: ["8000:8000"]
+    depends_on:
+      db: { condition: service_healthy }
+    restart: unless-stopped
+volumes:
+  paya-db:

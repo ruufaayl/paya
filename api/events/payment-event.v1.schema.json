@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paya.local/schemas/payment-event.v1.json",
+  "title": "Paya payment state-change event (v1)",
+  "description": "Emitted via the transactional outbox for every transaction state change (payment.<state>). Delivery is at-least-once; consumers must de-duplicate on event_id.",
+  "type": "object",
+  "required": [
+    "event_id",
+    "seq",
+    "type",
+    "schema_version",
+    "aggregate_id",
+    "correlation_id",
+    "occurred_at",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique per event; the de-duplication key"
+    },
+    "seq": {
+      "type": "integer",
+      "description": "Monotonic outbox sequence (ordering)"
+    },
+    "type": {
+      "type": "string",
+      "pattern": "^payment\\.(created|validated|authorised|posted|pending|settled|reconciled|under_review|reversed|rejected|failed|expired)$"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "aggregate_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Transaction id"
+    },
+    "correlation_id": {
+      "type": "string"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payload": {
+      "type": "object",
+      "required": [
+        "txn_id",
+        "txn_ref",
+        "amount_minor"
+      ],
+      "properties": {
+        "txn_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "txn_ref": {
+          "type": "string",
+          "description": "Immutable business reference, e.g. PAYA-20261120-ED0F19"
+        },
+        "type": {
+          "enum": [
+            "PAYMENT",
+            "REVERSAL",
+            "REFUND"
+          ]
+        },
+        "from": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "to": {
+          "type": "string"
+        },
+        "amount_minor": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "PKR in paisa"
+        },
+        "currency": {
+          "const": "PKR"
+        },
+        "merchant_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "customer_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "customer_status": {
+          "type": "string",
+          "description": "What the customer/cashier may be shown"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "x-compatibility": "Adding optional fields is backward compatible. Renaming/removing fields or changing meaning requires schema_version 2 and a deprecation notice.",
+  "x-owner": "Payments / Transaction service",
+  "x-consumers": [
+    "notification-service",
+    "mission-control (live view)",
+    "reconciliation (future)"
+  ],
+  "x-privacy": "No personal data beyond internal ids; no names, IBANs or identity numbers."
+}
