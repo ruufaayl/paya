@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Paya case opened (v1)",
+  "type": "object",
+  "required": [
+    "event_id",
+    "seq",
+    "type",
+    "schema_version",
+    "correlation_id",
+    "occurred_at",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Unique per event; de-duplication key"
+    },
+    "seq": {
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "aggregate_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "correlation_id": {
+      "type": "string"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "type": {
+      "const": "case.opened"
+    },
+    "payload": {
+      "type": "object",
+      "required": [
+        "case_ref",
+        "kind",
+        "owner_role"
+      ],
+      "properties": {
+        "case_ref": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "COMPLIANCE_HOLD",
+            "PENDING_REVIEW",
+            "RECON_BREAK"
+          ]
+        },
+        "owner_role": {
+          "enum": [
+            "OPS",
+            "COMPLIANCE",
+            "FINANCE"
+          ]
+        },
+        "summary": {
+          "type": "string"
+        },
+        "txn_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  },
+  "x-owner": "Paya",
+  "x-delivery": "at-least-once via transactional outbox; consumers de-duplicate on event_id"
+}

@@ -294,3 +294,31 @@ def test_ledger_is_append_only_and_unbalanced_journals_are_refused(client, as_):
             s.add(j); s.flush()
             s.execute(text("INSERT INTO ledger_entries (journal_id, account_id, direction, amount_minor, created_at) "
                            "SELECT :j, id, 'D', 100, now() FROM accounts LIMIT 1"), {"j": j.id})
+
+
+# ---------------------------------------------------------------- Week 2 conformance check on the event log
+def test_conformance_no_settlement_without_authorisation_and_posting(client, as_):
+    """Replays the event log (case=txn, activity=to_status) and checks the designed order is never violated."""
+    pay(client, as_, new_request(client, as_, 10_000))
+    chaos.queue("TIMEOUT_AFTER_ACCEPT")
+    pay(client, as_, new_request(client, as_, 11_000))
+    payments.run_status_enquiries(force=True)
+    pay(client, as_, new_request(client, as_, 12_000), customer="zarak")
+    client.post("/v1/compliance/holds/" + detail_ref_of_open_hold() + "/decision", headers=as_("hamza.compliance"),
+                json={"decision": "RELEASE", "reason": "False positive after review"})
+    with session_scope() as s:
+        rows = s.execute(text("SELECT txn_id, to_status FROM transaction_status_history ORDER BY id")).all()
+    traces: dict = {}
+    for tid, to in rows:
+        traces.setdefault(tid, []).append(to)
+    settled = [t for t in traces.values() if "SETTLED" in t]
+    assert len(settled) == 3
+    for t in settled:
+        i = t.index("SETTLED")
+        assert "AUTHORISED" in t[:i] and "POSTED" in t[:i] and "PENDING" in t[:i], t
+
+
+def detail_ref_of_open_hold() -> str:
+    with session_scope() as s:
+        return s.execute(select(Transaction.txn_ref).join(Case, Case.txn_id == Transaction.id)
+                         .where(Case.kind == "COMPLIANCE_HOLD", Case.state == "OPEN")).scalar_one()

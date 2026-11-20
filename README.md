@@ -98,6 +98,7 @@ The suite covers the 10 scenarios the brief requires plus 3 from the Week 9 lect
 | S11 | Week 9 workshop: retry with a *new* key blocked by business idempotency | `test_s11_*` |
 | S12 | Rail outage → circuit breaker refuses before taking money | `test_s12_*` |
 | S13 | Same settlement file imported twice → refused | `test_s13_*` |
+| W2 | Process conformance over the event log (no settlement without authorisation and posting) | `test_conformance_*` |
 
 ## Repository map
 
@@ -106,7 +107,7 @@ The suite covers the 10 scenarios the brief requires plus 3 from the Week 9 lect
 | `src/paya` | Ledger, state machine, payments, risk, rail, recon, events, security, API |
 | `tests` | Automated normal and failure scenarios |
 | `api` | `openapi.json` (sync contract) and `events/*.schema.json` (async contract) |
-| `docs/architecture` | ADRs, C4, BPMN, sequence diagrams, ERD, threat model |
+| `docs/architecture` | Week 10 gate pack (`00-week10-gate-pack.md`), journey and scope, C4, contracts, sequences, state model, BPMN 2.0, ADRs; rendered diagrams in `rendered/` |
 | `data` | Synthetic seed data only |
 | `web` | Phone app (PWA) and Mission Control (React, Vite, Tailwind, React Flow) |
 | `infra` | Dockerfile and Compose |

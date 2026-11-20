@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Raast rail acknowledgement callback (v1, simulated)",
+  "type": "object",
+  "required": [
+    "event_id",
+    "e2e_id",
+    "status",
+    "type"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Callback id; de-duplication key in processed_events"
+    },
+    "type": {
+      "const": "rail.ack"
+    },
+    "e2e_id": {
+      "type": "string",
+      "description": "End-to-end id Paya sent with the credit"
+    },
+    "status": {
+      "enum": [
+        "ACCEPTED",
+        "REJECTED"
+      ]
+    }
+  },
+  "x-note": "May be duplicated or delayed by the rail. Applying it twice has no second effect."
+}
