@@ -1,6 +1,7 @@
 ---
 title: "Paya: Architecture and Design Dossier"
 subtitle: "CS3017 Enterprise Systems & Applications · Fall 2026 · Raast P2M merchant payment with ledger-grade assurance"
+author: "Rufayl Waseem (24i-5660) · Taha Ali (24i-5525) · Harris Safi (24i-5652) · Kanz ur Rehman (24i-5544) · Mudaser Waleed (24i-5681)"
 ---
 
 ## 1. Executive summary

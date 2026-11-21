@@ -35,6 +35,7 @@ function Inner() {
   const [pick, setPick] = useState<string>("TIMEOUT_AFTER_ACCEPT");
   const [runs, setRuns] = useState<Run[]>([]);
   const [busy, setBusy] = useState(false);
+  const [payer, setPayer] = useState<"sara" | "omar" | "zarak">("sara");
   const mode = state.data?.mode;
   const modes: string[] = state.data ? Object.keys(state.data.modes) : Object.keys(EXPECT);
 
@@ -49,7 +50,7 @@ function Inner() {
     const id = `run-${Date.now()}`;
     try {
       const pr = await call<any>("ayesha.cashier", "/v1/payment-requests", { method: "POST", body: JSON.stringify({ amount_minor: 1200_00, order_ref: `LAB-${Date.now().toString(36).toUpperCase()}` }) });
-      const r = await call<any>("sara", "/v1/payments", { method: "POST", idempotencyKey: newIdempotencyKey(), body: JSON.stringify({ payment_request_id: pr.data.id }) });
+      const r = await call<any>(payer, "/v1/payments", { method: "POST", idempotencyKey: newIdempotencyKey(), body: JSON.stringify({ payment_request_id: pr.data.id }) });
       setRuns((x) => [{ id, mode: mode || "?", txn_ref: r.data.txn_ref, at: new Date().toISOString() }, ...x].slice(0, 12));
     } catch (e: any) {
       setRuns((x) => [{ id, mode: mode || "?", txn_ref: null, at: new Date().toISOString(), error: e?.message || "refused" }, ...x].slice(0, 12));
@@ -91,7 +92,14 @@ function Inner() {
             <Button variant="secondary" loading={busy} icon={<Play className="h-4 w-4" />} onClick={trigger}>3. Trigger test payment</Button>
             {mode !== "NORMAL" && can("chaos:control") && <Button variant="ghost" icon={<CircleStop className="h-4 w-4" />} onClick={() => apply.mutate("NORMAL")}>Restore healthy</Button>}
           </div>
-          <p className="mt-2 text-caption text-fg-muted">Test payments are Rs 1,200 from synthetic Sara to Chai Junction's till.</p>
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-caption text-fg-2">
+            <span>Test payment of Rs 1,200 to Chai Junction's till, paid by</span>
+            <select aria-label="Test payment made by" value={payer} onChange={(e) => setPayer(e.target.value as "sara" | "omar" | "zarak")}
+              className="h-8 rounded-md border border-line-control bg-surface px-2 text-caption text-fg">
+              <option value="sara">Sara (synthetic, tier 2)</option><option value="omar">Omar (synthetic, tier 1)</option><option value="zarak">Zarak (synthetic, watch-list match)</option>
+            </select>
+            <span className="text-fg-muted">The velocity rule holds a 6th payment by one customer within 10 minutes.</span>
+          </div>
         </Card>
       </div>
 

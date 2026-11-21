@@ -6,11 +6,11 @@ The brief (§10): *"Each member must explain design decisions, code ownership, t
 
 | Member | Owns (be able to walk through the code) | Pack |
 |---|---|---|
-| A: _name_ | Product, journey, scope, assumptions, ethics; demo lead | [member-a.md](member-a.md) |
-| B: _name_ | Transaction state machine, idempotency, ledger (`state.py`, `idempotency.py`, `ledger.py`, `payments.py`) | [member-b.md](member-b.md) |
-| C: _name_ | Reconciliation, data model, integrity checks, AI triage (`recon.py`, `integrity.py`, `ai_*.py`) | [member-c.md](member-c.md) |
-| D: _name_ | Security, RBAC, SoD, KYC/AML rules, audit chain, threat model (`security.py`, `risk.py`, `audit.py`) | [member-d.md](member-d.md) |
-| E: _name_ | Rail and resilience, events, observability, Mission Control, PWA (`rail.py`, `events.py`, `worker.py`, `observability.py`, `web/`) | [member-e.md](member-e.md) |
+| A: **Rufayl Waseem** (24i-5660) | Product, journey, scope, assumptions, ethics; demo lead | [member-a.md](member-a.md) |
+| B: **Taha Ali** (24i-5525) | Transaction state machine, idempotency, ledger (`state.py`, `idempotency.py`, `ledger.py`, `payments.py`) | [member-b.md](member-b.md) |
+| C: **Harris Safi** (24i-5652) | Reconciliation, data model, integrity checks, AI triage (`recon.py`, `integrity.py`, `ai_*.py`) | [member-c.md](member-c.md) |
+| D: **Kanz ur Rehman** (24i-5544) | Security, RBAC, SoD, KYC/AML rules, audit chain, threat model (`security.py`, `risk.py`, `audit.py`) | [member-d.md](member-d.md) |
+| E: **Mudaser Waleed** (24i-5681) | Rail and resilience, events, observability, Mission Control, PWA (`rail.py`, `events.py`, `worker.py`, `observability.py`, `web/`) | [member-e.md](member-e.md) |
 
 ## Common core: everyone, from memory
 

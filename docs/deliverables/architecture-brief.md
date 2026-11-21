@@ -1,6 +1,7 @@
 ---
 title: "Paya: Architecture Brief"
 subtitle: "CS3017 Enterprise Systems & Applications · Fall 2026 · Raast P2M merchant payment with ledger-grade assurance"
+author: "Rufayl Waseem (24i-5660) · Taha Ali (24i-5525) · Harris Safi (24i-5652) · Kanz ur Rehman (24i-5544) · Mudaser Waleed (24i-5681)"
 ---
 
 **Paya** makes a Raast QR payment *provably* paid. The cashier sees **PAID** only when the rail has confirmed and a double-entry ledger has posted settlement. A customer's screen, a screenshot or a notification is never treated as proof. Paya is a **technology service provider** to a licensed partner EMI (synthetic). It holds no funds and no licence. **This is an academic prototype on synthetic data. No real money moves, the Raast rail is simulated, and the internal architecture is a proposed reference design, not a claim about any firm.**

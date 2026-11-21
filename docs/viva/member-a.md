@@ -1,4 +1,4 @@
-# Member A: product, journey, scope, ethics (demo lead)
+# Member A (Rufayl Waseem, 24i-5660): product, journey, scope, ethics (demo lead)
 
 **Read:**
 - `docs/architecture/01-journey-and-scope.md`
@@ -20,3 +20,9 @@
 | What would you never do? | Store real CNIC, biometric or card data; probe a real bank or Raast endpoint; present a stablecoin as a live payment method (PVARA/SBP rules) |
 | Why "conditional go"? | The integrity core is proven. The conditions are a partner sandbox, MFA/revocation/rate limits, separate DB roles, merchant validation, and an LLM evaluation |
 | Show me the evidence the demo is not faked | `make demo-reset && make rehearse` replays the demo and asserts every claim. Mission Control renders real backend events only |
+
+## Paya 2.0 and Theme 3 additions (also yours)
+
+- **Product and UX of Paya 2.0:** `docs/revamp/PAYA_PRODUCT_EXPERIENCE.md`, `PAYA_DESIGN_SYSTEM.md`, `CUSTOMER_WALLET_UX.md`. Be ready to explain why green means "confirmed by the ledger" and why a rail-accepted payment is shown as *processing*.
+- **Conversational banking (Theme 3):** `src/paya/assistant.py`, ADR-011, doc 17. Why there is no LLM in the loop; how redaction runs before anything else; why "send money" returns a link instead of a payment.
+- **Likely questions:** "What stops the assistant moving money?" (no money-moving imports, test C9). "What does the assistant store?" (redacted text, intent, tools used; 30 days).

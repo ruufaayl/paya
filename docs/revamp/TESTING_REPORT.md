@@ -66,6 +66,6 @@ Run on 2026-11-21 against PostgreSQL 16 and the real face models (YuNet/SFace), 
 ## Not covered / outstanding
 
 - **Frontend component unit tests** were not added. Behaviour is covered end to end by the acceptance run instead.
-- The **Week 14 demo rehearsal** (`docs/architecture/tools/demo_rehearsal.cjs`) and the **Theme 1 browser run** (`docs/architecture/tools/kyc_e2e.cjs`) target the 1.x UI selectors and will not run against 2.0 without updating. Their recorded 1.x evidence remains valid as history. The revamp acceptance run covers the same flows, and more, on 2.0. Update `docs/demo/demo-script.md` before the next demo.
+- The **demo rehearsal** (`demo_rehearsal.cjs`) and `docs/demo/demo-script.md` are rewritten for 2.0. The rehearsal passes 8/8 scenes on a fresh database (`evidence/demo/rehearsal-*.md`); the 1.x run is archived in `evidence/demo/v1/`. The **Theme 1 browser run** (`kyc_e2e.cjs`) still targets 1.x selectors; its flows are covered by the 2.0 acceptance run and the rehearsal.
 - No screen-reader user testing (see `ACCESSIBILITY_REVIEW.md`).
 - No load test of the new read endpoints. They are paginated and indexed on existing columns, but have not been measured under load.

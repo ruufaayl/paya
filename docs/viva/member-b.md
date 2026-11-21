@@ -1,4 +1,4 @@
-# Member B: transaction state machine, idempotency, ledger
+# Member B (Taha Ali, 24i-5525): transaction state machine, idempotency, ledger
 
 **Read:**
 - `src/paya/state.py`: `TRANSITIONS`, `transition()`
@@ -24,3 +24,9 @@
 | Walk me through a rail REJECT | `apply_rail_outcome` → `_reverse`: a new REVERSAL transaction linked by `original_txn_id`, journal Dr 2150 / Cr 2100, original → REVERSED (`test_s5_*`) |
 | What happens if the server dies between commit and the rail call? | The payment is PENDING with `rail_attempts = 0`. The worker's `dispatch_undispatched` claims and sends it (`test_s9_*`, drill D1) |
 | What would break if you removed the deferred balance trigger? | The app also checks balance in `ledger.post`, but manual SQL or a future bug could then insert one-sided entries. The DB guard is defence in depth |
+
+## Paya 2.0 additions (also yours)
+
+- **Authoritative payment screens:** `web/src/wallet/Txn.tsx` and `Review.tsx`. The headline comes only from the server status; the idempotency key is kept per payment request in `sessionStorage`, so a reload or retry cannot charge twice.
+- **Customer money trail:** the `money_trail` and `rail_status` fields added to `GET /v1/transactions/{ref}` (`api/main.py`). They are derived from journals, not computed in the browser.
+- **Likely question:** "Can the animation show Paid early?" No: the success mark only mounts when the status is SETTLED; see acceptance checks 7–9 in `docs/revamp/TESTING_REPORT.md`.

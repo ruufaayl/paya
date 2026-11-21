@@ -1,4 +1,4 @@
-# Member E: rail, resilience, events, observability, Mission Control
+# Member E (Mudaser Waleed, 24i-5681): rail, resilience, events, observability, Mission Control
 
 **Read:**
 - `src/paya/rail.py`: `MockRaastRail`, `Chaos`, `CircuitBreaker`
@@ -24,3 +24,10 @@
 | Why only ~16 payments/s? | ~60 ms CPU per payment in one Python process; extra latency at c=10 is queueing. Scaling path: more processes plus a separate worker (now safe thanks to the row locks) |
 | Is Mission Control scripted? | No. `effectOf()` maps live WebSocket events and telemetry to animations; refresh it and it shows the replay buffer |
 | How do you trace one payment in the logs? | `correlation_id` on every request log line and in-request telemetry; worker lines join on `txn_ref` |
+
+## Paya 2.0 additions (also yours)
+
+- **Mission Control 2.0:** `web/src/console/` (operator gate and shell, live stream de-duplicated by event id with reconnect and pause, inspectors, ten pages). Topology separates static architecture from observed runtime and never claims "healthy" from a colour.
+- **Rail lab:** all nine simulated rail scenarios, expected behaviour mapped to tests, trigger, observed outcome, recovery tools.
+- **Frontend architecture:** `docs/revamp/FRONTEND_ARCHITECTURE.md` (TanStack Query cache, Radix dialogs, self-hosted fonts, SVG charts), `MOTION_DESIGN_SYSTEM.md`, `ACCESSIBILITY_REVIEW.md` (axe 0 violations).
+- **Rehearsal:** `docs/architecture/tools/demo_rehearsal.cjs` drives the whole demo and asserts every claim.

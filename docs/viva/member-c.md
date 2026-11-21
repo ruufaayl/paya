@@ -1,4 +1,4 @@
-# Member C: reconciliation, data model, integrity checks, AI triage
+# Member C (Harris Safi, 24i-5652): reconciliation, data model, integrity checks, AI triage
 
 **Read:**
 - `src/paya/recon.py`: `run`, `verify_control_totals`
@@ -23,3 +23,9 @@
 | How do you know it can't move money? | `test_ai_has_no_money_moving_capability` parses the modules' source and fails on any import of ledger, payments, state or recon functions |
 | Are your 94% numbers circular? | The true cause is chosen first; the agent sees only generated evidence with noise and traps; the errors are reported (omission near cut-off) |
 | Show me the ERD | `rendered/erd-core.png`. The full ERD is generated from the code, so it cannot drift |
+
+## Paya 2.0 additions (also yours)
+
+- **Reconciliation workspace:** `web/src/console/pages/Recon.tsx` and `GET /v1/finance/recon/runs/{id}/items` (`api/ops.py`): every line with ledger vs rail amounts, difference and its case.
+- **Case management:** `GET /v1/cases/{ref}`, `POST /v1/cases/{ref}/assign` (owner role only, audited, moves no money), and the operations read models (`/v1/ops/overview`, `/v1/ops/timeseries`, `/v1/ops/transactions`). Tests O1–O9.
+- **AI operations page:** triage metrics plus the assistant's metrics (handoff, not-understood and redaction rates).

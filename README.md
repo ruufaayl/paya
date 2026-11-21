@@ -3,6 +3,7 @@
 **Payment pakka hai.** Paya is a Raast person-to-merchant (P2M) payment assurance platform. When a customer pays a shop by scanning a QR code, the cashier sees **PAID** only once the money has actually moved and been recorded in a double-entry ledger. Customer screens, screenshots and notifications are never treated as proof of payment.
 
 > **Academic prototype – CS3017 Enterprise Systems & Applications, Fall 2026.**
+> Team: Rufayl Waseem (24i-5660), Taha Ali (24i-5525), Harris Safi (24i-5652), Kanz ur Rehman (24i-5544), Mudaser Waleed (24i-5681).
 > All people, merchants, aliases and IBANs are synthetic. **No real money moves.** The Raast rail is a local simulator. Paya does not claim to describe the internal systems of SBP, any bank, EMI or PSP. Its architecture is a *proposed reference architecture*.
 
 ## The problem
