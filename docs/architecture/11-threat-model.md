@@ -40,8 +40,8 @@ flowchart LR
 
 | ID | STRIDE | Threat | Where | Preventive control (built) | Detective control (built) | Recovery control | Residual risk |
 |---|---|---|---|---|---|---|---|
-| T-01 | Spoofing | Credential stuffing or brute force on staff accounts | `/v1/auth/login` | Argon2id hashes; lock after 5 failures in 15 min (429) | Every failure and lockout in the audit chain; `security.login_locked` telemetry | Lock expires after 15 min; admin can deactivate the user (`users.active`) | **Medium.** Lockout and a 30/min per-address limit are durable and shared (ADR-016); residual: no MFA; shared demo password in demo mode |
-| T-02 | Spoofing | Stolen JWT replayed (e.g. via XSS) | PWA local storage | 60-min expiry; HS256 secret of 32+ chars from env; strict JSON APIs | Audit trail of actions per user and correlation ID | Rotate `PAYA_JWT_SECRET` to invalidate every token | **Medium.** No revocation list; tokens live in `localStorage`. Production: httpOnly cookies or OIDC with short-lived tokens |
+| T-01 | Spoofing | Credential stuffing or brute force on staff accounts | `/v1/auth/login` | Argon2id hashes; lock after 5 failures in 15 min (429) | Every failure and lockout in the audit chain; `security.login_locked` telemetry | Lock expires after 15 min; admin can deactivate the user (`users.active`) | **Low-medium.** Durable lockout and per-address limits (ADR-016); staff TOTP, required outside demo mode (ADR-017). Residual: shared demo password in demo mode, where MFA is opt-in |
+| T-02 | Spoofing | Stolen JWT replayed (e.g. via XSS) | PWA local storage | 60-min expiry; HS256 secret of 32+ chars from env; strict JSON APIs | Audit trail of actions per user and correlation ID | Rotate `PAYA_JWT_SECRET` to invalidate every token | **Low-medium.** Every token names a server-side session checked on each request, so a stolen token is revoked in seconds per person (ADR-017). Residual: tokens live in `localStorage`; production: httpOnly cookies or OIDC |
 | T-03 | Tampering | Changing an amount or ledger history after the fact | DB | Append-only triggers on ledger, journals, audit and status history; balanced-journal trigger; app has no UPDATE path | `GET /v1/audit/verify` hash chain; integrity check `trial_balance_balanced` | Restore from backup (drill D3); correcting journals | **Low.** The app connects as `paya_app` (ADR-015): no UPDATE/DELETE on evidence, cannot ALTER or disable triggers. Residual: a stolen *owner* credential, which the API never holds in Compose |
 | T-04 | Tampering | Double spending through concurrent or retried requests | `/v1/payments` | Idempotency key; one live payment per QR; wallet row lock; `UNIQUE(txn_id, posting_type)` | `no_negative_wallets`, `in_transit_equals_open_payments` checks | Compensating reversal | **Low.** Proven by S2, S11 and the concurrency regression test |
 | T-05 | Tampering | Forged or replayed rail acknowledgement | Rail callback path | Inbox de-duplication; acks matched by E2E id to our own outstanding payments only | Reconciliation against the settlement file (STATUS_MISMATCH, MISSING_INTERNAL) | Claim journal + Finance case | **Medium.** The mock has no message signing. Production: mTLS plus signed messages from the rail operator |
@@ -77,7 +77,7 @@ flowchart LR
 |---|---|---|---|---|
 | AP-1 | Attacker retries or races payment requests to spend the same balance twice | High (normal network behaviour causes it by accident) | High (money loss, broken ledger) | **1, mitigated and tested** |
 | AP-2 | Insider reverses a payment to themselves, or releases a sanctioned customer's hold, alone | Medium | High (fraud, regulatory breach) | **2, mitigated and tested** |
-| AP-3 | Stolen staff token used from another device | Medium | High | Next: revocation and MFA (gap) |
+| AP-3 | Stolen staff token used from another device | Medium | High | Revocation per session or per person, and staff TOTP (ADR-017) |
 | AP-4 | Forged rail callback marks an unpaid payment as settled | Low (needs network position) | High | Production control: mTLS and signing (gap in mock) |
 | AP-5 | Flood of payment requests during the rail outage | Medium | Medium | Breaker plus the per-client ceiling (ADR-016) |
 
@@ -98,6 +98,5 @@ flowchart LR
 ## 4. Gaps carried forward
 
 The following open risks are also listed in the technical debt register:
-- MFA and token revocation.
 - Signed rail messages.
 - `react-router` v7 upgrade.

@@ -10,7 +10,7 @@ Pakistan's instant payment system has crossed into everyday commerce. SBP's annu
 
 Paya is designed as a **technology service provider** to a licensed partner EMI, which is synthetic in this prototype. It never holds funds or claims a licence. The implemented journey is the brief's *merchant payment* with its linked *reversal*. It runs from channel to gateway, then identity and AML controls, ledger, rail, posting, settlement, reconciliation, notification and finance reporting.
 
-The prototype runs locally with one command. It is covered by 124 automated backend tests (the ten required scenarios plus concurrency, security, AI, migration and theme tests, all run as a data-only database role), by browser acceptance runs, and by GitHub Actions continuous integration. It has been measured:
+The prototype runs locally with one command. It is covered by 138 automated backend tests (the ten required scenarios plus concurrency, security, AI, migration and theme tests, all run as a data-only database role), by browser acceptance runs, and by GitHub Actions continuous integration. It has been measured:
 
 - **Recovery:** after a forced crash with payments in flight, the API was healthy in 1.3 s, and every payment settled exactly once within 6 s.
 - **Load:** 400 payments, including a storm of duplicate acknowledgements, with zero duplicate settlements.
@@ -334,7 +334,7 @@ The report names the main error: an omission that settled near cut-off looks lik
 - self-hosted fonts, so the PWA works offline;
 - a single status language in which **green means confirmed by the ledger**; uncertainty is shown as *processing*, never as success.
 
-The payment result is driven only by server status. A browser test samples the screen and the database together and fails if the screen says "Paid" before the ledger has settled. Accessibility was evaluated against WCAG 2.2 AA: zero automated violations on twenty-two screens, and computed contrast for every colour pairing. The backend gained read-only operations endpoints (search, time series, event history, reconciliation lines, audit log) and one control, case assignment, which moves no money. The financial modules were not modified.
+The payment result is driven only by server status. A browser test samples the screen and the database together and fails if the screen says "Paid" before the ledger has settled. Accessibility was evaluated against WCAG 2.2 AA: zero automated violations on twenty-three screens, and computed contrast for every colour pairing. The backend gained read-only operations endpoints (search, time series, event history, reconciliation lines, audit log) and one control, case assignment, which moves no money. The financial modules were not modified.
 
 **Theme 1: digital onboarding and KYC (ADR-010).** A customer opens a tier-1 wallet in about two minutes:
 
@@ -363,7 +363,7 @@ All five themes reuse the integrity core: cases, roles, the ledger, the audit ch
 **Limits we accept for a prototype, each with an owner in the technical-debt register:**
 
 - one API process caps near sixteen payments per second;
-- no multi-factor authentication or token revocation (rate limits are in place, ADR-016);
+- access tokens live in browser storage rather than httpOnly cookies, and there are no MFA recovery codes;
 - the simulated rail has no message signing, and its behaviour rests on assumptions A3 and A4 rather than Raast specifications;
 - the AI's LLM path is untested against a real model;
 - onboarding liveness is a basic active check, not certified presentation-attack detection, and the face recogniser has not been evaluated for accuracy or fairness on consented real faces;
@@ -382,11 +382,10 @@ Several of our best design improvements came from evidence rather than foresight
 **Recommendation: CONDITIONAL GO** for a controlled pilot on synthetic or partner-sandbox data, subject to:
 
 1. a licensed partner sandbox behind `RailPort`;
-2. multi-factor authentication and token revocation;
-3. merchant and cashier interviews validating assumption A1;
-4. any LLM passing the same evaluation before use.
+2. merchant and cashier interviews validating assumption A1;
+3. any LLM passing the same evaluation before use.
 
-Met since the review: separate database roles (ADR-015; the application cannot disable triggers or rewrite evidence) and rate limiting (ADR-016).
+Met since the review: separate database roles (ADR-015), rate limiting (ADR-016), and instant token revocation with staff two-step verification (ADR-017).
 
 # Appendices
 

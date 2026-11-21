@@ -51,6 +51,8 @@ PERMISSIONS: dict[str, set[str]] = {
     "access:read": {"AUDITOR", "SYSADMIN", "COMPLIANCE"},
     # Conversational banking: customers chat about their OWN data; staff read transcripts of handed-off chats.
     "assistant:use": {"CUSTOMER"},
+    # Sessions and MFA (ADR-017): an administrator can end anyone's sessions or reset their MFA (never their own).
+    "sessions:revoke": {"SYSADMIN"},
     # Green banking: a customer's footprint, pot and offsets are their own; staff see portfolio aggregates only.
     "green:use": {"CUSTOMER"},
     # Super app: customers use partner services; Compliance owns third-party risk (suspend / resume a partner).
@@ -72,6 +74,7 @@ class Principal:
     role: str
     customer_id: str | None = None
     merchant_id: str | None = None
+    sid: str | None = None   # the session this token belongs to (ADR-017); checked on every request
 
 
 def hash_password(pw: str) -> str:
@@ -85,10 +88,12 @@ def verify_password(pw: str, hashed: str) -> bool:
         return False
 
 
-def issue_token(p: Principal, ttl_minutes: int | None = None) -> str:
+def issue_token(p: Principal, ttl_minutes: int | None = None, sid: str | None = None) -> str:
     cfg = get_settings()
     claims = {"sub": p.user_id, "usr": p.username, "role": p.role, "cid": p.customer_id, "mid": p.merchant_id,
               "iat": now(), "exp": now() + timedelta(minutes=ttl_minutes or cfg.jwt_ttl_minutes)}
+    if sid:
+        claims["sid"] = sid
     return jwt.encode(claims, cfg.jwt_secret, algorithm="HS256")
 
 
@@ -97,8 +102,10 @@ def decode_token(token: str) -> Principal:
         c = jwt.decode(token, get_settings().jwt_secret, algorithms=["HS256"])
     except jwt.PyJWTError as exc:
         raise Unauthenticated("invalid or expired token") from exc
+    if "scope" in c:   # an MFA challenge is not an access token
+        raise Unauthenticated("not an access token")
     return Principal(user_id=c["sub"], username=c["usr"], role=c["role"], customer_id=c.get("cid"),
-                     merchant_id=c.get("mid"))
+                     merchant_id=c.get("mid"), sid=c.get("sid"))
 
 
 def can(p: Principal, permission: str) -> bool:

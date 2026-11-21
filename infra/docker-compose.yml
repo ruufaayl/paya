@@ -33,6 +33,9 @@ services:
       # The API holds the APP role only: it cannot ALTER, DROP, TRUNCATE, disable triggers or rewrite evidence.
       PAYA_DATABASE_URL: postgresql+psycopg://paya_app:${PAYA_APP_DB_PASSWORD:-paya-app-local-only}@db:5432/paya
       PAYA_MIGRATE_ON_START: "false"
+      # Staff MFA (ADR-017): unset = required outside demo mode, opt-in in demo mode. Set a real key in production.
+      PAYA_MFA_ENFORCED: ${PAYA_MFA_ENFORCED:-}
+      PAYA_MFA_ENCRYPTION_KEY: ${PAYA_MFA_ENCRYPTION_KEY:-}
       PAYA_JWT_SECRET: ${PAYA_JWT_SECRET:?set PAYA_JWT_SECRET in .env (32+ random characters)}
       PAYA_DEMO_MODE: ${PAYA_DEMO_MODE:-true}
       PAYA_VELOCITY_MAX_PAYMENTS: ${PAYA_VELOCITY_MAX_PAYMENTS:-5}   # raised only for load tests

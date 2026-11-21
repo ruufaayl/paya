@@ -26,7 +26,7 @@ def test_m1_models_and_migrations_agree(client):
 
 def test_m2_database_is_at_head_and_upgrade_is_idempotent(client):
     first = migrate.upgrade()
-    assert first["revision"] == migrate.upgrade()["revision"] == migrate.head_revision() == "0003"
+    assert first["revision"] == migrate.upgrade()["revision"] == migrate.head_revision()
     assert first["app_role"] == "paya_app" and first["stamped_legacy_database"] is False
 
 
@@ -58,9 +58,13 @@ def test_m5_legacy_database_is_stamped_not_rebuilt(client, as_):
     pay(client, as_, new_request(client, as_, 7_000))
     with session_scope() as s:
         before = s.execute(select(func.count()).select_from(Transaction)).scalar()
-    with owner().begin() as c:                       # a database made by create_all before migrations existed:
-        c.execute(text("DROP TABLE alembic_version"))  # no version table, and none of the later tables
-        c.execute(text("DROP TABLE rate_limit_counters"))
+    # A database made by create_all before migrations existed: the baseline's tables, no version table.
+    from alembic import command
+    with owner().begin() as c:
+        cfg = migrate._config(migrate.owner_url())
+        cfg.attributes["connection"] = c
+        command.downgrade(cfg, migrate.BASELINE)       # removes everything added after the baseline
+        c.execute(text("DROP TABLE alembic_version"))
     out = migrate.upgrade()
     assert out["stamped_legacy_database"] is True and out["revision"] == migrate.head_revision()
     with session_scope() as s:

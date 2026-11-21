@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-21T20:54:19.900Z",
+  "at": "2026-11-21T21:31:22.724Z",
   "passed": 14,
   "failed": 0,
   "results": [
@@ -11,7 +11,7 @@
     {
       "n": "bill opens the normal review with the server's amount",
       "ok": true,
-      "note": "Rs 5492"
+      "note": "Rs 2928"
     },
     {
       "n": "order is Done only after the payment settled",

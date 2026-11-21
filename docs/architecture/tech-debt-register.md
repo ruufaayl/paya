@@ -8,8 +8,8 @@
 | Local JWT auth instead of an identity provider (e.g. Keycloak) | Security lead | Temporary | Keep for the prototype; document the OIDC path |
 | Single-node PostgreSQL (RPO = last committed transaction while the volume survives; last dump if it is lost) | DevOps | Accepted for the prototype | Documented RTO/RPO; `pg_dump` in the runbook |
 | Balances computed by aggregation | Integrity lead | Accepted | Add a balance projection if load tests require it |
-| ~~Login lockout state is in-process (resets on restart)~~ | Security lead | **Done (ADR-016)** | Lockout in PostgreSQL, shared and durable. MFA for staff remains open |
-| No JWT revocation list; tokens in browser localStorage | Security lead | Temporary | Short-lived tokens via OIDC + httpOnly cookies |
+| ~~Login lockout state is in-process (resets on restart)~~ | Security lead | **Done (ADR-016)** | Lockout in PostgreSQL, shared and durable. Staff MFA: done (ADR-017) |
+| ~~No JWT revocation~~; tokens in browser localStorage | Security lead | **Revocation done (ADR-017)**; storage temporary | Server-side sessions checked on every request. Remaining: httpOnly cookies or OIDC; MFA recovery codes |
 | ~~No general API rate limiting~~ | Security lead | **Done in the app (ADR-016)** | Per-client ceiling on every `/v1` call; move it to a gateway in production |
 | ~~App DB role could ALTER tables (disable triggers)~~ | Integrity lead | **Done (ADR-015)** | `paya_app` is data-only, no UPDATE/DELETE on evidence; the API never holds owner credentials (`evidence/security/db-roles-2026-11-21.md`) |
 | Mock rail has no message signing | Integrity lead | Strategic (mock) | mTLS + signed messages with the real operator |

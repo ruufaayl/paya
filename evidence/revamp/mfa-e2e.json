@@ -1,0 +1,79 @@
+{
+  "at": "2026-11-21T21:18:03.606Z",
+  "passed": 12,
+  "failed": 0,
+  "results": [
+    {
+      "phase": "optin",
+      "n": "enrolled from the Security page",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "optin",
+      "n": "password alone returns a challenge, not an access token",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "optin",
+      "n": "wrong code refused in the console",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "optin",
+      "n": "right code opens Mission Control",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "optin",
+      "n": "the other browser is told its session was ended (no silent re-login)",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "optin",
+      "n": "after a reload: still not signed in (asks for a code again)",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "optin",
+      "n": "admin ends Sana's sessions: her token stops at once",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "optin",
+      "n": "staff table shows Hamza's two-step verification on",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "optin",
+      "n": "wallet sign-out revokes the token on the server",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "enforced",
+      "n": "enforced: staff password alone yields only a set-up challenge",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "enforced",
+      "n": "enforced: console opens only after the authenticator is set up",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "enforced",
+      "n": "enforced: customers are not affected",
+      "ok": true,
+      "note": ""
+    }
+  ]
+}

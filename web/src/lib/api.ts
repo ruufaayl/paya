@@ -33,21 +33,70 @@ export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string, public body?: any) { super(message); }
 }
 
-export async function login(username: string, password = DEMO_PASSWORD): Promise<Session> {
-  const r = await fetch(`${apiBase()}/v1/auth/login`, {
-    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ username, password }),
-  });
-  const body = await r.json().catch(() => ({}));
-  if (!r.ok) throw new ApiError(r.status, body?.error?.code || "LOGIN_FAILED", body?.error?.message || "Login failed");
+// ---- MFA and revocation (ADR-017) ----------------------------------------------------------------
+// A staff sign-in may need a second factor. The screen that can ask for it registers a handler; without
+// one (the customer wallet) such a sign-in fails with MFA_REQUIRED.
+export interface MfaChallenge { username: string; kind: "mfa" | "setup"; challenge: string }
+type MfaHandler = (c: MfaChallenge) => Promise<Session>;
+let mfaHandler: MfaHandler | null = null;
+export function setMfaHandler(fn: MfaHandler | null) { mfaHandler = fn; }
+
+// A session ended by sign-out elsewhere, an administrator or an MFA change must NOT be silently re-opened
+// with the demo password: the user signs in again explicitly.
+const endedReason: Record<string, string> = {};
+type EndedListener = (username: string, reason: string) => void;
+const endedListeners = new Set<EndedListener>();
+export function onSessionEnded(fn: EndedListener) { endedListeners.add(fn); return () => { endedListeners.delete(fn); }; }
+
+function store(username: string, body: any): Session {
   const s: Session = { username, token: body.access_token, role: body.role, display_name: body.display_name,
     customer_id: body.customer_id || undefined, merchant_id: body.merchant_id || undefined };
   memSessions = { ...memSessions, [username]: s };
   saveSessions();
+  delete endedReason[username];
   return s;
 }
 
+async function post(path: string, payload: unknown): Promise<any> {
+  const r = await fetch(`${apiBase()}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new ApiError(r.status, body?.error?.code || "ERROR", body?.error?.message || r.statusText, body);
+  return body;
+}
+
+export async function login(username: string, password = DEMO_PASSWORD): Promise<Session> {
+  const body = await post("/v1/auth/login", { username, password }).catch((e: ApiError) => {
+    throw e.code === "ERROR" ? new ApiError(e.status, "LOGIN_FAILED", "Login failed") : e;
+  });
+  if (body.mfa_required || body.mfa_setup_required) {
+    const c: MfaChallenge = { username, kind: body.mfa_required ? "mfa" : "setup", challenge: body.challenge };
+    if (!mfaHandler) throw new ApiError(401, "MFA_REQUIRED", "This account needs a verification code. Use Mission Control.");
+    return mfaHandler(c);
+  }
+  return store(username, body);
+}
+
+export async function verifyMfa(username: string, challenge: string, code: string): Promise<Session> {
+  return store(username, await post("/v1/auth/mfa/verify", { challenge, code }));
+}
+export async function startMfaSetup(challenge: string): Promise<{ secret: string; otpauth_uri: string }> {
+  return post("/v1/auth/mfa/setup", { challenge });
+}
+export async function confirmMfaSetup(username: string, challenge: string, code: string): Promise<Session> {
+  return store(username, await post("/v1/auth/mfa/setup/confirm", { challenge, code }));
+}
+
+/** Sign out on the server (the token stops working everywhere at once), then forget it here. */
+export async function logout(username: string) {
+  const s = memSessions[username];
+  if (s) await fetch(`${apiBase()}/v1/auth/logout`, { method: "POST", headers: { authorization: `Bearer ${s.token}` } }).catch(() => {});
+  forget(username);
+}
+
 export async function ensure(username: string): Promise<Session> {
-  return memSessions[username] || login(username);
+  if (memSessions[username]) return memSessions[username];
+  if (endedReason[username]) throw new ApiError(401, "SESSION_ENDED", `Your session was ended (${endedReason[username]}). Sign in again.`);
+  return login(username);
 }
 
 export async function call<T = any>(as: string, path: string, init: RequestInit & { idempotencyKey?: string } = {}): Promise<{ data: T; headers: Headers; status: number }> {
@@ -56,8 +105,12 @@ export async function call<T = any>(as: string, path: string, init: RequestInit 
   if (init.body) headers["content-type"] = "application/json";
   if (init.idempotencyKey) headers["Idempotency-Key"] = init.idempotencyKey;
   const r = await fetch(`${apiBase()}${path}`, { ...init, headers });
-  if (r.status === 401) { forget(as); }
   const body = await r.json().catch(() => ({}));
+  if (r.status === 401) {
+    forget(as);
+    const reason = body?.error?.reason;
+    if (reason) { endedReason[as] = reason; endedListeners.forEach((fn) => fn(as, reason)); }
+  }
   if (!r.ok) throw new ApiError(r.status, body?.error?.code || "ERROR", body?.error?.message || r.statusText, body);
   return { data: body as T, headers: r.headers, status: r.status };
 }

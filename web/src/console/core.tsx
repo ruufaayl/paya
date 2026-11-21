@@ -5,7 +5,7 @@ import { Lock } from "lucide-react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import { EmptyState } from "../ds/ui";
-import { call, ensure, wsUrl } from "../lib/api";
+import { call, ensure, login, logout, sessions, wsUrl } from "../lib/api";
 import type { StreamMsg } from "../lib/stream";
 
 // ------------------------------------------------------------------ operator
@@ -34,7 +34,8 @@ export function useCan() {
 }
 
 export async function loadOperator(username: string): Promise<Operator> {
-  await ensure(username);
+  // An explicit choice of operator: sign in if there is no live session (asks for a code when MFA is on).
+  if (!sessions()[username]) await login(username);
   const me = (await call<any>(username, "/v1/me")).data;
   const staff = STAFF.find((s) => s.username === username);
   return { username, role: me.role, permissions: me.permissions, display_name: staff ? `${staff.name} · ${staff.title}` : username };
@@ -45,7 +46,7 @@ export function OperatorProvider({ op, setOp, children }: { op: Operator; setOp:
   const value = useMemo(() => ({
     op,
     switchTo: async (u: string) => { const next = await loadOperator(u); try { localStorage.setItem(OP_KEY, u); } catch { /* */ } qc.clear(); setOp(next); },
-    signOut: () => { try { localStorage.removeItem(OP_KEY); } catch { /* */ } qc.clear(); setOp(null); },
+    signOut: () => { void logout(op.username); try { localStorage.removeItem(OP_KEY); } catch { /* */ } qc.clear(); setOp(null); },
   }), [op, setOp, qc]);
   return <OpCtx.Provider value={value}>{children}</OpCtx.Provider>;
 }

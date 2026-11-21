@@ -38,6 +38,11 @@ class User(Base):
     customer_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("customers.id"))
     merchant_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("merchants.id"))
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    # Staff MFA (ADR-017): TOTP secret encrypted with AES-GCM; never stored or logged in clear.
+    mfa_secret_enc: Mapped[str | None] = mapped_column(Text)
+    mfa_pending_enc: Mapped[str | None] = mapped_column(Text)        # during enrolment, until a code confirms it
+    mfa_enrolled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    mfa_last_step: Mapped[int | None] = mapped_column(BigInteger)     # replay protection: a code works once
     created_at: Mapped[datetime] = TS()
     __table_args__ = (
         CheckConstraint(
@@ -594,3 +599,20 @@ class RateLimitCounter(Base):
     window_start: Mapped[int] = mapped_column(BigInteger, primary_key=True)   # epoch seconds
     count: Mapped[int] = mapped_column(Integer, nullable=False)
     __table_args__ = (Index("ix_rate_limit_window", "window_start"),)
+
+
+# ---------------------------------------------------------------- Sessions (ADR-017)
+class AuthSession(Base):
+    """One sign-in. Every access token names its session; a revoked, expired or deactivated-user session
+    is refused on the next request, so revocation is immediate."""
+    __tablename__ = "auth_sessions"
+    id: Mapped[uuid.UUID] = UUIDPK()
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    mfa: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)   # signed in with a second factor
+    user_agent: Mapped[str | None] = mapped_column(String(120))
+    created_at: Mapped[datetime] = TS()
+    last_seen_at: Mapped[datetime] = TS()
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoked_by: Mapped[str | None] = mapped_column(String(64))
+    revoked_reason: Mapped[str | None] = mapped_column(String(128))

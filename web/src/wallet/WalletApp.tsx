@@ -1,11 +1,11 @@
 // Paya Wallet: the customer (and cashier) phone experience. Light, calm, mobile-first.
 import { AnimatePresence, motion } from "framer-motion";
 import { Home, LayoutGrid, ListOrdered, ScanLine, UserRound } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { dur, ease } from "../ds/motion";
 import { cx } from "../ds/ui";
-import { forget, session } from "../lib/api";
+import { logout, onSessionEnded, session } from "../lib/api";
 import { useTheme } from "../lib/hooks";
 import Account from "./Account";
 import Activity from "./Activity";
@@ -32,10 +32,13 @@ export default function WalletApp() {
   const [user, setUser] = useState<string | null>(read());
   const s = user ? session(user) : undefined;
   const signIn = (u: string) => { write(u); setUser(u); nav("/app", { replace: true }); };
-  const signOut = () => { if (user) forget(user); write(null); setUser(null); nav("/app", { replace: true }); };
+  const signOut = () => { if (user) void logout(user); write(null); setUser(null); nav("/app", { replace: true }); };
+  // Signed out elsewhere ("sign out everywhere", an administrator): back to sign-in, no silent re-login.
+  const [ended, setEnded] = useState<string | null>(null);
+  useEffect(() => onSessionEnded((u, reason) => { if (u === user) { setEnded(reason); write(null); setUser(null); } }), [user]);
 
   if (loc.pathname.startsWith("/app/open")) return <Onboarding onDone={signIn} />;
-  if (!user || !s) return <SignIn onSignedIn={signIn} />;
+  if (!user || !s) return <SignIn onSignedIn={(u) => { setEnded(null); signIn(u); }} notice={ended ? `You were signed out (${ended}). Sign in again.` : undefined} />;
   if (s.role === "CASHIER" || s.role === "MERCHANT_ADMIN") return <Cashier user={user} onSignOut={signOut} />;
   if (s.role !== "CUSTOMER") return <SignIn onSignedIn={signIn} notice="Staff accounts use Mission Control, not the wallet." />;
 

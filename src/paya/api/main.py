@@ -25,10 +25,10 @@ from ..models import (
     ReconItem, ReconRun, ScreeningResult, Transaction, TransactionStatusHistory, User,
 )
 from ..rail import MODES, breaker, chaos, rail
-from ..security import Principal, can, decode_token, issue_token, require, verify_password
+from ..security import Principal, can, decode_token, require, verify_password
 from ..state import CUSTOMER_STATUS
 from ..observability import configure_logging, current_correlation, emit, metrics as http_metrics
-from .. import ratelimit
+from .. import auth, ratelimit
 from ..worker import Worker
 import time
 
@@ -124,7 +124,9 @@ async def paya_error(request: Request, exc: PayaError):
 def principal(authorization: Annotated[str | None, Header()] = None) -> Principal:
     if not authorization or not authorization.lower().startswith("bearer "):
         raise Unauthenticated("missing bearer token")
-    return decode_token(authorization.split(" ", 1)[1])
+    p = decode_token(authorization.split(" ", 1)[1])
+    auth.check(p, p.sid)   # revoked, expired or deactivated: refused now, not at token expiry (ADR-017)
+    return p
 
 
 def authorised(permission: str):
@@ -173,21 +175,15 @@ def login(body: LoginIn, request: Request):
         ratelimit.hit("login_fail", body.username, raise_on_limit=False)
         raise Unauthenticated("invalid username or password")
     ratelimit.clear("login_fail", body.username)
-    with session_scope() as s:
-        u = s.execute(select(User).where(User.username == body.username)).scalar_one()
-        p = Principal(user_id=str(u.id), username=u.username, role=u.role,
-                      customer_id=str(u.customer_id) if u.customer_id else None,
-                      merchant_id=str(u.merchant_id) if u.merchant_id else None)
-        audit.record(s, actor=u.username, actor_role=u.role, action="LOGIN", object_type="session", object_id=None,
-                     correlation_id=request.state.correlation_id)
-        return {"access_token": issue_token(p), "token_type": "bearer", "role": u.role, "display_name": u.display_name,
-                "customer_id": p.customer_id, "merchant_id": p.merchant_id}
+    # Password right. Staff with MFA (or under enforcement) get only a 5-minute challenge here (ADR-017).
+    return auth.after_password(u, user_agent=request.headers.get("user-agent"),
+                               correlation_id=request.state.correlation_id)
 
 
 @app.get("/v1/me", tags=["auth"])
 def me(p: Principal = Depends(principal)):
     from ..security import permissions_for
-    return {**p.__dict__, "permissions": permissions_for(p.role)}
+    return {**p.__dict__, "permissions": permissions_for(p.role), "security": auth.status(p.user_id, p.sid)}
 
 
 # ------------------------------------------------------------------ merchant
@@ -759,6 +755,7 @@ def chaos_duplicate(p: Principal = Depends(authorised("chaos:control"))):
 async def stream(ws: WebSocket, token: str = Query(...)):
     try:
         p = decode_token(token)
+        auth.check(p, p.sid)
     except PayaError:
         await ws.close(code=4401)
         return
@@ -826,6 +823,10 @@ app.include_router(ops_router)
 from .green_api import router as green_router  # noqa: E402
 
 app.include_router(green_router)
+
+from .auth_api import router as auth_router  # noqa: E402
+
+app.include_router(auth_router)
 
 from .services_api import router as services_router  # noqa: E402
 

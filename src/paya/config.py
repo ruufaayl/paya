@@ -1,6 +1,7 @@
 """Runtime configuration. All values come from environment variables (see .env.example)."""
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -58,6 +59,17 @@ class Settings(BaseSettings):
     rate_assistant_per_customer_per_minute: int = 20
     rate_general_per_client_per_minute: int = 600   # every /v1 call, per signed-in user (else per address)
     trust_forwarded_for: bool = False              # only behind a reverse proxy you control
+
+    # Sessions and staff MFA (ADR-017)
+    mfa_enforced: bool | None = None         # None = enforced unless demo_mode; enrolled staff always need a code
+    mfa_encryption_key: str | None = None    # base64 32 bytes for AES-GCM; dev fallback derives one from jwt_secret
+    mfa_challenge_minutes: int = 5
+    mfa_max_attempts: int = 5                # code attempts per user per 5 minutes
+
+    @field_validator("mfa_enforced", "mfa_encryption_key", "migration_database_url", "app_db_password", mode="before")
+    @classmethod
+    def _empty_is_unset(cls, v):
+        return None if v == "" else v   # docker compose passes "" for an unset ${VAR:-}
 
     # Stablecoin sandbox (Theme 5). OFF unless explicitly enabled. Test tokens only; no rupee conversion.
     stablecoin_sandbox: bool = False

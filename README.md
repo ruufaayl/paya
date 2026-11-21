@@ -107,6 +107,10 @@ Stablecoin payments aren't permitted for Paya under PVARA/SBP rules, so this is 
 
 The schema is managed by Alembic (`src/paya/migrations`): `make migrate` upgrades to the latest revision as the schema owner and grants the app role data privileges only. In Docker Compose a one-shot `migrate` service does this, and the API connects as `paya_app`, which cannot alter tables, disable the ledger's triggers, or update or delete ledger, journal, audit or status-history rows. A database created before migrations existed is stamped and upgraded, never rebuilt. Design: ADR-015. Evidence: `evidence/security/db-roles-2026-11-21.md`.
 
+## Sessions and two-step verification
+
+Every access token belongs to a server-side session checked on each request, so signing out, "sign out everywhere else", an administrator ending someone's sessions, or deactivating a user stops the token immediately. Staff can turn on two-step verification (any authenticator app, RFC 6238) from Mission Control → **Security**. Outside demo mode it is required for staff, and the password alone gives no access. Secrets are encrypted with `PAYA_MFA_ENCRYPTION_KEY`. Design: ADR-017.
+
 ## Test
 
 ```bash

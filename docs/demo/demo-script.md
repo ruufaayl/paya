@@ -102,7 +102,7 @@
 
 *Show:* Mission Control **Audit & access** (as Auditor: chain intact, denials listed), then `docs/revamp/TESTING_REPORT.md`.
 
-> "124 backend tests cover the required scenarios and more. The browser acceptance run checks 33 claims on a fresh database, and the rehearsal you just watched is automated too. Accessibility is scanned with zero violations. The limits: one process at about 16 payments a second, no MFA or token revocation yet, a simulated rail and registry, and liveness that is basic rather than certified. Our recommendation is a **conditional go**."
+> "138 backend tests cover the required scenarios and more. The browser acceptance run checks 33 claims on a fresh database, and the rehearsal you just watched is automated too. Accessibility is scanned with zero violations. The limits: one process at about 16 payments a second, tokens still in browser storage, a simulated rail and registry, and liveness that is basic rather than certified. Our recommendation is a **conditional go**."
 
 ## If something goes wrong live
 

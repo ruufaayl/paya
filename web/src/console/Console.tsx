@@ -1,7 +1,7 @@
 // Paya Mission Control: a financial-operations console. Every number is read from the backend; every action is
 // performed as the signed-in operator and checked by the server.
 import {
-  Activity, ArrowLeftRight, Bot, ChevronDown, FileCheck2, FlaskConical, Gauge, FlaskRound, Leaf, Store, LogOut, Menu, Network, Radio, Search,
+  Activity, ArrowLeftRight, Bot, ChevronDown, FileCheck2, FlaskConical, Gauge, FlaskRound, KeyRound, Leaf, Store, LogOut, Menu, Network, Radio, Search,
   ShieldCheck, ScrollText, UserCheck, UserRoundCog, Users,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -10,11 +10,13 @@ import { Badge, Button, Card, Dot, Logo, Spinner, cx } from "../ds/ui";
 import { ApiError } from "../lib/api";
 import { useApi, useTheme } from "../lib/hooks";
 import { CaseInspector, KycInspector, TxnInspector } from "./inspectors";
+import { MfaPrompt, SessionEndedNotice } from "./Mfa";
 import { OP_KEY, OperatorProvider, STAFF, StreamProvider, loadOperator, useCan, useLive, useOperator, type Operator } from "./core";
 import AiOps from "./pages/AiOps";
 import GreenPage from "./pages/Green";
 import Partners from "./pages/Partners";
 import SandboxPage from "./pages/SandboxPage";
+import Security from "./pages/Security";
 import Audit from "./pages/Audit";
 import Cases from "./pages/Cases";
 import Events from "./pages/Events";
@@ -45,6 +47,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
   { group: "Control", items: [
     { to: "/control/rail-lab", label: "Rail lab", icon: FlaskConical, perm: "backoffice:read" },
     { to: "/control/audit", label: "Audit & access", icon: ScrollText, perm: "audit:read" },
+    { to: "/control/security", label: "Security", icon: KeyRound, perm: "backoffice:read" },
   ] },
 ];
 
@@ -52,26 +55,32 @@ export default function Console() {
   useTheme("console");
   const [op, setOp] = useState<Operator | null>(null);
   const [booting, setBooting] = useState(true);
+  const [notice, setNotice] = useState<string | null>(null);
   useEffect(() => {
     let u: string | null = null;
     try { u = localStorage.getItem(OP_KEY); } catch { /* */ }
     if (!u) { setBooting(false); return; }
-    loadOperator(u).then(setOp).catch(() => undefined).finally(() => setBooting(false));
+    loadOperator(u).then(setOp).catch((e) => {
+      const reason = e instanceof ApiError ? e.body?.error?.reason : undefined;
+      if (reason) setNotice(`${u}'s session was ended (${reason}). Sign in again.`);   // never silently re-opened
+    }).finally(() => setBooting(false));
   }, []);
-  if (booting) return <div className="grid h-full place-items-center bg-canvas"><Spinner className="h-6 w-6" /></div>;
-  if (!op) return <OperatorGate onReady={setOp} />;
+  if (booting) return <div className="grid h-full place-items-center bg-canvas"><Spinner className="h-6 w-6" /><MfaPrompt /></div>;
+  if (!op) return <><OperatorGate onReady={setOp} notice={notice} /><MfaPrompt /></>;
   return (
     <OperatorProvider op={op} setOp={setOp}>
       <StreamProvider as={op.username}>
         <Shell />
       </StreamProvider>
+      <MfaPrompt />
+      <SessionEndedNotice username={op.username} onSignIn={() => loadOperator(op.username).then(setOp).catch(() => setOp(null))} />
     </OperatorProvider>
   );
 }
 
-function OperatorGate({ onReady }: { onReady: (o: Operator) => void }) {
+function OperatorGate({ onReady, notice }: { onReady: (o: Operator) => void; notice?: string | null }) {
   const [busy, setBusy] = useState<string | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(notice || null);
   const pick = async (u: string) => {
     setBusy(u); setErr(null);
     try {
@@ -174,6 +183,7 @@ function Shell() {
             <Route path="sandbox" element={<SandboxPage />} />
             <Route path="rail-lab" element={<RailLab />} />
             <Route path="audit" element={<Audit />} />
+            <Route path="security" element={<Security />} />
             <Route path="*" element={<Navigate to="/control" replace />} />
           </Routes>
         </main>
