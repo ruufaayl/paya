@@ -10,7 +10,7 @@
 | # | Title (the message) | Content | Visual (file) | Speaker |
 |---|---|---|---|---|
 | 1 | **Paya: payment pakka hai** | Raast P2M cashier confirmation problem; Paya as a technology service provider to a licensed partner; synthetic data and no real money; the team | Paya 2.0 till PAID (`evidence/demo/scene-1-till.png`) | A (Rufayl) |
-| 2 | **The problem is trust in "paid"** | Raast P2M grew from 4.9m to 182.5m transactions (FY26, verify against SBP PDF); registered ≠ active merchants; reconciliation is still manual. Journey: dynamic-QR merchant payment and linked reversal | Journey strip: QR → pay → PAID → reconciled | A (Rufayl) |
+| 2 | **The problem is trust in "paid"** | Raast P2M grew from 4.9m to ~180m transactions, FY25–FY26 (SBP Governor's Annual Reports 2024–25 and 2025–26, p. 58); registered ≠ active merchants; reconciliation is still manual. Journey: dynamic-QR merchant payment and linked reversal | Journey strip: QR → pay → PAID → reconciled | A (Rufayl) |
 | 3 | **Architecture: one money path** | C4 container incl. Themes 1 and 3; modular monolith (ADR-001); ledger is truth; simulators and bounded themes (ADR-005/010/011) | `docs/deliverables/figures/brief-architecture.png` | B (Taha) |
 | 4 | **Transaction integrity: designed for the unhappy path** | State machine (timeout = PENDING, ADR-006); idempotency at four layers (ADR-003); append-only, balanced ledger (ADR-002); row locks plus constraints (ADR-007) | `rendered/state-model.png` + `rendered/seq-timeout.png` | B (Taha) |
 | 5 | **Ledger and reconciliation** | Posting rules (worked example E1); 4-layer recon stack; exception taxonomy with owners; 14 integrity checks | Table from `evidence/ledger/worked-examples.md`; break card screenshot | C (Harris) |

@@ -16,7 +16,7 @@
 | Why not build a wallet? | Wallets exist; the gap is trust and reconciliation at the counter. The brief's journey list includes merchant payment, and our implementation still contains every mandatory component, including the wallet ledger |
 | Are you a bank or an EMI? | No. A TSP under a licensed partner. Raast access is only through participants. The SBP 2025 Technology Risk Management Framework covers outsourcing to TSPs |
 | What is your riskiest assumption? | A1: that cashiers trust screenshots. We found no Pakistan-specific study, so merchant interviews are a condition of our GO |
-| Where does the 182.5m figure come from? | SBP FY26 payment systems review, as reported by Pakera. We mark it "verify against the primary PDF" |
+| Where does the ~180m figure come from? | SBP Governor's Annual Reports 2024–25 and 2025–26, p. 58. We checked it against the reports themselves; an earlier secondary source said 182.5m, so we quote the rounded primary figure |
 | What would you never do? | Store real CNIC, biometric or card data; probe a real bank or Raast endpoint; present a stablecoin as a live payment method (PVARA/SBP rules) |
 | Why "conditional go"? | The integrity core is proven. The conditions are a partner sandbox, MFA/revocation/rate limits, separate DB roles, merchant validation, and an LLM evaluation |
 | Show me the evidence the demo is not faked | `make demo-reset && make rehearse` replays the demo and asserts every claim. Mission Control renders real backend events only |

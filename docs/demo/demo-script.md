@@ -38,7 +38,7 @@
 
 *Show:* the start page (`/`), then Mission Control **Overview**.
 
-> "At a Pakistani counter, a cashier often decides a QR payment worked by looking at the customer's phone. Raast P2M grew from 4.9 million to 182 million payments in a year, but a screenshot isn't a settlement. Paya's promise: the till says **PAID** only when the money has moved and the ledger says so. Everything here is synthetic, the Raast rail is a simulator (you can see it badged in the top bar), and no real money moves."
+> "At a Pakistani counter, a cashier often decides a QR payment worked by looking at the customer's phone. Raast P2M grew from 4.9 million to about 180 million payments in a year, but a screenshot isn't a settlement. Paya's promise: the till says **PAID** only when the money has moved and the ledger says so. Everything here is synthetic, the Raast rail is a simulator (you can see it badged in the top bar), and no real money moves."
 
 ### 0:40 – 2:20 · Scene 1: a normal payment (Speaker B)
 

@@ -6,7 +6,7 @@ author: "Rufayl Waseem (24i-5660) · Taha Ali (24i-5525) · Harris Safi (24i-565
 
 ## 1. Executive summary
 
-Pakistan's instant payment system has crossed into everyday commerce. SBP's FY26 reporting shows Raast person-to-merchant payments growing from 4.9 million to 182.5 million transactions in a year. Yet the moment of truth at a shop counter is still often a cashier glancing at a customer's phone. **Paya** is a payment-assurance platform for that moment. The cashier sees *PAID* only when the rail has confirmed and a double-entry ledger has posted settlement. Every exception that follows (timeouts, duplicates, rejections, missing settlement lines) becomes owned, evidenced work rather than a spreadsheet.
+Pakistan's instant payment system has crossed into everyday commerce. SBP's annual reports show Raast person-to-merchant payments growing from 4.9 million to about 180 million transactions in a year. Yet the moment of truth at a shop counter is still often a cashier glancing at a customer's phone. **Paya** is a payment-assurance platform for that moment. The cashier sees *PAID* only when the rail has confirmed and a double-entry ledger has posted settlement. Every exception that follows (timeouts, duplicates, rejections, missing settlement lines) becomes owned, evidenced work rather than a spreadsheet.
 
 Paya is designed as a **technology service provider** to a licensed partner EMI, which is synthetic in this prototype. It never holds funds or claims a licence. The implemented journey is the brief's *merchant payment* with its linked *reversal*. It runs from channel to gateway, then identity and AML controls, ledger, rail, posting, settlement, reconciliation, notification and finance reporting.
 
@@ -414,7 +414,7 @@ Several of our best design improvements came from evidence rather than foresight
 
 ## Appendix C: Sources
 
-- State Bank of Pakistan: Annual Payment Systems Review FY25 (press release, 3 Nov 2025); Quarterly Payment Systems Review Q3 FY26 (25 Jun 2026); PSP&OD Circular 04 of 2023 (Raast P2M); Technology Risk Management Framework for Payment Institutions (2025). FY26 P2M figures as reported by Pakera; to be verified against the SBP publication.
+- State Bank of Pakistan: Annual Payment Systems Review FY25 (press release, 3 Nov 2025); Quarterly Payment Systems Review Q3 FY26 (25 Jun 2026); PSP&OD Circular 04 of 2023 (Raast P2M); Technology Risk Management Framework for Payment Institutions (2025). Raast P2M volumes (4.9m FY25, ~180m FY26): SBP Governor's Annual Reports 2024–25 and 2025–26, p. 58, checked by the team against the reports.
 - Pakistan Virtual Assets Act 2026 and PVARA Virtual Asset Services Regulations 2026, via Legal 500 Pakistan guide (2026).
 - Course materials: CS3017 Weeks 1–9 lecture decks; 16-week reading pack; Semester Project Guidelines Fall 2026.
 - Raisinghani, *Foundations of Information Systems*, OpenStax (2025); van der Aalst & Carmona (eds.), *Process Mining Handbook* (2022); NIST CSF 2.0.

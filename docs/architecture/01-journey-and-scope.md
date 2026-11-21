@@ -33,7 +33,8 @@ These figures are from public sources. Before the deck, re-check each one agains
 | Fact | Source |
 |---|---|
 | Digital channels carried 88% of retail transactions by volume in FY25 (9.1bn transactions). | SBP Annual Payment Systems Review FY25 ([SBP PR, 3 Nov 2025](https://www.sbp.org.pk/press/2025/Pr-03-Nov-2025.pdf); [Dawn](https://www.dawn.com/news/1953006)) |
-| Raast P2M grew from 4.9m transactions in FY25 to 182.5m in FY26, with 3.6m merchants registered on a Raast alias. | SBP FY26 review, as reported by [Pakera](https://pakera.pk/raast-2-76-billion-payments-fy26-sbp-payment-systems-review/). **Verify against the SBP PDF.** |
+| Raast P2M grew from 4.9m transactions in FY25 to about 180m in FY26. | SBP Governor's Annual Reports 2024–25 and 2025–26, p. 58 (verified by the team against the reports) |
+| 3.6m merchants are registered on a Raast alias. | SBP FY26 review, as reported by [Pakera](https://pakera.pk/raast-2-76-billion-payments-fy26-sbp-payment-systems-review/) (secondary source) |
 | Fewer than 0.7m retailers were linked to digital payments in Nov 2025. | [Profit](https://profit.pakistantoday.com.pk/2025/11/11/less-than-700000-retailers-linked-with-digital-payment-systems-as-pm-pushes-for-cashless-economy/). The gap between *registered* and *active* merchants is part of our problem statement. |
 | SBP requires providers to give merchants real-time payment confirmation or rejection. Merchant service providers (MSPs) handle QR deployment, refunds and settlement. | [SBP PSP&OD Circular 04/2023](https://www.sbp.org.pk/psd/2023/C4.htm) |
 | Small merchants report problems with reconciliation, settlement and digital literacy. | [Express Tribune](https://tribune.com.pk/story/2630109/digital-payments-target-merchant-growth) |
