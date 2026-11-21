@@ -74,6 +74,8 @@ def telemetry(node: str, phase: str, *, txn_ref: str | None = None, detail: dict
               level: str = "info") -> None:
     _broadcast({"kind": "telemetry", "node": node, "phase": phase, "txn_ref": txn_ref,
                 "level": level, "detail": detail or {}, "at": now().isoformat()})
+    from .observability import emit
+    emit(f"{node}.{phase}", {"warn": "warning"}.get(level, level), txn_ref=txn_ref, **(detail or {}))
 
 
 def relay_once(batch: int = 200, deliver_duplicate_of: set[str] | None = None) -> int:

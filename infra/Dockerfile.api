@@ -11,4 +11,4 @@ RUN --mount=type=secret,id=ca,required=false \
 USER paya
 EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=3s --retries=5 CMD python -c "import urllib.request;urllib.request.urlopen('http://localhost:8000/healthz')"
-CMD ["uvicorn", "paya.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "paya.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]

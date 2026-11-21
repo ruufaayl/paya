@@ -20,6 +20,7 @@ services:
       PAYA_DATABASE_URL: postgresql+psycopg://paya:${PAYA_DB_PASSWORD:-paya-local-only}@db:5432/paya
       PAYA_JWT_SECRET: ${PAYA_JWT_SECRET:?set PAYA_JWT_SECRET in .env (32+ random characters)}
       PAYA_DEMO_MODE: ${PAYA_DEMO_MODE:-true}
+      PAYA_VELOCITY_MAX_PAYMENTS: ${PAYA_VELOCITY_MAX_PAYMENTS:-5}   # raised only for load tests
     ports: ["8000:8000"]
     depends_on:
       db: { condition: service_healthy }

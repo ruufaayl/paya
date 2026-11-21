@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 from typing import Protocol
 
-from sqlalchemy import BigInteger, Boolean, Date, DateTime, String, select
+from sqlalchemy import BigInteger, Boolean, Date, DateTime, String, select, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from .db import session_scope
@@ -136,6 +136,9 @@ class MockRaastRail:
         if mode == "TIMEOUT_NO_RECORD":
             raise RailTimeout("no response within timeout")
         with session_scope() as s:
+            # Serialise per e2e id so two concurrent sends of the same credit cannot both insert (real rails
+            # are idempotent on the end-to-end id; the mock must be too, even under races).
+            s.execute(text("SELECT pg_advisory_xact_lock(hashtext(:e))"), {"e": e2e_id})
             existing = s.get(RailPayment, e2e_id)
             if existing is None:  # idempotent on e2e id: a resend never creates a second credit
                 status = "REJECTED" if mode == "REJECT" else "ACCEPTED"

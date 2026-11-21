@@ -355,3 +355,30 @@ def test_integrity_checks_pass_on_healthy_system_and_catch_a_silent_customer(cli
     failed = {c["check"]: c for c in r["checks"] if c["status"] == "FAIL"}
     assert r["overall"] == "FAIL" and failed["settled_without_customer_notice"]["value"] == 1
     assert client.get("/v1/finance/integrity", headers=as_("ayesha.cashier")).status_code == 403
+
+
+# ---------------------------------------------------------------- concurrency regression (found by the load test)
+def test_concurrent_dispatch_callbacks_and_enquiries_settle_exactly_once(client, as_):
+    from concurrent.futures import ThreadPoolExecutor
+    chaos.set_mode("DUPLICATE_ACK")
+    with session_scope() as s:
+        cust = s.execute(text("select customer_id from users where username='sara'")).scalar_one()
+    txns = [payments.initiate_payment(customer_id=cust, payment_request_id=uuid.UUID(new_request(client, as_, 2_000 + i)),
+                                      actor="sara", correlation_id=f"corr-race-{i}") for i in range(4)]
+    jobs = []
+    for t in txns:  # the API background task, the worker and repeat calls all race for the same payment
+        jobs += [lambda t=t: payments.dispatch(t.id), lambda t=t: payments.dispatch(t.id, only_first_send=True),
+                 lambda t=t: payments.dispatch(t.id), lambda: worker.dispatch_undispatched(),
+                 lambda: payments.process_rail_callbacks(), lambda: payments.run_status_enquiries(force=True)]
+    with ThreadPoolExecutor(12) as ex:
+        results = [f.result() for f in [ex.submit(j) for j in jobs]]   # .result() re-raises any exception
+    payments.process_rail_callbacks()
+    chaos.reset()
+    for t in txns:
+        assert status(t.txn_ref) == "SETTLED"
+        assert journals(t.txn_ref) == ["AUTH_POST", "FEE", "SETTLE"]
+    with session_scope() as s:
+        e2es = [s.execute(select(Transaction.rail_e2e_id).where(Transaction.id == t.id)).scalar_one() for t in txns]
+        assert s.execute(select(func.count()).select_from(RailPayment).where(RailPayment.e2e_id.in_(e2es))).scalar_one() == 4
+    assert_ledger_invariants()
+    assert results  # every job completed without raising

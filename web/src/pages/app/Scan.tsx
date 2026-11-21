@@ -8,10 +8,15 @@ import { call, pkr } from "../../lib/api";
 interface OpenRequest { id: string; order_ref: string; amount: { minor: number }; merchant: { name: string; category: string }; expires_at: string }
 
 /** Extract the payment-request id from a Paya QR payload (synthetic format; real Raast QR follows SBP specs). */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function parse(text: string): string | null {
+  // A QR code is untrusted input. Only a well-formed payment-request UUID may ever reach the router
+  // (compensating control for the open-redirect advisories in react-router 6.x; see threat model T-12).
   try {
-    const u = new URL(text.replace(/^paya:\/\//, "https://paya.local/"));
-    return u.searchParams.get("pr");
+    if (!text.startsWith("paya://pay?")) return null;
+    const pr = new URL(text.replace(/^paya:\/\//, "https://paya.local/")).searchParams.get("pr");
+    return pr && UUID_RE.test(pr) ? pr.toLowerCase() : null;
   } catch { return null; }
 }
 

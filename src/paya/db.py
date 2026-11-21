@@ -89,6 +89,8 @@ INTEGRITY_DDL = [
     CREATE UNIQUE INDEX IF NOT EXISTS uq_one_live_payment_per_request ON transactions (payment_request_id)
       WHERE type = 'PAYMENT' AND status NOT IN ('REJECTED', 'FAILED', 'EXPIRED', 'REVERSED');
     """,
+    # 3b. Exactly one house account per chart-of-accounts code (NULL owners would otherwise not conflict).
+    "CREATE UNIQUE INDEX IF NOT EXISTS uq_house_account ON accounts (code) WHERE owner_type IS NULL;",
     # 4. Only one reversal per original transaction.
     """
     CREATE UNIQUE INDEX IF NOT EXISTS uq_one_reversal_per_original ON transactions (original_txn_id)

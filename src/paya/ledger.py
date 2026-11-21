@@ -9,7 +9,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import date
 
-from sqlalchemy import case, func, select
+from sqlalchemy import case, func, select, text
 from sqlalchemy.orm import Session
 
 from .config import get_settings
@@ -41,7 +41,13 @@ class Line:
     amount_minor: int
 
 
+def _account_creation_lock(s: Session, code: str, owner: object) -> None:
+    """Get-or-create must not race: two first-time settlements for one merchant would otherwise both insert."""
+    s.execute(text("SELECT pg_advisory_xact_lock(hashtext(:k))"), {"k": f"acct:{code}:{owner}"})
+
+
 def house_account(s: Session, code: str) -> Account:
+    _account_creation_lock(s, code, None)
     acc = s.execute(
         select(Account).where(Account.code == code, Account.owner_type.is_(None))
     ).scalar_one_or_none()
@@ -54,6 +60,7 @@ def house_account(s: Session, code: str) -> Account:
 
 
 def owned_account(s: Session, code: str, owner_type: str, owner_id: uuid.UUID) -> Account:
+    _account_creation_lock(s, code, owner_id)
     acc = s.execute(
         select(Account).where(Account.code == code, Account.owner_type == owner_type, Account.owner_id == owner_id)
     ).scalar_one_or_none()

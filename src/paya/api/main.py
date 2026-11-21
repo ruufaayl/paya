@@ -18,7 +18,7 @@ from sqlalchemy import func, select
 from .. import audit, events, ledger, notifications, payments, recon
 from ..config import get_settings
 from ..db import create_schema, session_scope
-from ..errors import Forbidden, NotFound, PayaError, Unauthenticated, ValidationFailed
+from ..errors import Forbidden, LoginLocked, NotFound, PayaError, Unauthenticated, ValidationFailed
 from ..idempotency import execute as idempotent
 from ..models import (
     Account, Approval, AuditLog, Case, Customer, Journal, LedgerEntry, Merchant, Notification, PaymentRequest,
@@ -27,7 +27,9 @@ from ..models import (
 from ..rail import MODES, breaker, chaos, rail
 from ..security import Principal, can, decode_token, issue_token, require, verify_password
 from ..state import CUSTOMER_STATUS
+from ..observability import configure_logging, current_correlation, emit, login_guard, metrics as http_metrics
 from ..worker import Worker
+import time
 
 _worker: Worker | None = None
 
@@ -35,6 +37,7 @@ _worker: Worker | None = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global _worker
+    configure_logging()
     create_schema()
     notifications.register()
     if get_settings().demo_mode:
@@ -62,9 +65,30 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 @app.middleware("http")
 async def correlation(request: Request, call_next):
     cid = request.headers.get("X-Correlation-ID") or payments.new_correlation_id()
+    if len(cid) > 64 or not all(c.isalnum() or c in "-_." for c in cid):
+        cid = payments.new_correlation_id()  # never trust a malformed client correlation id into logs
     request.state.correlation_id = cid
-    response = await call_next(request)
+    token = current_correlation.set(cid)
+    started = time.perf_counter()
+    status = 500
+    try:
+        response = await call_next(request)
+        status = response.status_code
+    finally:
+        ms = (time.perf_counter() - started) * 1000
+        route = getattr(request.scope.get("route"), "path", "unmatched")
+        http_metrics.observe(route, request.method, status, ms)
+        if route not in ("/healthz", "/metrics"):
+            emit("http_request", "warning" if status >= 400 else "info", correlation_id=cid,
+                 method=request.method, route=route, status=status, duration_ms=round(ms, 1))
+        current_correlation.reset(token)
     response.headers["X-Correlation-ID"] = cid
+    # Security headers: API responses are never cached or sniffed, and never framed.
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    if request.url.path.startswith("/v1"):
+        response.headers["Cache-Control"] = "no-store"
     return response
 
 
@@ -107,13 +131,27 @@ class LoginIn(BaseModel):
 
 @app.post("/v1/auth/login", tags=["auth"])
 def login(body: LoginIn, request: Request):
+    if login_guard.locked(body.username):
+        with session_scope() as s:
+            audit.record(s, actor=body.username[:64], actor_role="UNKNOWN", action="LOGIN", object_type="session",
+                         object_id=None, outcome="DENIED", reason="locked: too many failed attempts",
+                         correlation_id=request.state.correlation_id)
+        events.telemetry("security", "login_locked", detail={"user": body.username[:64]}, level="error")
+        raise LoginLocked("too many failed attempts; try again in 15 minutes")
+    failed = False
     with session_scope() as s:
         u = s.execute(select(User).where(User.username == body.username, User.active.is_(True))).scalar_one_or_none()
         if u is None or not verify_password(body.password, u.password_hash):
-            audit.record(s, actor=body.username, actor_role="UNKNOWN", action="LOGIN", object_type="session",
+            audit.record(s, actor=body.username[:64], actor_role="UNKNOWN", action="LOGIN", object_type="session",
                          object_id=None, outcome="DENIED", reason="bad credentials",
                          correlation_id=request.state.correlation_id)
-            raise Unauthenticated("invalid username or password")
+            failed = True
+    if failed:
+        login_guard.failure(body.username)
+        raise Unauthenticated("invalid username or password")
+    login_guard.success(body.username)
+    with session_scope() as s:
+        u = s.execute(select(User).where(User.username == body.username)).scalar_one()
         p = Principal(user_id=str(u.id), username=u.username, role=u.role,
                       customer_id=str(u.customer_id) if u.customer_id else None,
                       merchant_id=str(u.merchant_id) if u.merchant_id else None)
@@ -217,14 +255,27 @@ def pay(body: PayIn, request: Request, background: BackgroundTasks,
     if not replayed and resp.get("status") == "PENDING":
         background.add_task(_dispatch_and_relay, uuid.UUID(resp["txn_id"]))
     else:
-        background.add_task(events.relay_once)
+        background.add_task(_safe_relay)
     return JSONResponse(status_code=code, content=resp, headers={"Idempotent-Replayed": str(replayed).lower()})
 
 
 def _dispatch_and_relay(txn_id: uuid.UUID) -> None:
-    events.relay_once()
-    payments.dispatch(txn_id)
-    events.relay_once()
+    """Runs after the response is sent. It must never raise: an exception here would drop the client's
+    keep-alive connection. Anything it fails to do, the recovery worker finishes from the database."""
+    try:
+        events.relay_once()
+        payments.dispatch(txn_id)
+        events.relay_once()
+    except Exception as exc:  # noqa: BLE001
+        events.telemetry("worker", "background_dispatch_failed", detail={"txn_id": str(txn_id), "error": str(exc)[:200]},
+                         level="error")
+
+
+def _safe_relay() -> None:
+    try:
+        events.relay_once()
+    except Exception as exc:  # noqa: BLE001
+        events.telemetry("worker", "background_relay_failed", detail={"error": str(exc)[:200]}, level="error")
 
 
 @app.get("/v1/wallet", tags=["payments"])
@@ -338,14 +389,14 @@ def compliance_decision(txn_ref: str, body: DecisionIn, background: BackgroundTa
     if txn.status == "PENDING":
         background.add_task(_dispatch_and_relay, txn.id)
     else:
-        background.add_task(events.relay_once)
+        background.add_task(_safe_relay)
     return {"txn_ref": txn.txn_ref, "status": txn.status}
 
 
 @app.post("/v1/ops/transactions/{txn_ref}/enquiry", tags=["backoffice"])
 def ops_enquiry(txn_ref: str, background: BackgroundTasks, p: Principal = Depends(authorised("ops:enquiry"))):
     stats = payments.run_status_enquiries(force=True)
-    background.add_task(events.relay_once)
+    background.add_task(_safe_relay)
     return stats
 
 
@@ -373,7 +424,7 @@ def list_approvals(p: Principal = Depends(authorised("backoffice:read"))):
 @app.post("/v1/finance/approvals/{approval_id}/approve", tags=["backoffice"])
 def approve(approval_id: uuid.UUID, background: BackgroundTasks, p: Principal = Depends(authorised("reversal:approve"))):
     txn = payments.approve_reversal(approval_id=approval_id, actor=p.username, actor_role=p.role)
-    background.add_task(events.relay_once)
+    background.add_task(_safe_relay)
     return {"txn_ref": txn.txn_ref, "status": txn.status}
 
 
@@ -387,7 +438,7 @@ def run_recon(body: ReconIn, background: BackgroundTasks, p: Principal = Depends
     f = rail.settlement_file(body.business_date or datetime.now(timezone.utc).date(),
                              duplicate_first_line=body.duplicate_line)
     summary = recon.run(f, actor=p.username)
-    background.add_task(events.relay_once)
+    background.add_task(_safe_relay)
     return summary
 
 
@@ -534,9 +585,13 @@ def prometheus():
                          .group_by(Transaction.status)).all()
         open_cases = s.execute(select(func.count()).select_from(Case).where(Case.state != "RESOLVED")).scalar_one()
         in_transit = ledger.ledger_balance(s, ledger.house_account(s, "2150"))
+        from ..models import OutboxEvent
+        unpublished = s.execute(select(func.count()).select_from(OutboxEvent).where(OutboxEvent.published_at.is_(None))).scalar_one()
     lines = ["# TYPE paya_payments_total gauge"]
     lines += [f'paya_payments_total{{status="{st}"}} {n}' for st, n in rows]
     lines += ["# TYPE paya_open_cases gauge", f"paya_open_cases {open_cases}",
               "# TYPE paya_in_transit_minor gauge", f"paya_in_transit_minor {in_transit}",
-              "# TYPE paya_rail_breaker_open gauge", f"paya_rail_breaker_open {int(breaker.state == 'OPEN')}"]
+              "# TYPE paya_rail_breaker_open gauge", f"paya_rail_breaker_open {int(breaker.state == 'OPEN')}",
+              "# TYPE paya_outbox_unpublished gauge", f"paya_outbox_unpublished {unpublished}",
+              *http_metrics.prometheus()]
     return "\n".join(lines) + "\n"

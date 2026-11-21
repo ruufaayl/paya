@@ -180,11 +180,22 @@ def _authorise_and_post(s: Session, txn: Transaction, customer: Customer, *, act
     transition(s, txn, "PENDING", actor=SYSTEM, reason="sent_to_clearing", evidence={"rail_e2e_id": txn.rail_e2e_id})
 
 
-def dispatch(txn_id: uuid.UUID) -> str:
-    """Send a PENDING payment to the rail. Safe to call repeatedly (rail is idempotent on e2e id)."""
+def _locked(s: Session, txn_id: uuid.UUID) -> Transaction | None:
+    """Row-lock a transaction. Every path that changes state from a rail answer goes through this lock,
+    so concurrent dispatch, callback, enquiry and file processing serialise instead of racing."""
+    return s.execute(select(Transaction).where(Transaction.id == txn_id).with_for_update()).scalar_one_or_none()
+
+
+def dispatch(txn_id: uuid.UUID, *, only_first_send: bool = False) -> str:
+    """Send a PENDING payment to the rail. Safe to call repeatedly (rail is idempotent on e2e id).
+
+    `only_first_send` makes the claim atomic for the recovery worker: under the row lock it skips the
+    payment if anyone else has already sent it, so the API's background dispatch and the worker never
+    both send the first attempt.
+    """
     with session_scope() as s:
-        txn = s.get(Transaction, txn_id)
-        if txn is None or txn.status != "PENDING":
+        txn = _locked(s, txn_id)
+        if txn is None or txn.status != "PENDING" or (only_first_send and txn.rail_attempts > 0):
             return "SKIPPED"
         merchant = s.get(Merchant, txn.merchant_id)
         e2e, amount, alias, ref = txn.rail_e2e_id, txn.amount_minor, merchant.raast_alias, txn.txn_ref
@@ -202,9 +213,8 @@ def dispatch(txn_id: uuid.UUID) -> str:
         events.telemetry("rail", "unavailable", txn_ref=ref, detail={"error": str(exc), "breaker": breaker.state}, level="error")
         return "UNAVAILABLE"
     with session_scope() as s:
-        txn = s.get(Transaction, txn_id)
-        apply_rail_outcome(s, txn, ack.status, source="sync_ack", evidence={"rail_ref": ack.rail_ref, "reason": ack.reason})
-    return ack.status
+        txn = _locked(s, txn_id)
+        return apply_rail_outcome(s, txn, ack.status, source="sync_ack", evidence={"rail_ref": ack.rail_ref, "reason": ack.reason})
 
 
 def apply_rail_outcome(s: Session, txn: Transaction, status: str, *, source: str, evidence: dict) -> str:
@@ -294,7 +304,7 @@ def run_status_enquiries(force: bool = False) -> dict:
     for tid in ids:
         stats["checked"] += 1
         with session_scope() as s:
-            txn = s.get(Transaction, tid)
+            txn = _locked(s, tid)
             if txn.status != "PENDING":
                 continue
             e2e, ref = txn.rail_e2e_id, txn.txn_ref
@@ -304,7 +314,7 @@ def run_status_enquiries(force: bool = False) -> dict:
         except RailUnavailable:
             answer = "UNAVAILABLE"
         with session_scope() as s:
-            txn = s.get(Transaction, tid)
+            txn = _locked(s, tid)
             if txn.status != "PENDING":
                 continue
             if answer in ("ACCEPTED", "REJECTED"):

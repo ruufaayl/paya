@@ -101,6 +101,16 @@ The suite covers the 10 scenarios the brief requires plus 3 from the Week 9 lect
 | W2 | Process conformance over the event log (no settlement without authorisation and posting) | `test_conformance_*` |
 | W9 | Reconciliation stack: technical, operational, financial and exception checks | `test_integrity_checks_*` |
 | SoD | Self-approval refused and the denial kept in the audit chain | `test_s6c_*` |
+| Race | Concurrent dispatch, callbacks and enquiries settle exactly once (found by load test) | `test_concurrent_*` |
+| Security | Login lockout, security headers, metrics, JSON logs with correlation, secret scrubbing | `tests/test_security_observability.py` |
+
+## Evidence tools
+
+```bash
+python docs/architecture/tools/recovery_drill.py   # crash, DB restart, backup/restore drill against the Compose stack
+PAYA_VELOCITY_MAX_PAYMENTS=100000 make up           # (load test only) then:
+python docs/architecture/tools/load_test.py         # writes evidence/performance/
+```
 
 ## Repository map
 
@@ -109,7 +119,7 @@ The suite covers the 10 scenarios the brief requires plus 3 from the Week 9 lect
 | `src/paya` | Ledger, state machine, payments, risk, rail, recon, events, security, API |
 | `tests` | Automated normal and failure scenarios |
 | `api` | `openapi.json` (sync contract) and `events/*.schema.json` (async contract) |
-| `docs/architecture` | gate pack for Weeks 10 and 12 (`00-gate-pack.md`), journey and scope, C4, contracts, sequences, state model, BPMN 2.0, ADRs; rendered diagrams in `rendered/` |
+| `docs/architecture` | gate pack for Weeks 10, 12 and 13 (`00-gate-pack.md`), journey and scope, C4, contracts, sequences, state model, BPMN 2.0, ADRs; rendered diagrams in `rendered/` |
 | `data` | Synthetic seed data only |
 | `web` | Phone app (PWA) and Mission Control (React, Vite, Tailwind, React Flow) |
 | `infra` | Dockerfile and Compose |

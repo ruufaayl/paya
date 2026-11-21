@@ -19,7 +19,7 @@ def dispatch_undispatched() -> int:
         ids = s.execute(select(Transaction.id).where(Transaction.status == "PENDING",
                                                       Transaction.rail_attempts == 0)).scalars().all()
     for tid in ids:
-        payments.dispatch(tid)
+        payments.dispatch(tid, only_first_send=True)
     return len(ids)
 
 

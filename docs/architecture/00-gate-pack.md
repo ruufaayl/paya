@@ -1,4 +1,4 @@
-# Gate pack: Paya (Weeks 10 and 12)
+# Gate pack: Paya (Weeks 10, 12 and 13)
 
 **Course:** CS3017 Enterprise Systems & Applications, Fall 2026.
 **Submitted:** 2026-11-20.
@@ -34,6 +34,20 @@ The brief (section 11) defines two Week 10 gates. Each item below points to its 
 | Ledger/reconciliation logic | [09: Ledger and reconciliation](09-ledger-and-reconciliation.md). Chart of accounts, posting rules, exception taxonomy, 4-layer reconciliation stack. System-generated postings in [evidence/ledger/worked-examples.md](../../evidence/ledger/worked-examples.md) |
 | Identity/consent or KYC controls | [10: Identity, KYC/AML and consent controls](10-identity-kyc-consent-controls.md). Permission matrix, SoD rules, joiner-mover-leaver, KYC/AML rules, consent and data minimisation, audit chain |
 
+## Gate 4 (Week 13): prototype, failure/resilience, security/observability
+
+| Gate | Minimum evidence required | Where it is |
+|---|---|---|
+| Prototype | Normal path works locally and is covered by an automated test | `make up`, `test_s1_normal_success_end_to_end`; [evidence/tests](../../evidence/tests/) (25 tests passing) |
+| Failure/resilience | Timeout, duplicate and partial-failure behaviour demonstrated | [13: Resilience and recovery](13-resilience-and-recovery.md) failure catalogue F1–F13; tests S3, S4, S5, S11, S12, `test_concurrent_*`; live in Mission Control chaos modes |
+| Security/observability | Threat model | [11: Threat model](11-threat-model.md). STRIDE (14 threats), top-5 attack paths, residual risk; dependency audits in [evidence/security](../../evidence/security/) |
+| | RBAC | [10: Identity and controls](10-identity-kyc-consent-controls.md) permission matrix; tests S6, S7, S8; lockout test |
+| | Audit evidence | Hash-chained `audit_log`, `GET /v1/audit/verify`; tests S6c, S8, lockout |
+| | Metrics/logging | [12: Observability and SLOs](12-observability-and-slos.md). JSON logs with correlation ID, `/metrics`, integrity checks, Mission Control |
+| | Recovery assumptions | [13](13-resilience-and-recovery.md) §2 RTO/RPO with business justification; **measured** drill in [evidence/resilience](../../evidence/resilience/) |
+| | (brief §2) SLO/SLI | [12](12-observability-and-slos.md) §2, eight SLOs with measured values from [evidence/performance](../../evidence/performance/) |
+| | (brief §2) Runbooks / exception handling | [14: Runbooks](14-runbooks.md) RB-1 to RB-7 |
+
 ## Delivered early (later gates)
 
 | Item | Gate | Where |
@@ -47,7 +61,6 @@ The brief (section 11) defines two Week 10 gates. Each item below points to its 
 
 ## Still to do
 
-- **Week 13:** SLO/SLI specification, RTO/RPO note, runbooks.
 - **Week 14:** AI extension with governance and evaluation.
 
 ## Questions for the instructor
