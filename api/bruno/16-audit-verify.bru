@@ -1,0 +1,21 @@
+meta {
+  name: 16 Verify the audit hash chain
+  type: http
+  seq: 16
+}
+post {
+  url: {{baseUrl}}/v1/auth/login
+  body: json
+  auth: none
+}
+body:json {
+  { "username": "auditor", "password": "{{password}}" }
+}
+script:post-response {
+  const r = await bru.sendRequest({ method: "GET", url: bru.interpolate("{{baseUrl}}/v1/audit/verify"),
+    headers: { Authorization: "Bearer " + res.body.access_token } });
+  bru.setVar("chainIntact", r.data.chain_intact);
+}
+tests {
+  test("chain intact", function() { expect(bru.getVar("chainIntact")).to.equal(true); });
+}

@@ -1,0 +1,29 @@
+@page { size: A4; margin: 14mm 15mm 14mm 15mm; }
+:root { --ink: #0b1220; --muted: #4b5563; --rule: #d7dde5; --accent: #0a7a46; --soft: #f3f6f8; }
+html { font-family: "Inter", "Segoe UI", Arial, sans-serif; color: var(--ink); }
+body { font-size: 9.2pt; line-height: 1.34; margin: 0; max-width: none; padding: 0; }
+body.dossier { font-size: 10.6pt; line-height: 1.5; }
+header#title-block-header { border-bottom: 2px solid var(--accent); margin-bottom: 8px; padding-bottom: 4px; }
+h1.title { font-size: 17pt; margin: 0; letter-spacing: -0.01em; }
+p.subtitle { margin: 2px 0 0; color: var(--muted); font-size: 9pt; }
+p.author, p.date { margin: 0; color: var(--muted); font-size: 8.5pt; }
+h1 { font-size: 14pt; margin: 16px 0 6px; color: var(--accent); }
+h2 { font-size: 11pt; margin: 10px 0 4px; color: var(--accent); border-bottom: 1px solid var(--rule); padding-bottom: 2px; }
+body.dossier h2 { font-size: 13pt; margin-top: 18px; }
+h3 { font-size: 10.5pt; margin: 10px 0 3px; }
+p { margin: 4px 0 6px; }
+ul, ol { margin: 3px 0 6px; padding-left: 18px; }
+li { margin: 1px 0; }
+table { border-collapse: collapse; width: 100%; margin: 3px 0 6px; font-size: 8.2pt; page-break-inside: avoid; }
+body.dossier table { font-size: 9pt; }
+th { background: var(--soft); text-align: left; font-weight: 600; }
+th, td { border: 1px solid var(--rule); padding: 2px 5px; vertical-align: top; }
+code { font-family: "JetBrains Mono", Consolas, monospace; font-size: 0.86em; background: var(--soft); padding: 0 2px; border-radius: 2px; }
+img { display: block; margin: 4px auto; max-width: 100%; }
+figure { margin: 4px 0; } figcaption { text-align: center; color: var(--muted); font-size: 8.5pt; }
+blockquote { margin: 6px 0; padding: 4px 10px; border-left: 3px solid var(--accent); background: var(--soft); }
+strong { font-weight: 650; }
+nav#TOC { font-size: 9.5pt; columns: 2; margin-bottom: 8px; } nav#TOC ul { padding-left: 14px; }
+.pagebreak { page-break-before: always; }
+h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
+table, img { break-inside: avoid; }

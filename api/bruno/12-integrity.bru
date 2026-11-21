@@ -1,0 +1,19 @@
+meta {
+  name: 12 Integrity checks (4 reconciliation layers)
+  type: http
+  seq: 12
+}
+get {
+  url: {{baseUrl}}/v1/finance/integrity
+  auth: bearer
+}
+auth:bearer {
+  token: {{financeToken}}
+}
+tests {
+  test("no FAIL and ledger balanced", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.checks.filter(c => c.status === "FAIL")).to.have.length(0);
+    expect(res.body.checks.find(c => c.check === "trial_balance_balanced").status).to.equal("PASS");
+  });
+}

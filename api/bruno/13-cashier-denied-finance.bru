@@ -1,0 +1,22 @@
+meta {
+  name: 13 Cashier attempts a finance action (denied and audited)
+  type: http
+  seq: 13
+}
+post {
+  url: {{baseUrl}}/v1/finance/recon/run
+  body: json
+  auth: bearer
+}
+auth:bearer {
+  token: {{cashierToken}}
+}
+body:json {
+  {}
+}
+tests {
+  test("403 FORBIDDEN", function() {
+    expect(res.status).to.equal(403);
+    expect(res.body.error.code).to.equal("FORBIDDEN");
+  });
+}

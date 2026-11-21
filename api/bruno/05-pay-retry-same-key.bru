@@ -1,0 +1,26 @@
+meta {
+  name: 05 Retry with the SAME key (replay, no second debit)
+  type: http
+  seq: 5
+}
+post {
+  url: {{baseUrl}}/v1/payments
+  body: json
+  auth: bearer
+}
+auth:bearer {
+  token: {{customerToken}}
+}
+script:pre-request {
+  req.setHeader("Idempotency-Key", bru.getVar("idemKey"));
+}
+body:json {
+  { "payment_request_id": "{{prId}}" }
+}
+tests {
+  test("same txn_ref replayed", function() {
+    expect(res.status).to.equal(202);
+    expect(res.body.txn_ref).to.equal(bru.getVar("txnRef"));
+    expect(res.headers["idempotent-replayed"]).to.equal("true");
+  });
+}

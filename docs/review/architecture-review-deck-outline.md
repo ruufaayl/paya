@@ -1,4 +1,8 @@
-# Architecture review deck: outline (10 slides)
+# Architecture review deck (10 slides)
+
+**The deck:** https://claude.ai/artifact/2uR7wF94vQVqfD9czFayYF. It is private until shared from its Share menu, and exports to PowerPoint or PDF from there. Slide sources are in `deck-source/`. Speaker notes name the presenting member on every slide.
+
+## Outline
 
 **Brief:** 8–10 slides covering business context, architecture, transaction integrity, risks, controls, resilience, and a go / conditional-go recommendation.
 **Style:** one message per slide, real screenshots and diagrams from the repo (no stock art), and every number cited to an evidence file.

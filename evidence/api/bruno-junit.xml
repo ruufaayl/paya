@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<testsuites>
+  <testsuite name="01 Login cashier (Ayesha)" file="01-login-cashier.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-21T04:22:02.404" hostname="vm" time="0.401">
+    <testcase name="200 and CASHIER role" status="pass" classname="01-login-cashier" time="0.401"/>
+  </testsuite>
+  <testsuite name="02 Create dynamic QR (PKR 2,450)" file="02-create-payment-request.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-21T04:22:02.404" hostname="vm" time="0.281">
+    <testcase name="201 with QR payload" status="pass" classname="02-create-payment-request" time="0.281"/>
+  </testsuite>
+  <testsuite name="03 Login customer (Sara)" file="03-login-customer.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-21T04:22:02.404" hostname="vm" time="0.256">
+    <testcase name="200" status="pass" classname="03-login-customer" time="0.256"/>
+  </testsuite>
+  <testsuite name="04 Pay (Idempotency-Key)" file="04-pay.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-21T04:22:02.404" hostname="vm" time="0.335">
+    <testcase name="202 Accepted, never 'Paid' before settlement" status="pass" classname="04-pay" time="0.335"/>
+  </testsuite>
+  <testsuite name="05 Retry with the SAME key (replay, no second debit)" file="05-pay-retry-same-key.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-21T04:22:02.404" hostname="vm" time="0.204">
+    <testcase name="same txn_ref replayed" status="pass" classname="05-pay-retry-same-key" time="0.204"/>
+  </testsuite>
+  <testsuite name="06 New key, same QR (business idempotency)" file="06-pay-new-key-same-qr.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-21T04:22:02.404" hostname="vm" time="0.230">
+    <testcase name="409 and points to the existing payment" status="pass" classname="06-pay-new-key-same-qr" time="0.230"/>
+  </testsuite>
+  <testsuite name="07 Transaction detail (customer view)" file="07-transaction-detail.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-21T04:22:02.404" hostname="vm" time="1.741">
+    <testcase name="settled with full timeline" status="pass" classname="07-transaction-detail" time="1.741"/>
+  </testsuite>
+  <testsuite name="08 Login finance (Rabia)" file="08-login-finance.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-21T04:22:02.404" hostname="vm" time="0.243">
+    <testcase name="200" status="pass" classname="08-login-finance" time="0.243"/>
+  </testsuite>
+  <testsuite name="09 Ledger evidence for the payment (finance view)" file="09-ledger-detail.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-21T04:22:02.404" hostname="vm" time="0.105">
+    <testcase name="AUTH_POST, SETTLE and FEE journals, each balanced" status="pass" classname="09-ledger-detail" time="0.105"/>
+  </testsuite>
+  <testsuite name="10 Run reconciliation" file="10-reconcile.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-21T04:22:02.404" hostname="vm" time="0.123">
+    <testcase name="file processed with control totals" status="pass" classname="10-reconcile" time="0.123"/>
+  </testsuite>
+  <testsuite name="11 Import the same settlement file again" file="11-reconcile-same-file-again.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-21T04:22:02.404" hostname="vm" time="0.089">
+    <testcase name="409 duplicate file refused" status="pass" classname="11-reconcile-same-file-again" time="0.089"/>
+  </testsuite>
+  <testsuite name="12 Integrity checks (4 reconciliation layers)" file="12-integrity.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-21T04:22:02.404" hostname="vm" time="0.111">
+    <testcase name="no FAIL and ledger balanced" status="pass" classname="12-integrity" time="0.111"/>
+  </testsuite>
+  <testsuite name="13 Cashier attempts a finance action (denied and audited)" file="13-cashier-denied-finance.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-21T04:22:02.404" hostname="vm" time="0.097">
+    <testcase name="403 FORBIDDEN" status="pass" classname="13-cashier-denied-finance" time="0.097"/>
+  </testsuite>
+  <testsuite name="14 Login a different customer (Omar)" file="14-login-other-customer.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-21T04:22:02.404" hostname="vm" time="0.252">
+    <testcase name="200" status="pass" classname="14-login-other-customer" time="0.252"/>
+  </testsuite>
+  <testsuite name="15 Omar cannot see Sara's payment" file="15-other-customer-cannot-see.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-21T04:22:02.404" hostname="vm" time="0.096">
+    <testcase name="404 - the reference is not even revealed" status="pass" classname="15-other-customer-cannot-see" time="0.096"/>
+  </testsuite>
+  <testsuite name="16 Verify the audit hash chain" file="16-audit-verify.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-21T04:22:02.404" hostname="vm" time="0.262">
+    <testcase name="chain intact" status="pass" classname="16-audit-verify" time="0.262"/>
+  </testsuite>
+</testsuites>

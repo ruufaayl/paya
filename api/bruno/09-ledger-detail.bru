@@ -1,0 +1,23 @@
+meta {
+  name: 09 Ledger evidence for the payment (finance view)
+  type: http
+  seq: 9
+}
+get {
+  url: {{baseUrl}}/v1/transactions/{{txnRef}}
+  auth: bearer
+}
+auth:bearer {
+  token: {{financeToken}}
+}
+tests {
+  test("AUTH_POST, SETTLE and FEE journals, each balanced", function() {
+    const types = res.body.ledger.map(j => j.posting_type).sort();
+    expect(types).to.eql(["AUTH_POST", "FEE", "SETTLE"]);
+    for (const j of res.body.ledger) {
+      const d = j.entries.filter(e => e.direction === "D").reduce((a, e) => a + e.amount.minor, 0);
+      const c = j.entries.filter(e => e.direction === "C").reduce((a, e) => a + e.amount.minor, 0);
+      expect(d).to.equal(c);
+    }
+  });
+}

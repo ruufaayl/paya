@@ -1,4 +1,4 @@
-# Gate pack: Paya (Weeks 10, 12, 13 and 14)
+# Gate pack: Paya (Weeks 10 to 15)
 
 **Course:** CS3017 Enterprise Systems & Applications, Fall 2026.
 **Submitted:** 2026-11-20.
@@ -47,6 +47,20 @@ The brief (section 11) defines two Week 10 gates. Each item below points to its 
 | | Recovery assumptions | [13](13-resilience-and-recovery.md) §2 RTO/RPO with business justification; **measured** drill in [evidence/resilience](../../evidence/resilience/) |
 | | (brief §2) SLO/SLI | [12](12-observability-and-slos.md) §2, eight SLOs with measured values from [evidence/performance](../../evidence/performance/) |
 | | (brief §2) Runbooks / exception handling | [14: Runbooks](14-runbooks.md) RB-1 to RB-7 |
+
+## Gate 6 (Week 15): final defence deliverables
+
+| Deliverable (brief §10) | Where it is |
+|---|---|
+| Architecture brief (2 pages) | [docs/deliverables/dist/architecture-brief.pdf](../deliverables/dist/architecture-brief.pdf) (2 pages; `.docx` alongside); source `architecture-brief.md` |
+| Architecture/design dossier (3,500–5,000 words) | [docs/deliverables/dist/design-dossier.pdf](../deliverables/dist/design-dossier.pdf) (3,930-word body, 12 pages incl. appendices; `.docx` alongside) |
+| Version-controlled repository | This repo; CI on every push; `make verify` |
+| Technical demo (8–10 min) | [docs/demo/demo-script.md](../demo/demo-script.md); rehearsal evidence in [evidence/demo](../../evidence/demo/) |
+| Engineering evidence pack | [evidence/README.md](../../evidence/README.md). Tests, Bruno API collection run (16/16), load test, recovery drill, log trace, screenshots, AI evaluation |
+| Board / architecture-review deck (8–10 slides) | 10 slides: Claude Slides artifact (link in [docs/review](../review/architecture-review-deck-outline.md)); exports to PowerPoint/PDF; sources in `docs/review/deck-source/` |
+| Individual viva | [docs/viva/](../viva/README.md) |
+
+Rebuild the PDFs and DOCX files with `node docs/architecture/tools/build_deliverables.cjs`.
 
 ## Gate 5 (Week 14): architecture review
 

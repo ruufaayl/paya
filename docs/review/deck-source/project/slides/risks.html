@@ -1,0 +1,15 @@
+<section id="risks">
+<p class="eyebrow">Risks and limits</p>
+<h2>What we accept, and who owns it</h2>
+<table class="data">
+<tr><th style="width:38%;">Limit</th><th style="width:20%;">Risk</th><th style="width:42%;">Next step (owner)</th></tr>
+<tr><td>One API process, about 16 payments/s</td><td>Medium</td><td>More processes plus separate worker; locks already safe (Integrity lead)</td></tr>
+<tr><td>No MFA, token revocation or rate limiting</td><td>High for a pilot</td><td>OIDC with short-lived tokens; gateway limits (Security lead)</td></tr>
+<tr><td>App DB role could disable triggers</td><td>Medium</td><td>Separate owner and app roles (Integrity lead)</td></tr>
+<tr><td>Simulated rail; assumptions A3 and A4</td><td>Medium</td><td>Licensed sandbox behind RailPort (Integrity lead)</td></tr>
+<tr><td>Riskiest assumption A1 is unvalidated</td><td>High for the business</td><td>10–15 merchant and cashier interviews (Product lead)</td></tr>
+<tr><td>LLM path untested on a real model</td><td>Low (rules default)</td><td>Same 120-case evaluation before enabling (AI lead)</td></tr>
+</table>
+<div class="footer"><p>Full register: docs/architecture/tech-debt-register.md · threat model T-01 to T-15</p><p class="page"></p></div>
+<aside>Speaker D. Each limit has an owner and a next step in the technical-debt register. The two that matter most before any pilot are authentication hardening and validating assumption A1, the claim that cashiers trust screenshots. Several of our best improvements came from evidence: the load-test race, the identical-file gap, the lost denial audit and the missing restart policy.</aside>
+</section>

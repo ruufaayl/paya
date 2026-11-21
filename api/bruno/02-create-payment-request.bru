@@ -1,0 +1,29 @@
+meta {
+  name: 02 Create dynamic QR (PKR 2,450)
+  type: http
+  seq: 2
+}
+post {
+  url: {{baseUrl}}/v1/payment-requests
+  body: json
+  auth: bearer
+}
+auth:bearer {
+  token: {{cashierToken}}
+}
+script:pre-request {
+  bru.setVar("orderRef", "BRU-" + Date.now());
+}
+body:json {
+  { "amount_minor": 245000, "order_ref": "{{orderRef}}" }
+}
+script:post-response {
+  bru.setVar("prId", res.body.id);
+}
+tests {
+  test("201 with QR payload", function() {
+    expect(res.status).to.equal(201);
+    expect(res.body.qr_payload).to.contain("paya://pay?pr=");
+    expect(res.body.status).to.equal("OPEN");
+  });
+}

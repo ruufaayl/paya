@@ -1,0 +1,12 @@
+<section id="security" class="dark" data-transition="fade">
+<p class="eyebrow">Security, KYC/AML and access governance</p>
+<h2>No single person, and no machine, can move money alone</h2>
+<div class="row">
+<div class="card"><p class="tag">Segregation of duties</p><h3>Maker ≠ checker</h3><p class="body">Ops requests, Finance approves. Enforced in the app and by a database CHECK. A refused attempt is still audited.</p></div>
+<div class="card"><p class="tag">KYC / AML</p><h3>A hold moves no money</h3><p class="body">Tier, velocity and watch-list rules are versioned config. Only Compliance releases, with a recorded reason.</p></div>
+<div class="card"><p class="tag">Evidence</p><h3>Hash-chained audit</h3><p class="body">Logins, denials, decisions and AI suggestions. Verification names the first broken row.</p></div>
+<div class="card"><p class="tag">Threat model</p><h3>15 STRIDE threats</h3><p class="body">Lockout after 5 failures, security headers, scrubbed logs. Vulnerable dependencies found and upgraded.</p></div>
+</div>
+<div class="footer"><p>8 roles · one role per user · tests S6, S6b, S6c, S7, S8 · docs/architecture/10–11</p><p class="page"></p></div>
+<aside>Speaker D. One role per user makes the joiner-mover-leaver SoD conflict structurally impossible. A customer asking for someone else’s transaction gets 404, so references are never revealed. We prioritised two attack paths, double spending and an insider acting alone; both are mitigated and tested. Residual risks we own: no MFA or token revocation yet, no general rate limit, and a database superuser could disable triggers.</aside>
+</section>

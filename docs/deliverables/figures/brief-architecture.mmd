@@ -1,0 +1,27 @@
+flowchart LR
+  subgraph PAY["Money path - one ACID transaction, then the rail"]
+    direction LR
+    C["Customer wallet / Cashier till<br/>(PWA)"] --> G["API gateway<br/>JWT · RBAC · idempotency<br/>correlation ID"]
+    G --> R["Risk rules<br/>KYC tier · velocity · watch-list"]
+    R -- "PASS" --> L[("Double-entry ledger<br/>append-only · balanced")]
+    L -- "credit, E2E id" --> RA["Raast rail<br/>simulated, RailPort"]
+  end
+  subgraph CTRL["Controls, recovery and evidence"]
+    direction LR
+    H(["Compliance officer<br/>release / reject"])
+    W["Recovery worker<br/>status enquiry, same E2E"]
+    RC["Reconciliation<br/>control totals · 7 categories"] --> AI["AI triage<br/>suggest only"] --> OF(["Ops maker · Finance checker"])
+    O[("Outbox")] --> N["Notifier · Mission Control"]
+  end
+  R -- "HOLD" --> H
+  H -- "release" --> L
+  RA -- "ack / enquiry" --> W
+  W --> L
+  L --> O
+  RA -- "settlement file" --> RC
+  classDef human fill:#efe9ff,stroke:#7c5cff,color:#2b1b6b
+  classDef store fill:#e8f7ef,stroke:#0a7a46,color:#0b3d24
+  classDef ext fill:#eef2f7,stroke:#64748b,color:#1f2937
+  class H,OF human
+  class L,O store
+  class RA ext

@@ -1,0 +1,24 @@
+meta {
+  name: 07 Transaction detail (customer view)
+  type: http
+  seq: 7
+}
+get {
+  url: {{baseUrl}}/v1/transactions/{{txnRef}}
+  auth: bearer
+}
+auth:bearer {
+  token: {{customerToken}}
+}
+script:pre-request {
+  await new Promise(r => setTimeout(r, 1500));
+}
+tests {
+  test("settled with full timeline", function() {
+    expect(res.status).to.equal(200);
+    expect(["SETTLED", "RECONCILED"]).to.include(res.body.status);
+    expect(res.body.display_status).to.equal("Paid");
+    const steps = res.body.timeline.map(t => t.to);
+    expect(steps).to.include.members(["VALIDATED", "AUTHORISED", "POSTED", "PENDING", "SETTLED"]);
+  });
+}

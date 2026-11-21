@@ -1,0 +1,32 @@
+meta {
+  name: 04 Pay (Idempotency-Key)
+  type: http
+  seq: 4
+}
+post {
+  url: {{baseUrl}}/v1/payments
+  body: json
+  auth: bearer
+}
+auth:bearer {
+  token: {{customerToken}}
+}
+script:pre-request {
+  bru.setVar("idemKey", "bruno-" + Date.now() + "-" + Math.floor(Math.random() * 1e9));
+  req.setHeader("Idempotency-Key", bru.getVar("idemKey"));
+  req.setHeader("X-Correlation-ID", "corr-bruno-" + Date.now());
+}
+body:json {
+  { "payment_request_id": "{{prId}}" }
+}
+script:post-response {
+  bru.setVar("txnRef", res.body.txn_ref);
+}
+tests {
+  test("202 Accepted, never 'Paid' before settlement", function() {
+    expect(res.status).to.equal(202);
+    expect(res.body.status).to.equal("PENDING");
+    expect(res.body.display_status).to.equal("Sent - awaiting confirmation");
+    expect(res.headers["idempotent-replayed"]).to.equal("false");
+  });
+}

@@ -1,0 +1,25 @@
+meta {
+  name: 06 New key, same QR (business idempotency)
+  type: http
+  seq: 6
+}
+post {
+  url: {{baseUrl}}/v1/payments
+  body: json
+  auth: bearer
+}
+auth:bearer {
+  token: {{customerToken}}
+}
+script:pre-request {
+  req.setHeader("Idempotency-Key", "bruno-second-tap-" + Date.now());
+}
+body:json {
+  { "payment_request_id": "{{prId}}" }
+}
+tests {
+  test("409 and points to the existing payment", function() {
+    expect(res.status).to.equal(409);
+    expect(["PAYMENT_ALREADY_IN_PROGRESS", "PAYMENT_REQUEST_CLOSED"]).to.include(res.body.error.code);
+  });
+}

@@ -1,0 +1,19 @@
+   ✓ 200 and CASHIER role
+   ✓ 201 with QR payload
+   ✓ 200
+   ✓ 202 Accepted, never 'Paid' before settlement
+   ✓ same txn_ref replayed
+   ✓ 409 and points to the existing payment
+   ✓ settled with full timeline
+   ✓ 200
+   ✓ AUTH_POST, SETTLE and FEE journals, each balanced
+   ✓ file processed with control totals
+   ✓ 409 duplicate file refused
+   ✓ no FAIL and ledger balanced
+   ✓ 403 FORBIDDEN
+   ✓ 200
+   ✓ 404 - the reference is not even revealed
+   ✓ chain intact
+│ Status        │     ✓ PASS     │
+│ Requests      │ 16 (16 Passed) │
+│ Tests         │     16/16      │

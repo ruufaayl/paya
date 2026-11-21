@@ -1,0 +1,23 @@
+meta {
+  name: 10 Run reconciliation
+  type: http
+  seq: 10
+}
+post {
+  url: {{baseUrl}}/v1/finance/recon/run
+  body: json
+  auth: bearer
+}
+auth:bearer {
+  token: {{financeToken}}
+}
+body:json {
+  {}
+}
+tests {
+  test("file processed with control totals", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.records).to.be.above(0);
+    expect(res.body.match_rate).to.be.at.least(0);
+  });
+}

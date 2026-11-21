@@ -1,0 +1,22 @@
+meta {
+  name: 11 Import the same settlement file again
+  type: http
+  seq: 11
+}
+post {
+  url: {{baseUrl}}/v1/finance/recon/run
+  body: json
+  auth: bearer
+}
+auth:bearer {
+  token: {{financeToken}}
+}
+body:json {
+  {}
+}
+tests {
+  test("409 duplicate file refused", function() {
+    expect(res.status).to.equal(409);
+    expect(res.body.error.code).to.equal("DUPLICATE_SETTLEMENT_FILE");
+  });
+}

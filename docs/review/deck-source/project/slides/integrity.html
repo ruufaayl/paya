@@ -1,0 +1,16 @@
+<section id="integrity" style="gap:28px;">
+<p class="eyebrow">Transaction integrity</p>
+<h2>Designed for the unhappy path</h2>
+<div class="chain">
+<p class="pill">CREATED</p><p class="arrow">→</p><p class="pill">VALIDATED</p><p class="arrow">→</p><p class="pill">AUTHORISED</p><p class="arrow">→</p><p class="pill">POSTED</p><p class="arrow">→</p><p class="pill warn">PENDING</p><p class="arrow">→</p><p class="pill ok">SETTLED</p><p class="arrow">→</p><p class="pill ok">RECONCILED</p>
+</div>
+<div class="row">
+<div class="card"><p class="tag">Layer 1 · HTTP</p><h3>Same key, same answer</h3><p class="body">Stored response replayed; no second debit.</p></div>
+<div class="card"><p class="tag">Layer 2 · Business</p><h3>One live payment per QR</h3><p class="body">A second tap with a new key gets 409 and the payment to follow.</p></div>
+<div class="card"><p class="tag">Layer 3 · Ledger</p><h3>Each posting at most once</h3><p class="body">UNIQUE(txn, posting type) plus row locks.</p></div>
+<div class="card"><p class="tag">Layer 4 · Rail</p><h3>Resend the same E2E id</h3><p class="body">Only after the rail says NOT_FOUND.</p></div>
+</div>
+<p style="font-size:32px;"><b>Timeout = PENDING, never FAILED (ADR-006).</b> We ask the rail at 5 s → 5 min. After 15 min a human owns it, and any reversal is maker-checker.</p>
+<div class="footer"><p>Proof: tests S2, S3, S4, S5, S11; concurrency test passed 5/5 runs</p><p class="page"></p></div>
+<aside>Speaker B. Every transition is optimistic-locked, written to history and to the outbox in one transaction. Four layers of idempotency, each for a different failure. The key point for the viva: a timeout is an unknown outcome. Refunding on timeout is how both customer and merchant end up paid. Load testing found a race between our dispatch and the worker; constraints held, and we fixed it with row locks and an atomic claim.</aside>
+</section>

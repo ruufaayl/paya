@@ -1,0 +1,15 @@
+meta {
+  name: 15 Omar cannot see Sara's payment
+  type: http
+  seq: 15
+}
+get {
+  url: {{baseUrl}}/v1/transactions/{{txnRef}}
+  auth: bearer
+}
+auth:bearer {
+  token: {{otherToken}}
+}
+tests {
+  test("404 - the reference is not even revealed", function() { expect(res.status).to.equal(404); });
+}
