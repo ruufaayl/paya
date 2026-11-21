@@ -60,6 +60,24 @@ def run(s: Session) -> dict:
     out.append(_check("operational", "pending_beyond_review_window", overdue_pending == 0, overdue_pending,
                       "uncertain payments that should already be escalated to a human"))
 
+    # Onboarding: no account may exist that the KYC rules did not allow.
+    from .models import Customer, KYCApplication, KYCCheck
+    auto_ids = select(KYCApplication.id).where(KYCApplication.decision == "AUTO_APPROVED")
+    auto_bad = s.execute(select(func.count(func.distinct(KYCCheck.application_id))).where(
+        KYCCheck.application_id.in_(auto_ids), KYCCheck.outcome != "PASS",
+        # a liveness retry that later passed is allowed; any other non-pass is not
+        KYCCheck.check.notin_(["LIVENESS", "DOCUMENT_QUALITY"]))).scalar_one()
+    out.append(_check("operational", "kyc_auto_approval_only_when_all_checks_pass", auto_bad == 0, auto_bad,
+                      "an application was approved automatically although a check did not pass"))
+    unverified = s.execute(select(func.count()).select_from(KYCApplication).join(
+        Customer, Customer.id == KYCApplication.customer_id).where(
+        KYCApplication.state == "APPROVED", Customer.kyc_status != "VERIFIED")).scalar_one()
+    orphan = s.execute(select(func.count()).select_from(KYCApplication).where(
+        KYCApplication.state == "APPROVED", KYCApplication.customer_id.is_(None))).scalar_one()
+    out.append(_check("operational", "kyc_approved_has_verified_customer", unverified + orphan == 0,
+                      {"unverified": unverified, "missing": orphan},
+                      "every approved application opened exactly one verified customer"))
+
     # ---- Layer 3: financial (internal)
     tb = ledger.trial_balance(s)
     out.append(_check("financial", "trial_balance_balanced", tb["balanced"],

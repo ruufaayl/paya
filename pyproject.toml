@@ -12,6 +12,7 @@ dependencies = [
   "pydantic-settings==2.*",
   "pyjwt==2.*",
   "argon2-cffi==23.*",
+  "opencv-python-headless==4.10.0.84",  # onboarding: document checks, QR, YuNet/SFace face models
 ]
 
 [project.optional-dependencies]

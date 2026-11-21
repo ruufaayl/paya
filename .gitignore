@@ -10,3 +10,6 @@ dist/
 .DS_Store
 *.tsbuildinfo
 docs/deliverables/dist/*.html
+
+# face models are downloaded, never committed (see models/README.md)
+models/*.onnx

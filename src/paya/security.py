@@ -9,6 +9,7 @@ Permission matrix - one role can never perform every sensitive action:
   FINANCE         APPROVE reversals (checker), run reconciliation, finance reports
   SYSADMIN        chaos/config in demo mode only; no financial actions
   AUDITOR         read-only everything incl. audit chain verification
+  APPLICANT       (not a user) a short-lived token that can only complete its own onboarding application
 """
 from dataclasses import dataclass
 from datetime import timedelta
@@ -41,6 +42,10 @@ PERMISSIONS: dict[str, set[str]] = {
     "ai:triage": {"OPS", "FINANCE"},
     "ai:review": {"OPS", "FINANCE"},
     "cases:resolve": {"OPS", "FINANCE"},
+    # Onboarding: an APPLICANT token is scoped to one application and can do nothing else.
+    "kyc:apply": {"APPLICANT"},
+    "kyc:read": {"COMPLIANCE", "OPS", "AUDITOR"},
+    "kyc:decide": {"COMPLIANCE"},
 }
 
 
@@ -64,10 +69,10 @@ def verify_password(pw: str, hashed: str) -> bool:
         return False
 
 
-def issue_token(p: Principal) -> str:
+def issue_token(p: Principal, ttl_minutes: int | None = None) -> str:
     cfg = get_settings()
     claims = {"sub": p.user_id, "usr": p.username, "role": p.role, "cid": p.customer_id, "mid": p.merchant_id,
-              "iat": now(), "exp": now() + timedelta(minutes=cfg.jwt_ttl_minutes)}
+              "iat": now(), "exp": now() + timedelta(minutes=ttl_minutes or cfg.jwt_ttl_minutes)}
     return jwt.encode(claims, cfg.jwt_secret, algorithm="HS256")
 
 

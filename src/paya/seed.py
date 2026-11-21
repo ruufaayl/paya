@@ -32,6 +32,7 @@ STAFF = [
     ("sana.ops", "Sana (Operations)", "OPS", None, None),
     ("faisal.ops", "Faisal (Operations)", "OPS", None, None),
     ("hamza.compliance", "Hamza (Compliance)", "COMPLIANCE", None, None),
+    ("nadia.compliance", "Nadia (Compliance, second officer)", "COMPLIANCE", None, None),
     ("rabia.finance", "Rabia (Finance & reconciliation)", "FINANCE", None, None),
     ("admin", "System administrator", "SYSADMIN", None, None),
     ("auditor", "Internal audit (read-only)", "AUDITOR", None, None),

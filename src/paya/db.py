@@ -102,12 +102,15 @@ INTEGRITY_DDL = [
 def create_schema() -> None:
     from . import models  # noqa: F401  (register tables)
     from .rail import RailBase
+    from .registry import RegistryBase
 
     eng = engine()
     with eng.begin() as conn:
         conn.execute(text("CREATE SCHEMA IF NOT EXISTS rail"))
+        conn.execute(text("CREATE SCHEMA IF NOT EXISTS registry"))
     Base.metadata.create_all(eng)
     RailBase.metadata.create_all(eng)
+    RegistryBase.metadata.create_all(eng)
     with eng.begin() as conn:
         for stmt in INTEGRITY_DDL:
             conn.execute(text(stmt))
@@ -118,3 +121,4 @@ def drop_schema() -> None:
     with eng.begin() as conn:
         conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;"))
         conn.execute(text("DROP SCHEMA IF EXISTS rail CASCADE;"))
+        conn.execute(text("DROP SCHEMA IF EXISTS registry CASCADE;"))

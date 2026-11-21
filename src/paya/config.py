@@ -28,6 +28,24 @@ class Settings(BaseSettings):
     pending_review_after_seconds: int = 900
     settlement_cutoff_utc_hour: int = 16  # 21:00 Pakistan time
 
+    # Digital onboarding & KYC (Theme 1). Synthetic identities only; images are never stored.
+    kyc_rules_version: str = "kyc.v1"
+    kyc_pepper: str = "dev-only-kyc-pepper"     # keyed hash for identity numbers and image digests
+    kyc_face_engine: str = "opencv"            # opencv | none (tests inject a mock)
+    kyc_model_dir: str = "models"
+    kyc_face_match_threshold: float = 0.363   # SFace cosine threshold published with the model
+    kyc_face_grey_zone: float = 0.30          # below the threshold but above this: human review
+    kyc_liveness_turn_ratio: float = 0.18     # nose offset / eye distance for a head turn
+    kyc_liveness_centre_ratio: float = 0.10
+    kyc_challenge_ttl_seconds: int = 120
+    kyc_max_liveness_attempts: int = 3
+    kyc_max_document_attempts: int = 5
+    kyc_screening_threshold: float = 0.85     # fuzzy name similarity that counts as a potential match
+    kyc_require_geolocation: bool = True
+    kyc_abandon_after_hours: int = 72
+    kyc_session_minutes: int = 30
+    kyc_welcome_credit_minor: int = 5_000_00  # demo mode only: synthetic credit so a new wallet can pay
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -7,7 +7,10 @@ COPY src ./src
 # Optional corporate/proxy CA (not needed on a normal network): docker build --secret id=ca,src=<bundle>
 RUN --mount=type=secret,id=ca,required=false \
     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi && \
-    pip install --no-cache-dir . && useradd -r -u 10001 paya
+    pip install --no-cache-dir . && \
+    if [ -f /run/secrets/ca ]; then export SSL_CERT_FILE=/run/secrets/ca; fi && \
+    python -m paya.fetch_models /app/models && useradd -r -u 10001 paya
+ENV PAYA_KYC_MODEL_DIR=/app/models
 USER paya
 EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=3s --retries=5 CMD python -c "import urllib.request;urllib.request.urlopen('http://localhost:8000/healthz')"

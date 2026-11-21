@@ -394,3 +394,67 @@ class AISuggestion(Base):
         CheckConstraint("reviewer_decision IS NULL OR reviewer_decision IN ('ACCEPTED','OVERRIDDEN')", name="ck_ai_decision"),
         CheckConstraint("confidence >= 0 AND confidence <= 1", name="ck_ai_confidence"),
     )
+
+
+# ---------------------------------------------------------------- Digital onboarding & KYC (Theme 1)
+class KYCApplication(Base):
+    """One attempt to open a wallet. Holds decisions and evidence about images, never the images themselves.
+
+    Biometric data (photos, face templates) is processed in memory and discarded in the same request.
+    Identity numbers are stored only as a keyed hash, so duplicates can be found without keeping the number.
+    """
+    __tablename__ = "kyc_applications"
+    id: Mapped[uuid.UUID] = UUIDPK()
+    ref: Mapped[str] = mapped_column(String(24), unique=True, nullable=False)
+    state: Mapped[str] = mapped_column(String(16), default="STARTED", nullable=False)
+    version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    full_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    date_of_birth: Mapped[date | None] = mapped_column(Date)
+    mobile_masked: Mapped[str] = mapped_column(String(32), nullable=False)
+    username: Mapped[str] = mapped_column(String(64), nullable=False)
+    password_hash: Mapped[str | None] = mapped_column(Text)  # moved to users on approval, then cleared
+    consent_version: Mapped[str] = mapped_column(String(16), nullable=False)
+    biometric_consent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    id_number_hash: Mapped[str | None] = mapped_column(String(64), index=True)
+    document_digest: Mapped[str | None] = mapped_column(String(64))
+    document_data: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)  # extracted fields, no number
+    challenge: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)  # nonce, steps, expiry, used
+    document_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    liveness_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    geolocation: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)  # rounded to ~1 km
+    decision: Mapped[str | None] = mapped_column(String(16))  # AUTO_APPROVED | APPROVED | REJECTED | MORE_INFO
+    decision_reasons: Mapped[list] = mapped_column(JSONB, default=list, nullable=False)
+    decided_by: Mapped[str | None] = mapped_column(String(64))
+    recommended_by: Mapped[str | None] = mapped_column(String(64))  # first officer on a two-person decision
+    recommendation: Mapped[str | None] = mapped_column(String(16))
+    tier_granted: Mapped[int | None] = mapped_column(Integer)
+    customer_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("customers.id"))
+    case_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("cases.id"))
+    rule_version: Mapped[str] = mapped_column(String(16), nullable=False)
+    correlation_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = TS()
+    updated_at: Mapped[datetime] = TS()
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    __table_args__ = (
+        CheckConstraint("state IN ('STARTED','DOCUMENT_OK','REFERRED','APPROVED','REJECTED','MORE_INFO','ABANDONED')",
+                        name="ck_kyc_app_state"),
+        CheckConstraint("decided_by IS NULL OR recommended_by IS NULL OR decided_by <> recommended_by",
+                        name="ck_kyc_two_person"),
+        CheckConstraint("tier_granted IS NULL OR tier_granted BETWEEN 1 AND 2", name="ck_kyc_tier_granted"),
+    )
+
+
+class KYCCheck(Base):
+    """One automated check on an application: outcome, score, engine and the evidence used (no images)."""
+    __tablename__ = "kyc_checks"
+    id: Mapped[uuid.UUID] = UUIDPK()
+    application_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("kyc_applications.id"), nullable=False, index=True)
+    check: Mapped[str] = mapped_column(String(24), nullable=False)
+    outcome: Mapped[str] = mapped_column(String(8), nullable=False)  # PASS | REFER | FAIL | ERROR
+    score: Mapped[float | None] = mapped_column()
+    engine: Mapped[str] = mapped_column(String(64), nullable=False)
+    reason: Mapped[str | None] = mapped_column(String(64))
+    evidence: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
+    input_digest: Mapped[str | None] = mapped_column(String(64))  # keyed hash of the image, not the image
+    created_at: Mapped[datetime] = TS()
+    __table_args__ = (CheckConstraint("outcome IN ('PASS','REFER','FAIL','ERROR')", name="ck_kyc_check_outcome"),)

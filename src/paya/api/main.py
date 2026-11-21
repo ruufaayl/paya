@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 
-from .. import ai_service, audit, events, ledger, notifications, payments, recon
+from .. import ai_service, audit, events, kyc, ledger, notifications, payments, recon
 from ..config import get_settings
 from ..db import create_schema, session_scope
 from ..errors import Forbidden, LoginLocked, NotFound, PayaError, Unauthenticated, ValidationFailed
@@ -553,6 +553,102 @@ def metrics_summary(p: Principal = Depends(authorised("backoffice:read"))):
                 "ledger_balanced": ledger.trial_balance(s)["balanced"]}
 
 
+# ------------------------------------------------------------------ digital onboarding & KYC (Theme 1)
+class OnboardingStartIn(BaseModel):
+    full_name: str = Field(min_length=3, max_length=128)
+    date_of_birth: date
+    mobile: str = Field(min_length=10, max_length=20)
+    username: str = Field(min_length=3, max_length=32)
+    password: str = Field(min_length=10, max_length=128)
+    accept_terms: bool
+    biometric_consent: bool
+
+
+class ImageIn(BaseModel):
+    image: str = Field(max_length=4_300_000, description="JPEG/PNG/WebP as a data URL or base64. Never stored.")
+
+
+class FrameIn(BaseModel):
+    step: str = Field(pattern="^(CENTER|LEFT|RIGHT)$")
+    image: str = Field(max_length=4_300_000)
+
+
+class VerifyIn(BaseModel):
+    nonce: str = Field(max_length=64)
+    document_image: str = Field(max_length=4_300_000)
+    frames: list[FrameIn] = Field(min_length=3, max_length=3)
+    geolocation: dict | None = None
+
+
+class KYCDecisionIn(BaseModel):
+    decision: str = Field(pattern="^(APPROVE|REJECT|MORE_INFO)$")
+    reason: str = Field(min_length=5, max_length=500)
+    tier: int = Field(default=1, ge=1, le=2)
+
+
+@app.post("/v1/onboarding/start", status_code=201, tags=["onboarding"])
+def onboarding_start(body: OnboardingStartIn, request: Request):
+    """Begin opening a wallet. Returns a 30-minute token that can only complete this application."""
+    return kyc.start(**body.model_dump(), correlation_id=request.state.correlation_id)
+
+
+@app.post("/v1/onboarding/specimen", tags=["onboarding"])
+def onboarding_specimen(p: Principal = Depends(authorised("kyc:apply"))):
+    """Issue a SYNTHETIC specimen identity (and its signed code) so no real ID card is ever photographed."""
+    return kyc.issue_specimen(p.user_id)
+
+
+@app.post("/v1/onboarding/document", tags=["onboarding"])
+def onboarding_document(body: ImageIn, p: Principal = Depends(authorised("kyc:apply"))):
+    return kyc.submit_document(p.user_id, body.image)
+
+
+@app.post("/v1/onboarding/liveness/challenge", tags=["onboarding"])
+def onboarding_challenge(p: Principal = Depends(authorised("kyc:apply"))):
+    return kyc.new_challenge(p.user_id)
+
+
+@app.post("/v1/onboarding/verify", tags=["onboarding"])
+def onboarding_verify(body: VerifyIn, p: Principal = Depends(authorised("kyc:apply"))):
+    out = kyc.verify(p.user_id, nonce=body.nonce, document_image=body.document_image,
+                     frames=[f.model_dump() for f in body.frames], geolocation=body.geolocation)
+    _safe_relay()
+    return out
+
+
+@app.get("/v1/onboarding/status", tags=["onboarding"])
+def onboarding_status(p: Principal = Depends(authorised("kyc:apply"))):
+    return kyc.applicant_status(p.user_id)
+
+
+@app.get("/v1/kyc/applications", tags=["backoffice"])
+def kyc_applications(state: str | None = None, p: Principal = Depends(authorised("kyc:read"))):
+    return kyc.list_applications(state)
+
+
+@app.get("/v1/kyc/applications/{ref}", tags=["backoffice"])
+def kyc_application(ref: str, p: Principal = Depends(authorised("kyc:read"))):
+    return kyc.get_application(ref)
+
+
+@app.post("/v1/compliance/kyc/{ref}/decision", tags=["backoffice"])
+def kyc_decision(ref: str, body: KYCDecisionIn, p: Principal = Depends(authorised("kyc:decide"))):
+    out = kyc.decide(ref, decision=body.decision, reason=body.reason, tier=body.tier, actor=p.username,
+                     actor_role=p.role)
+    _safe_relay()
+    return out
+
+
+@app.get("/v1/kyc/engine", tags=["backoffice"])
+def kyc_engine(p: Principal = Depends(authorised("backoffice:read"))):
+    from .. import kyc_engines
+    from ..registry import registry
+    fe = kyc_engines.face_engine()
+    return {"face_engine": fe.name if fe else None, "registry_mode": registry.mode,
+            "rules_version": get_settings().kyc_rules_version,
+            "note": None if fe else "face models not installed: every application is referred to Compliance"}
+
+
 # ------------------------------------------------------------------ chaos (demo mode only)
 class ChaosIn(BaseModel):
     mode: str
@@ -579,6 +675,24 @@ def chaos_set(body: ChaosIn, request: Request, p: Principal = Depends(authorised
     events.telemetry("chaos", "rail_mode_changed", detail={"mode": body.mode, "by": p.username},
                      level="warn" if body.mode != "NORMAL" else "info")
     return chaos_state(p)
+
+
+class RegistryChaosIn(BaseModel):
+    mode: str = Field(pattern="^(NORMAL|TIMEOUT|DOWN)$")
+
+
+@app.post("/v1/chaos/registry", tags=["chaos"])
+def chaos_registry(body: RegistryChaosIn, request: Request, p: Principal = Depends(authorised("chaos:control"))):
+    if not get_settings().demo_mode:
+        raise Forbidden("chaos controls are disabled outside demo mode")
+    from ..registry import registry
+    registry.set_mode(body.mode)
+    with session_scope() as s:
+        audit.record(s, actor=p.username, actor_role=p.role, action="CHAOS_REGISTRY_MODE", object_type="registry",
+                     object_id="REGISTRY_MOCK", details=body.model_dump(), correlation_id=request.state.correlation_id)
+    events.telemetry("chaos", "registry_mode_changed", detail={"mode": body.mode, "by": p.username},
+                     level="warn" if body.mode != "NORMAL" else "info")
+    return {"registry_mode": registry.mode}
 
 
 @app.post("/v1/chaos/relay-duplicate", tags=["chaos"])
