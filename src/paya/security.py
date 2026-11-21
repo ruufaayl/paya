@@ -53,6 +53,9 @@ PERMISSIONS: dict[str, set[str]] = {
     "assistant:use": {"CUSTOMER"},
     # Green banking: a customer's footprint, pot and offsets are their own; staff see portfolio aggregates only.
     "green:use": {"CUSTOMER"},
+    # Super app: customers use partner services; Compliance owns third-party risk (suspend / resume a partner).
+    "services:use": {"CUSTOMER"},
+    "partners:manage": {"COMPLIANCE"},
 }
 
 

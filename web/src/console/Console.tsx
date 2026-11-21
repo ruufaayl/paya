@@ -1,7 +1,7 @@
 // Paya Mission Control: a financial-operations console. Every number is read from the backend; every action is
 // performed as the signed-in operator and checked by the server.
 import {
-  Activity, ArrowLeftRight, Bot, ChevronDown, FileCheck2, FlaskConical, Gauge, Leaf, LogOut, Menu, Network, Radio, Search,
+  Activity, ArrowLeftRight, Bot, ChevronDown, FileCheck2, FlaskConical, Gauge, Leaf, Store, LogOut, Menu, Network, Radio, Search,
   ShieldCheck, ScrollText, UserCheck, UserRoundCog, Users,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -13,6 +13,7 @@ import { CaseInspector, KycInspector, TxnInspector } from "./inspectors";
 import { OP_KEY, OperatorProvider, STAFF, StreamProvider, loadOperator, useCan, useLive, useOperator, type Operator } from "./core";
 import AiOps from "./pages/AiOps";
 import GreenPage from "./pages/Green";
+import Partners from "./pages/Partners";
 import Audit from "./pages/Audit";
 import Cases from "./pages/Cases";
 import Events from "./pages/Events";
@@ -37,6 +38,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
     { to: "/control/recon", label: "Reconciliation", icon: FileCheck2, perm: "backoffice:read" },
     { to: "/control/ai", label: "AI operations", icon: Bot, perm: "backoffice:read" },
     { to: "/control/green", label: "Green banking", icon: Leaf, perm: "backoffice:read" },
+    { to: "/control/partners", label: "Partners & services", icon: Store, perm: "backoffice:read" },
   ] },
   { group: "Control", items: [
     { to: "/control/rail-lab", label: "Rail lab", icon: FlaskConical, perm: "backoffice:read" },
@@ -166,6 +168,7 @@ function Shell() {
             <Route path="recon" element={<Recon />} />
             <Route path="ai" element={<AiOps />} />
             <Route path="green" element={<GreenPage />} />
+            <Route path="partners" element={<Partners />} />
             <Route path="rail-lab" element={<RailLab />} />
             <Route path="audit" element={<Audit />} />
             <Route path="*" element={<Navigate to="/control" replace />} />

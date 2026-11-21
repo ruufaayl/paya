@@ -40,6 +40,11 @@ FACTORS: dict[str, dict] = {
     "FUEL": {"label": "Fuel", "kg_per_1000": 9.5},
     "TRANSPORT": {"label": "Transport", "kg_per_1000": 4.2},
     "CARBON_OFFSET": {"label": "Offsets", "kg_per_1000": 0.0},
+    # super-app partner categories (Theme 4)
+    "UTILITY": {"label": "Electricity and gas", "kg_per_1000": 6.0},
+    "TELECOM": {"label": "Mobile", "kg_per_1000": 0.6},
+    "ECOMMERCE": {"label": "Online shopping", "kg_per_1000": 1.8},
+    "INSURANCE": {"label": "Insurance", "kg_per_1000": 0.3},
 }
 DEFAULT_FACTOR = {"label": "Other spending", "kg_per_1000": 2.0}
 UNCERTAINTY = 0.5  # +/- 50 %: spend-based factors are coarse

@@ -106,6 +106,23 @@ def run(s: Session) -> dict:
         .group_by(Transaction.id).having(func.count(Journal.id) != 1).subquery())).scalar_one()
     out.append(_check("financial", "green_pot_move_has_one_journal", bad_moves == 0, bad_moves,
                       "every green pot movement is booked as exactly one balanced journal"))
+    # Super app (Theme 4): an order's amount is the amount its payment request asks for, and a partner only
+    # ever received fields the customer had consented to when the order was made.
+    from .models import PartnerConsent, PaymentRequest as PR, ServiceOrder
+    drift = s.execute(select(func.count()).select_from(ServiceOrder).join(PR, PR.id == ServiceOrder.payment_request_id)
+                      .where(PR.amount_minor != ServiceOrder.amount_minor)).scalar_one()
+    out.append(_check("financial", "service_order_matches_payment_request", drift == 0, drift,
+                      "an order's price differs from what the customer was asked to pay"))
+    overshared = 0
+    for o, c in s.execute(select(ServiceOrder, PartnerConsent).outerjoin(
+            PartnerConsent, PartnerConsent.id == ServiceOrder.consent_id)).all():
+        if not o.shared:
+            continue
+        if c is None or not set(o.shared) <= set(c.scopes) or c.granted_at > o.created_at \
+                or (c.revoked_at is not None and c.revoked_at < o.created_at):
+            overshared += 1
+    out.append(_check("operational", "partner_data_shared_only_with_consent", overshared == 0, overshared,
+                      "a partner received customer data without a matching, live consent"))
     unreconciled = s.execute(select(func.count()).select_from(Transaction).where(
         Transaction.type == "PAYMENT", Transaction.status == "SETTLED", Transaction.recon_result.is_(None),
         Transaction.updated_at < t - timedelta(hours=36))).scalar_one()

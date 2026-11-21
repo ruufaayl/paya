@@ -12,7 +12,7 @@ author: "Rufayl Waseem (24i-5660) · Taha Ali (24i-5525) · Harris Safi (24i-565
 
 | In scope (built and tested) | Out of scope (stated) |
 |---|---|
-| Dynamic QR; idempotent pay; KYC tier, velocity and watch-list rules with compliance hold; reversal with maker-checker; simulated Raast with 9 failure modes; settlement-file reconciliation; AI triage of breaks; operations console; **digital onboarding & KYC** (Theme 1); **green pot, footprint estimate and offsets** (Theme 2); **conversational banking assistant** (Theme 3) | Cards and chargebacks; real NADRA verification or certified liveness; real bank, EMI or Raast connectivity; post-settlement refunds; production HA |
+| Dynamic QR; idempotent pay; KYC tier, velocity and watch-list rules with compliance hold; reversal with maker-checker; simulated Raast with 9 failure modes; settlement-file reconciliation; AI triage of breaks; operations console; **digital onboarding & KYC** (Theme 1); **green pot, footprint estimate and offsets** (Theme 2); **conversational banking assistant** (Theme 3); **super-app partner services** (bills, top-up, shop, takaful; Theme 4) | Cards and chargebacks; real NADRA verification or certified liveness; real bank, EMI or Raast connectivity; post-settlement refunds; production HA |
 
 ## Systems (C4 containers) and systems of record
 
@@ -52,7 +52,7 @@ author: "Rufayl Waseem (24i-5660) · Taha Ali (24i-5525) · Harris Safi (24i-565
 | Wrong or edited ledger | Balanced-journal trigger; append-only triggers; corrections are linked journals | ledger tests |
 | Insider reversal | Ops requests, Finance approves; DB `CHECK maker ≠ checker`; denial audited | S6, S6b, S6c |
 | Sanctions or fraud | Rules → HOLD; no money moves until Compliance decides | S7 |
-| Settlement mismatch | Control totals; duplicate-file refusal; 7 break categories with owners; 16 integrity checks | S10, S13 |
+| Settlement mismatch | Control totals; duplicate-file refusal; 7 break categories with owners; 18 integrity checks | S10, S13 |
 | AI over-reach | Suggest-only agent; abstains; owner-only review; no money-moving code (source-checked) | AI tests, evaluation |
 | Onboarding error or bias | Machines approve only clear cases, people reject; unknown → referral; two officers for a possible sanctions match (DB `CHECK`) | K1–K15, ADR-010 |
 | Chat moves money or leaks data | Read-only, customer-scoped assistant; secrets redacted before storage; handoff to Ops is audited | C1–C10, ADR-011 |
@@ -66,7 +66,7 @@ author: "Rufayl Waseem (24i-5660) · Taha Ali (24i-5525) · Harris Safi (24i-565
 | Duplicate financial effect | 0 | 0 / 400, incl. duplicate-ack storm |
 | Recovery (RTO / RPO) | API 5 min; committed data RPO 0 | 1.3 s after SIGKILL; 0 lost |
 | Reconciliation | every break owned within 24 h | automatic owner and SLA |
-| Reproducibility | one command; CI | `make verify`; CI green; 77 tests; demo rehearsal 8/8 scenes |
+| Reproducibility | one command; CI | `make verify`; CI green; 90 tests; demo rehearsal 8/8 scenes |
 | Accessibility | WCAG 2.2 AA (self-assessed) | 0 axe violations (13 screens); 0 contrast failures |
 | AI safety | 0 unsafe autonomy | 0% (94.1% accuracy on acted cases) |
 

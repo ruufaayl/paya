@@ -55,7 +55,8 @@ def test_o4_event_history_is_durable_and_filterable(client, as_):
     assert older[0]["seq"] < seqs[0]
 
 
-def test_o5_recon_items_show_each_break_with_its_case(client, as_):
+def test_o5_recon_items_show_each_break_with_its_case(client, as_, settings, monkeypatch):
+    monkeypatch.setattr(settings, "settlement_cutoff_utc_hour", 24)   # settled before cut-off: a real break
     chaos.set_mode("PARTIAL")
     ref = _settle(client, as_)
     chaos.reset()
@@ -66,7 +67,8 @@ def test_o5_recon_items_show_each_break_with_its_case(client, as_):
     assert out["run"]["file_sha256"]
 
 
-def test_o6_assignment_is_owner_only_audited_and_moves_no_money(client, as_):
+def test_o6_assignment_is_owner_only_audited_and_moves_no_money(client, as_, settings, monkeypatch):
+    monkeypatch.setattr(settings, "settlement_cutoff_utc_hour", 24)
     payments_tb = None
     with session_scope() as s:
         payments_tb = trial_balance(s)

@@ -20,6 +20,14 @@
     "violations": []
   },
   {
+    "screen": "wallet: services",
+    "violations": []
+  },
+  {
+    "screen": "wallet: service (shop)",
+    "violations": []
+  },
+  {
     "screen": "wallet: assistant",
     "violations": []
   },
@@ -65,6 +73,10 @@
   },
   {
     "screen": "console: green banking",
+    "violations": []
+  },
+  {
+    "screen": "console: partners",
     "violations": []
   }
 ]

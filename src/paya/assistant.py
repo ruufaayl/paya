@@ -81,6 +81,7 @@ INTENTS: list[tuple[str, list[str]]] = [
     ("SECURITY", [r"\b(otp|pin|password|scam|fraud|hack(ed)?|stolen|chori|dhoka|suspicious|someone asked)\b"]),
     ("OUT_OF_SCOPE", [r"\b(invest|investment|stock|shares|crypto|bitcoin|loan|qarz|interest rate|forex|lottery)\b"]),
     ("GREEN", [r"\b(carbon|footprint|co2|green pot|offset\w*|environment\w*|aloodgi|mahol|climate)\b"]),
+    ("ORDERS", [r"\b(bill|bijli|top.?up|load|order|policy|takaful|insurance|bazaar)\b"]),
     ("PAY", [r"\b(pay|send|transfer|bhej|bhejna|bhejo|payment karo|kar do)\b"]),
     ("REFUND", [r"\b(refund|reverse|reversal|wapas|return my|money back|paise wapas|cancel)\b"]),
     ("WHY_DECLINED", [r"\b(declin\w*|reject\w*|fail\w*|why|kyun|kyon|nahi hua|ruk gaya|blocked)\b"]),
@@ -288,6 +289,20 @@ def _answer(s: Session, cust: Customer, conv: Conversation, intent: str, text: s
             msg += f" You've offset about {f['offset_kg']:.0f} kg."
         return msg + " Moving money into the pot or offsetting is done on the Green screen, where you confirm it yourself.", \
             cards, ["What's my balance?", "Show my recent payments"], tools, handoff
+    if intent == "ORDERS":
+        from . import services  # Theme 4, read-only here: chat never places or pays an order
+        rows = services.my_orders(cid)[:3]
+        tools.append("orders")
+        cards.append({"type": "action", "label": "Open Services", "route": "/app/services"})
+        if not rows:
+            return ("You haven't used any services yet. Bills, mobile top-up, Bazaar Lane and micro-takaful are in "
+                    "Services, where you review and confirm each payment yourself."), cards, ["What's my balance?"], tools, handoff
+        words = {"COMPLETED": "done", "PROCESSING": "being confirmed by Raast", "AWAITING_PAYMENT": "waiting for you to pay",
+                 "NOT_PAID": "not paid", "EXPIRED": "expired"}
+        parts = [f"{o['partner_name']} {pkr(o['amount_minor'])} ({o['ref']}): {words[o['status']]}"
+                 + (f", {o['fulfilment'].lower()}" if o["fulfilment"] else "") for o in rows]
+        return "Your latest orders: " + "; ".join(parts) + ". I can't pay bills from chat, but Services can.", \
+            cards, ["Show my recent payments"], tools, handoff
     if intent == "PAY":
         cards.append({"type": "action", "label": "Scan a QR to pay", "route": "/app/scan"})
         return ("I can't send money from chat. That keeps your payments safe. Tap below to scan the shop's QR; "

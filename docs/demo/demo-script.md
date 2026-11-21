@@ -1,7 +1,7 @@
 # Paya: technical demo script (Paya 2.0, about 10 minutes)
 
 **The brief asks for:** the normal flow, at least two failure/recovery scenarios, and one reconciliation outcome.
-**This script shows:** a normal flow; **three** failure/recovery scenarios (lost request, compliance hold, Raast outage); a reconciliation break triaged by AI and resolved by its owner; and the three themes (digital onboarding with the two-person rule, the green pot and footprint estimate, and the Paya Assistant).
+**This script shows:** a normal flow; **three** failure/recovery scenarios (lost request, compliance hold, Raast outage); a reconciliation break triaged by AI and resolved by its owner; and the four themes (digital onboarding with the two-person rule, the green pot and footprint estimate, the Paya Assistant, and super-app services).
 
 **Rehearsal:** reset the data, then `make rehearse` plays this whole script against the real stack and checks every claim the presenter makes. Results: `evidence/demo/rehearsal-<date>.md` and `evidence/demo/scene-*.png`. (The 1.x rehearsal and screenshots are kept in `evidence/demo/v1/`.)
 
@@ -19,7 +19,7 @@
 
 | Step | Command / action | Check |
 |---|---|---|
-| 1 | `make demo-reset`: **fresh synthetic data**. Never rehearse on live data. The velocity rule (5 payments per customer per 10 min) correctly holds a 6th payment | `curl localhost:8000/healthz` → ok |
+| 1 | Demo after 21:00 Pakistan time? Set `PAYA_SETTLEMENT_CUTOFF_UTC_HOUR=24` in `.env` first (see Scene 5). Then `make demo-reset`: **fresh synthetic data**. Never rehearse on live data. The velocity rule (5 payments per customer per 10 min) correctly holds a 6th payment | `curl localhost:8000/healthz` → ok |
 | 2 | `make models` once (face models), then `cd web && npm run build && npx vite preview --port 4173`, or the Vercel URL | Start page loads |
 | 3 | (iPhone) `cloudflared tunnel --url http://localhost:8000`; on the phone's start page paste the tunnel URL into **Paya server address**; Share → Add to Home Screen | Wallet sign-in loads |
 | 4 | Laptop on the projector: `/control` → sign in as **Sana (Operations)** | Top bar shows **Live**, Raast rail **Simulated · NORMAL**, **Integrity pass** |
@@ -95,12 +95,13 @@
 | Hamza tries **Confirm** | "The server refuses: same person." | Toast **Needs a different person** |
 | **Act as → Nadia** → **Confirm approval** | "A second officer confirms. The database itself enforces it." | Phone flips to **Your wallet is open** |
 | Phone (Sara): **Ask Paya** → "mera balance kitna hai", then "send 500 to Ali" | "Conversational banking in Roman Urdu, answered from the ledger. And it can't move money, even if you ask nicely." | Balance card; "I can't send money from chat" |
+| (If time) Phone (Sara): **Services** → Indus Power → any 10-digit number → **Pay** → slide | "The super app adds bills, top-up, shopping and takaful, but no new money path: it's the same review, ledger and Raast. The order says *Bill paid* only after settlement, and the same bill can't be paid twice." | My orders: **Done · Bill paid to the biller** |
 
 ### 9:30 – 10:30 · Evidence and decision (Speaker B)
 
 *Show:* Mission Control **Audit & access** (as Auditor: chain intact, denials listed), then `docs/revamp/TESTING_REPORT.md`.
 
-> "77 backend tests cover the required scenarios and more. The browser acceptance run checks 33 claims on a fresh database, and the rehearsal you just watched is automated too. Accessibility is scanned with zero violations. The limits: one process at about 16 payments a second, no MFA yet, a simulated rail and registry, and liveness that is basic rather than certified. Our recommendation is a **conditional go**."
+> "90 backend tests cover the required scenarios and more. The browser acceptance run checks 33 claims on a fresh database, and the rehearsal you just watched is automated too. Accessibility is scanned with zero violations. The limits: one process at about 16 payments a second, no MFA yet, a simulated rail and registry, and liveness that is basic rather than certified. Our recommendation is a **conditional go**."
 
 ## If something goes wrong live
 
@@ -110,4 +111,5 @@
 | A payment is held unexpectedly | "The velocity rule just did its job." | Release it as Hamza, or pay as another customer |
 | Top bar shows **Reconnecting…** | "The stream is display-only; the money is in the database." | Wait, or refresh the page |
 | Onboarding liveness says **Try again** | "It wants a clearer head turn. That's the anti-spoofing check." | Turn further; it allows 3 attempts, then refers to a person |
+| Missing line shows **Timing difference** and no case (demo after 21:00 PKT) | "Correct: after the cut-off, Raast's line is expected in tomorrow's file. That's the rule, not a bug." | Before the demo: `PAYA_SETTLEMENT_CUTOFF_UTC_HOUR=24` in `.env`, then `make demo-reset` |
 | API down | "Let's prove recovery." | `docker restart paya-api-1`; healthy within seconds |

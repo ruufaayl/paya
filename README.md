@@ -91,6 +91,10 @@ Run `make models` once to fetch the face models (YuNet, MIT licence; SFace, Apac
 
 **Green** in the wallet shows an *estimate* of the carbon linked to your settled spending (spend-based factors, `green.v1`, with a ±50% range and the method on screen). A **green pot** ring-fences your own money on ledger account 2110, moved by balanced, idempotent journals; round-ups come only from settled payments. **Offsets** are ordinary Raast payments to a synthetic project, reviewed on the normal screen; a certificate appears only after settlement and is labelled simulated. Mission Control's **Green banking** page shows aggregates only. Design: `docs/architecture/18-green-banking.md`, ADR-012.
 
+## Super app: partner services (Theme 4)
+
+A **Services** tab turns the wallet into a daily-use app: pay an electricity or gas bill by consumer number, top up your own mobile, shop at Bazaar Lane (with a merchant-funded first-order offer), or buy a month of micro-takaful. Every partner is paid on the **same review screen and money path** as a shop payment, so an order only says "Bill paid" or "Cover active" once the ledger has settled it. Prices and bills come from the server; one bill can be paid once; partners receive only the fields you consented to; Compliance can suspend a partner from Mission Control's **Partners & services** page. Investments are not offered. All partners are synthetic. Design: `docs/architecture/19-super-app.md`, ADR-013.
+
 ## Conversational banking (Theme 3)
 
 **Ask Paya** in the wallet answers questions about your own money in English or Roman Urdu ("mera balance kitna hai", "did my payment to Chai Junction go through?"), using read-only data from the ledger. It cannot move money; for actions it links into the normal review-and-authorise flow. Card numbers, CNICs, OTPs and passwords are removed before anything is stored. "Talk to a person" opens a case for Operations, who can read the redacted transcript (each read is audited). Design: `docs/architecture/17-conversational-banking.md`, ADR-011.

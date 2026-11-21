@@ -1,6 +1,6 @@
 // Paya Wallet: the customer (and cashier) phone experience. Light, calm, mobile-first.
 import { AnimatePresence, motion } from "framer-motion";
-import { Home, ListOrdered, ScanLine, UserRound } from "lucide-react";
+import { Home, LayoutGrid, ListOrdered, ScanLine, UserRound } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { dur, ease } from "../ds/motion";
@@ -16,6 +16,7 @@ import HomeScreen from "./Home";
 import Onboarding from "./Onboarding";
 import Review from "./Review";
 import Scan from "./Scan";
+import Services, { ServiceScreen } from "./Services";
 import SignIn from "./SignIn";
 import Txn from "./Txn";
 
@@ -51,6 +52,8 @@ export default function WalletApp() {
               <Route path="scan" element={<Scan user={user} />} />
               <Route path="pay/:prId" element={<Review user={user} />} />
               <Route path="txn/:ref" element={<Txn user={user} />} />
+              <Route path="services" element={<Services user={user} />} />
+              <Route path="services/:code" element={<ServiceScreen user={user} />} />
               <Route path="green" element={<Green user={user} />} />
               <Route path="account" element={<Account user={user} onSignOut={signOut} />} />
               <Route path="assistant" element={<div className="h-[100dvh]"><Assistant user={user} /></div>} />
@@ -79,13 +82,14 @@ function TabBar() {
     <nav aria-label="Wallet" className="safe-bottom border-t border-line bg-surface/95 backdrop-blur">
       <div className="mx-auto flex max-w-[480px] items-end px-2 pt-1">
         {tab("/app", Home, "Home", true)}
-        {tab("/app/activity", ListOrdered, "Activity")}
+        {tab("/app/services", LayoutGrid, "Services")}
         <div className="flex flex-1 justify-center">
           <motion.button whileTap={{ scale: 0.94 }} onClick={() => nav("/app/scan")} aria-label="Scan to pay"
             className="-mt-5 grid h-14 w-14 place-items-center rounded-2xl bg-brand text-brand-fg shadow-e2">
             <ScanLine className="h-6 w-6" aria-hidden />
           </motion.button>
         </div>
+        {tab("/app/activity", ListOrdered, "Activity")}
         {tab("/app/account", UserRound, "Account")}
       </div>
     </nav>

@@ -169,6 +169,9 @@ def me(p: Principal = Depends(principal)):
 
 
 # ------------------------------------------------------------------ merchant
+# Requests a customer started for themselves (an offset, a super-app order): never offered as an open till,
+# and visible only to their creator (or back office).
+PRIVATE_KINDS = ("GREEN_OFFSET", "SERVICE")
 class PaymentRequestIn(BaseModel):
     amount_minor: int = Field(gt=0, le=10_000_000_00, description="Amount in paisa (PKR x 100)")
     order_ref: str = Field(min_length=1, max_length=64)
@@ -204,7 +207,7 @@ def list_payment_requests(status: str = "OPEN", p: Principal = Depends(principal
     if p.role not in ("CUSTOMER", "CASHIER", "MERCHANT_ADMIN") or not get_settings().demo_mode:
         raise Forbidden("not available")
     with session_scope() as s:
-        q = select(PaymentRequest.id).where(PaymentRequest.status == status, PaymentRequest.kind != "GREEN_OFFSET",
+        q = select(PaymentRequest.id).where(PaymentRequest.status == status, PaymentRequest.kind.notin_(PRIVATE_KINDS),
                                             PaymentRequest.expires_at > datetime.now(timezone.utc))
         if p.merchant_id:
             q = q.where(PaymentRequest.merchant_id == uuid.UUID(p.merchant_id))
@@ -218,7 +221,7 @@ def get_payment_request(pr_id: uuid.UUID, p: Principal = Depends(principal)):
     view = _payment_request_view(pr_id)
     if p.role in ("CASHIER", "MERCHANT_ADMIN") and view["merchant"]["id"] != p.merchant_id:
         raise Forbidden("not your merchant")
-    if view["kind"] == "GREEN_OFFSET":
+    if view["kind"] in PRIVATE_KINDS:
         with session_scope() as s:
             if s.get(PaymentRequest, pr_id).created_by != p.username and not can(p, "backoffice:read"):
                 raise NotFound("payment request not found")  # a customer's offset request is theirs alone
@@ -800,3 +803,7 @@ app.include_router(ops_router)
 from .green_api import router as green_router  # noqa: E402
 
 app.include_router(green_router)
+
+from .services_api import router as services_router  # noqa: E402
+
+app.include_router(services_router)

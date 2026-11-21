@@ -22,11 +22,13 @@ async function scan(page, name) {
   await ph.goto(`${WEB}/app/activity`); await ph.waitForTimeout(1000); await scan(ph, "wallet: activity");
   await ph.goto(`${WEB}/app/account`); await ph.waitForTimeout(1000); await scan(ph, "wallet: account");
   await ph.goto(`${WEB}/app/green`); await ph.waitForTimeout(1500); await scan(ph, "wallet: green");
+  await ph.goto(`${WEB}/app/services`); await ph.waitForTimeout(1500); await scan(ph, "wallet: services");
+  await ph.goto(`${WEB}/app/services/BAZAAR`); await ph.waitForTimeout(1200); await scan(ph, "wallet: service (shop)");
   await ph.goto(`${WEB}/app/assistant`); await ph.waitForTimeout(1000); await scan(ph, "wallet: assistant");
   await ph.goto(`${WEB}/app/open`); await ph.waitForTimeout(800); await scan(ph, "wallet: onboarding intro");
   const c = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
   await c.goto(`${WEB}/control`); await c.evaluate(() => { localStorage.clear(); localStorage.setItem("paya.operator", "auditor"); }); 
-  for (const [r, n] of [["", "overview"], ["/transactions", "transactions"], ["/cases", "cases"], ["/kyc", "kyc"], ["/recon", "recon"], ["/events", "events"], ["/audit", "audit"], ["/rail-lab", "rail lab"], ["/ai", "ai operations"], ["/green", "green banking"]]) {
+  for (const [r, n] of [["", "overview"], ["/transactions", "transactions"], ["/cases", "cases"], ["/kyc", "kyc"], ["/recon", "recon"], ["/events", "events"], ["/audit", "audit"], ["/rail-lab", "rail lab"], ["/ai", "ai operations"], ["/green", "green banking"], ["/partners", "partners"]]) {
     await c.goto(`${WEB}/control${r}`); await c.waitForTimeout(1500); await scan(c, `console: ${n}`);
   }
   await b.close();

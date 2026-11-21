@@ -1,0 +1,77 @@
+{
+  "at": "2026-11-21T18:16:04.438Z",
+  "passed": 14,
+  "failed": 0,
+  "results": [
+    {
+      "n": "hub lists bills, top-up, shop and takaful, and says investments are not offered",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "bill opens the normal review with the server's amount",
+      "ok": true,
+      "note": "Rs 2634"
+    },
+    {
+      "n": "order is Done only after the payment settled",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "the same bill can't be paid twice (another customer refused)",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "looking the bill up again says it is already paid",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "consent asked before the partner receives anything, naming the fields",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "offer priced by the server: Rs 2,750 less 10% = Rs 2,475",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "partner received only the consented field",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "shop order Done after settlement",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "Services fits a 360 px phone",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "Ops sees partners and volumes but can't suspend",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "suspended partner is unavailable in the wallet",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "suspension recorded in the audit chain with its reason",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "integrity: order amounts, consented sharing, trial balance",
+      "ok": true,
+      "note": ""
+    }
+  ]
+}

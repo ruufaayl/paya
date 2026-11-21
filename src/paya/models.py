@@ -489,3 +489,54 @@ class ChatMessage(Base):
     redactions: Mapped[list] = mapped_column(JSONB, default=list, nullable=False)  # kinds removed, never values
     created_at: Mapped[datetime] = TS()
     __table_args__ = (CheckConstraint("role IN ('USER','ASSISTANT')", name="ck_chat_role"),)
+
+
+# ---------------------------------------------------------------- Super app (Theme 4)
+class Partner(Base):
+    """A third-party service inside the wallet (biller, shop, insurer). Synthetic. Payment always goes through
+    the normal payment path to the partner's merchant record; Paya never holds partner funds."""
+    __tablename__ = "partners"
+    code: Mapped[str] = mapped_column(String(16), primary_key=True)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    kind: Mapped[str] = mapped_column(String(16), nullable=False)  # BILLER | TOPUP | SHOP | INSURER
+    merchant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("merchants.id"), nullable=False)
+    data_scopes: Mapped[list] = mapped_column(JSONB, default=list, nullable=False)  # customer fields it may receive
+    status: Mapped[str] = mapped_column(String(16), default="ACTIVE", nullable=False)  # ACTIVE | SUSPENDED
+    status_reason: Mapped[str | None] = mapped_column(Text)
+    status_by: Mapped[str | None] = mapped_column(String(64))
+    updated_at: Mapped[datetime] = TS()
+    __table_args__ = (
+        CheckConstraint("kind IN ('BILLER','TOPUP','SHOP','INSURER')", name="ck_partner_kind"),
+        CheckConstraint("status IN ('ACTIVE','SUSPENDED')", name="ck_partner_status"),
+    )
+
+
+class PartnerConsent(Base):
+    """A customer's consent to share named fields with one partner. Revocable; history kept (no deletes)."""
+    __tablename__ = "partner_consents"
+    id: Mapped[uuid.UUID] = UUIDPK()
+    customer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("customers.id"), nullable=False, index=True)
+    partner_code: Mapped[str] = mapped_column(ForeignKey("partners.code"), nullable=False)
+    scopes: Mapped[list] = mapped_column(JSONB, nullable=False)
+    granted_at: Mapped[datetime] = TS()
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class ServiceOrder(Base):
+    """A purchase inside the super app. Its money state is NOT stored here: it is read from the payment
+    (ledger-backed) behind payment_request_id, so an order can never say 'paid' when the ledger does not."""
+    __tablename__ = "service_orders"
+    id: Mapped[uuid.UUID] = UUIDPK()
+    ref: Mapped[str] = mapped_column(String(32), unique=True, nullable=False)
+    customer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("customers.id"), nullable=False, index=True)
+    partner_code: Mapped[str] = mapped_column(ForeignKey("partners.code"), nullable=False, index=True)
+    reference: Mapped[str | None] = mapped_column(String(64))  # consumer number, product code
+    period: Mapped[str | None] = mapped_column(String(16))      # bill month
+    lines: Mapped[list] = mapped_column(JSONB, nullable=False)
+    discount_minor: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
+    amount_minor: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    payment_request_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("payment_requests.id"), unique=True, nullable=False)
+    consent_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("partner_consents.id"))
+    shared: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)  # exactly what the partner received
+    created_at: Mapped[datetime] = TS()
+    __table_args__ = (CheckConstraint("amount_minor > 0", name="ck_order_amount"),)
