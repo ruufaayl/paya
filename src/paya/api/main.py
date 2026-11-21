@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 
-from .. import audit, events, ledger, notifications, payments, recon
+from .. import ai_service, audit, events, ledger, notifications, payments, recon
 from ..config import get_settings
 from ..db import create_schema, session_scope
 from ..errors import Forbidden, LoginLocked, NotFound, PayaError, Unauthenticated, ValidationFailed
@@ -40,6 +40,7 @@ async def lifespan(app: FastAPI):
     configure_logging()
     create_schema()
     notifications.register()
+    ai_service.register()
     if get_settings().demo_mode:
         from ..seed import seed
         seed()
@@ -366,13 +367,21 @@ def list_cases(state: str = "OPEN", p: Principal = Depends(authorised("cases:rea
         q = select(Case, Transaction.txn_ref).outerjoin(Transaction, Transaction.id == Case.txn_id).order_by(Case.created_at.desc())
         if state != "ALL":
             q = q.where(Case.state == state)
+        from ..models import AISuggestion
+        latest = {}
+        for row in s.execute(select(AISuggestion).order_by(AISuggestion.created_at)).scalars():
+            latest[row.case_id] = row
         out = []
         for c, ref in s.execute(q.limit(200)).all():
+            sug = latest.get(c.id)
             out.append({"case_ref": c.case_ref, "kind": c.kind, "state": c.state, "owner_role": c.owner_role,
                         "summary": c.summary, "txn_ref": ref, "details": c.details, "resolution": c.resolution,
                         "sla_due_at": c.sla_due_at.isoformat(), "created_at": c.created_at.isoformat(),
                         "overdue": c.state != "RESOLVED" and c.sla_due_at < datetime.now(timezone.utc),
-                        "mine": c.owner_role == p.role})
+                        "mine": c.owner_role == p.role,
+                        "ai": None if sug is None else {"id": str(sug.id), **sug.output, "latency_ms": sug.latency_ms,
+                                                        "reviewer_decision": sug.reviewer_decision,
+                                                        "reviewer": sug.reviewer}})
         return out
 
 
@@ -463,6 +472,60 @@ def recon_runs(p: Principal = Depends(authorised("finance:read"))):
                  "records": r.record_count, "value_total": money(r.value_total_minor), "summary": r.summary,
                  "run_by": r.run_by, "at": r.created_at.isoformat()}
                 for r in s.execute(select(ReconRun).order_by(ReconRun.created_at.desc()).limit(50)).scalars()]
+
+
+# ------------------------------------------------------------------ AI triage (suggest only) and case resolution
+@app.post("/v1/ai/cases/{case_ref}/triage", tags=["ai"])
+def ai_triage_case(case_ref: str, background: BackgroundTasks, p: Principal = Depends(authorised("ai:triage"))):
+    out = ai_service.triage_case(case_ref)
+    background.add_task(_safe_relay)
+    return out
+
+
+class AIReviewIn(BaseModel):
+    decision: str = Field(pattern="^(ACCEPTED|OVERRIDDEN)$")
+    reason_code: str | None = None
+    note: str | None = Field(default=None, max_length=500)
+
+
+@app.post("/v1/ai/suggestions/{suggestion_id}/review", tags=["ai"])
+def ai_review(suggestion_id: uuid.UUID, body: AIReviewIn, p: Principal = Depends(authorised("ai:review"))):
+    return ai_service.review(suggestion_id, decision=body.decision, reviewer=p.username, reviewer_role=p.role,
+                             reason_code=body.reason_code, note=body.note)
+
+
+@app.get("/v1/ai/metrics", tags=["ai"])
+def ai_metrics(p: Principal = Depends(authorised("backoffice:read"))):
+    """Live governance metrics for the agent (monitoring, not the offline evaluation)."""
+    from ..models import AISuggestion
+    with session_scope() as s:
+        rows = s.execute(select(AISuggestion)).scalars().all()
+        audited = {a.details.get("suggestion_id") for a in s.execute(
+            select(AuditLog).where(AuditLog.action == "AI_SUGGESTION")).scalars()}
+    n = len(rows) or 1
+    reviewed = [r for r in rows if r.reviewer_decision]
+    lat = sorted(r.latency_ms for r in rows)
+    return {"suggestions": len(rows), "abstention_rate": round(sum(r.abstained for r in rows) / n, 3),
+            "reviewed": len(reviewed),
+            "acceptance_rate": round(sum(r.reviewer_decision == "ACCEPTED" for r in reviewed) / (len(reviewed) or 1), 3),
+            "override_rate": round(sum(r.reviewer_decision == "OVERRIDDEN" for r in reviewed) / (len(reviewed) or 1), 3),
+            "fallbacks": sum(1 for r in rows if r.fallback_reason),
+            "latency_p95_ms": lat[int(0.95 * (len(lat) - 1))] if lat else None,
+            "audit_completeness": round(sum(str(r.id) in audited for r in rows) / n, 3),
+            "engine": rows[-1].engine if rows else None}
+
+
+class ResolveIn(BaseModel):
+    resolution: str
+    note: str = Field(min_length=3, max_length=500)
+
+
+@app.post("/v1/cases/{case_ref}/resolve", tags=["backoffice"])
+def resolve_case(case_ref: str, body: ResolveIn, background: BackgroundTasks,
+                 p: Principal = Depends(authorised("cases:resolve"))):
+    out = ai_service.resolve_case(case_ref, resolution=body.resolution, actor=p.username, actor_role=p.role, note=body.note)
+    background.add_task(_safe_relay)
+    return out
 
 
 @app.get("/v1/audit/verify", tags=["audit"])

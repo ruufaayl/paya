@@ -99,7 +99,69 @@ function Btn({ children, onClick, busy, icon }: { children: React.ReactNode; onC
   );
 }
 
-interface CaseRow { case_ref: string; kind: string; state: string; owner_role: string; summary: string; txn_ref: string | null; details: any; sla_due_at: string; overdue: boolean; created_at: string }
+interface AIRow { id: string; next_action: string; confidence: number; abstained: boolean; abstain_reasons: string[]; root_cause_hypothesis: string; summary: string; engine: string; evidence_refs: string[]; reviewer_decision: string | null; reviewer: string | null }
+interface CaseRow { case_ref: string; kind: string; state: string; owner_role: string; summary: string; txn_ref: string | null; details: any; sla_due_at: string; overdue: boolean; created_at: string; ai: AIRow | null }
+
+const PERSONA: Record<string, { user: string; name: string }> = { OPS: { user: "sana.ops", name: "Sana (Ops)" }, FINANCE: { user: "rabia.finance", name: "Rabia (Finance)" } };
+const ACTION_LABEL: Record<string, string> = {
+  WAIT_FOR_NEXT_FILE: "Wait for the next settlement file", RAISE_WITH_RAIL: "Raise with the rail operator",
+  VERIFY_FEE_CONFIG: "Verify fee configuration", ESCALATE_FINANCE: "Escalate to Finance", RAISE_CLAIM: "Raise a claim with the partner",
+  INVESTIGATE_WITH_RAIL: "Get the originating instruction from the rail", WAIT_FOR_ENQUIRY: "No action - next enquiry settles it",
+  RECOMMEND_REVERSAL: "Request a reversal (needs a checker)", HUMAN_REVIEW: "Human review",
+};
+const RESOLUTION_FOR: Record<string, string> = {
+  RAISE_WITH_RAIL: "RAIL_CONFIRMED_AND_REISSUED", WAIT_FOR_NEXT_FILE: "MATCHED_IN_LATER_FILE", VERIFY_FEE_CONFIG: "FEE_CONFIG_CORRECTED",
+  RAISE_CLAIM: "CLAIM_RAISED_WITH_PARTNER", ESCALATE_FINANCE: "WRITTEN_OFF_APPROVED", INVESTIGATE_WITH_RAIL: "NO_ACTION_FALSE_BREAK",
+};
+const RESOLUTIONS = ["RAIL_CONFIRMED_AND_REISSUED", "MATCHED_IN_LATER_FILE", "CLAIM_RAISED_WITH_PARTNER", "FEE_CONFIG_CORRECTED", "NO_ACTION_FALSE_BREAK", "WRITTEN_OFF_APPROVED"];
+
+function AISuggestionBox({ c, toast, after }: { c: CaseRow; toast: Toast; after: () => void }) {
+  const ai = c.ai!;
+  const who = PERSONA[c.owner_role];
+  const review = (decision: "ACCEPTED" | "OVERRIDDEN") => act(() => call(who.user, `/v1/ai/suggestions/${ai.id}/review`, {
+    method: "POST", body: JSON.stringify(decision === "ACCEPTED" ? { decision } : { decision, reason_code: "WRONG_ACTION", note: "Reviewer disagreed with the suggested action" }),
+  }), toast, decision === "ACCEPTED" ? `Suggestion accepted by ${who.name} - no money moved` : `Suggestion overridden by ${who.name}`).then(after);
+  return (
+    <div className={`mt-2 rounded-xl p-2.5 ring-1 ${ai.abstained ? "bg-amber-400/[0.06] ring-amber-400/30" : "bg-violet-500/[0.08] ring-violet-400/30"}`}>
+      <div className="flex items-center justify-between text-[10.5px]">
+        <span className="font-semibold text-violet-300">AI triage {ai.abstained ? "abstained" : "suggests"}</span>
+        <span className="font-mono text-slate-500">{Math.round(ai.confidence * 100)}% - {ai.engine}</span>
+      </div>
+      {ai.abstained ? (
+        <p className="mt-1 text-[11px] text-amber-200">Handed to a human: {ai.abstain_reasons.join("; ")}</p>
+      ) : (
+        <>
+          <p className="mt-1 text-[12px] font-semibold text-slate-100">{ACTION_LABEL[ai.next_action] || ai.next_action}</p>
+          <p className="text-[11px] text-slate-400">{ai.root_cause_hypothesis}</p>
+        </>
+      )}
+      <p className="mt-1 truncate font-mono text-[9.5px] text-slate-500">evidence: {ai.evidence_refs.join(", ")}</p>
+      {ai.reviewer_decision ? (
+        <p className="mt-1.5 text-[10.5px] text-slate-400">{ai.reviewer_decision.toLowerCase()} by {ai.reviewer}</p>
+      ) : !ai.abstained && who && (
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <button onClick={() => review("OVERRIDDEN")} className="rounded-lg bg-white/5 px-2 py-1.5 text-[10.5px] text-slate-300 ring-1 ring-white/10">Override</button>
+          <button onClick={() => review("ACCEPTED")} className="rounded-lg bg-violet-500 px-2 py-1.5 text-[10.5px] font-semibold text-white">Accept as {who.name}</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ResolveBox({ c, toast, after }: { c: CaseRow; toast: Toast; after: () => void }) {
+  const who = PERSONA[c.owner_role];
+  const [res, setRes] = useState(RESOLUTION_FOR[c.ai?.next_action || ""] || "RAIL_CONFIRMED_AND_REISSUED");
+  if (!who) return null;
+  return (
+    <div className="mt-2 flex gap-2">
+      <select value={res} onChange={(e) => setRes(e.target.value)} className="min-w-0 flex-1 rounded-lg bg-ink-850 px-2 py-1.5 text-[10.5px] ring-1 ring-white/10">
+        {RESOLUTIONS.map((r) => <option key={r} value={r}>{r.replace(/_/g, " ").toLowerCase()}</option>)}
+      </select>
+      <button onClick={() => act(() => call(who.user, `/v1/cases/${c.case_ref}/resolve`, { method: "POST", body: JSON.stringify({ resolution: res, note: "Resolved from Mission Control with evidence on file" }) }), toast, `Case closed by ${who.name}`).then(after)}
+        className="shrink-0 rounded-lg bg-paya-400 px-2.5 py-1.5 text-[10.5px] font-semibold text-ink-950">Resolve as {who.name.split(" ")[0]}</button>
+    </div>
+  );
+}
 interface ApprovalRow { id: string; action: string; status: string; txn_ref: string; amount: { minor: number }; maker: string; checker: string | null; reason: string }
 
 export function GatesPanel({ tick, toast, onOpen }: { tick: number; toast: Toast; onOpen: (ref: string) => void }) {
@@ -110,6 +172,7 @@ export function GatesPanel({ tick, toast, onOpen }: { tick: number; toast: Toast
     call<ApprovalRow[]>("auditor", "/v1/finance/approvals").then((r) => setApprovals(r.data.filter((a) => a.status === "REQUESTED"))).catch(() => undefined);
   }, []);
   useEffect(() => { load(); }, [load, tick]);
+  useEffect(() => { const t = setInterval(load, 5000); return () => clearInterval(t); }, [load]);  // safety net
   const after = () => setTimeout(load, 400);
 
   return (
@@ -154,8 +217,10 @@ export function GatesPanel({ tick, toast, onOpen }: { tick: number; toast: Toast
                 className="mt-2 w-full rounded-xl bg-amber-400 px-2 py-2 text-[11px] font-semibold text-ink-950">Request reversal as Sana (Ops)</button>
             )}
             {c.kind === "RECON_BREAK" && (
-              <p className="mt-2 text-[11px] text-slate-400">Category {c.details?.category} - internal {c.details?.internal_minor != null ? pkr(c.details.internal_minor) : "none"} vs Raast {c.details?.external_minor != null ? pkr(c.details.external_minor) : "none"}. AI triage will suggest a cause; a human closes it.</p>
+              <p className="mt-2 text-[11px] text-slate-400">Category {c.details?.category} - internal {c.details?.internal_minor != null ? pkr(c.details.internal_minor) : "none"} vs Raast {c.details?.external_minor != null ? pkr(c.details.external_minor) : "none"}.</p>
             )}
+            {c.ai && <AISuggestionBox c={c} toast={toast} after={after} />}
+            {c.kind === "RECON_BREAK" && <ResolveBox c={c} toast={toast} after={after} />}
           </motion.div>
         ))}
       </AnimatePresence>

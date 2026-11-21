@@ -93,9 +93,9 @@ Worked example (system output, E1 in the evidence file), customer pays PKR 2,450
 |---|---|---|---|
 | Internal technical | Outbox vs relay vs rail dispatch | `integrity.py` (technical) | `outbox_relay_lag`, `pending_never_sent_to_rail` |
 | Operational | Transaction state vs what customer and cashier were told | `integrity.py` (operational) | `settled_without_customer_notice`, `till_paid_without_settlement`, `pending_beyond_review_window` |
-| Financial | Ledger vs itself and vs transaction state; ledger vs rail file | `integrity.py` (financial) and `recon.py` | `trial_balance_balanced`, `in_transit_equals_open_payments`, `no_negative_wallets`, `expired_holds_released`, settlement-file recon |
+| Financial | Ledger vs itself and vs transaction state; ledger vs rail file | `integrity.py` (financial) and `recon.py` | `trial_balance_balanced`, `in_transit_equals_open_payments`, `no_negative_wallets`, `settled_but_unreconciled_after_d1`, `expired_holds_released`, settlement-file recon |
 | Exception management | Ageing, owner, SLA | `integrity.py` (exceptions) and `cases` | `cases_within_sla`, `every_case_has_owner` |
 
-`GET /v1/finance/integrity` (Finance, Auditor) runs all four layers and returns PASS, WARN or FAIL with values. `test_integrity_checks_*` proves it passes on a healthy system and fails when a customer was never told about a settled payment.
+`GET /v1/finance/integrity` (Finance, Auditor) runs all four layers (12 checks) and returns PASS, WARN or FAIL with values. `test_integrity_checks_*` proves it passes on a healthy system and fails when a customer was never told about a settled payment.
 
 **Not yet built (stated plainly):** a third source, the sponsor-bank statement against 1010; adjustment journals with approval workflow for AMOUNT_MISMATCH; posting the claim automatically for STATUS_MISMATCH.

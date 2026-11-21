@@ -78,7 +78,7 @@ def telemetry(node: str, phase: str, *, txn_ref: str | None = None, detail: dict
     emit(f"{node}.{phase}", {"warn": "warning"}.get(level, level), txn_ref=txn_ref, **(detail or {}))
 
 
-def relay_once(batch: int = 200, deliver_duplicate_of: set[str] | None = None) -> int:
+def relay_once(batch: int = 1000, deliver_duplicate_of: set[str] | None = None) -> int:
     """Publish pending outbox events. `deliver_duplicate_of` lets chaos tests deliver an event twice."""
     with _relay_lock:
         with session_scope() as s:

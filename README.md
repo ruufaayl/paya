@@ -103,6 +103,7 @@ The suite covers the 10 scenarios the brief requires plus 3 from the Week 9 lect
 | SoD | Self-approval refused and the denial kept in the audit chain | `test_s6c_*` |
 | Race | Concurrent dispatch, callbacks and enquiries settle exactly once (found by load test) | `test_concurrent_*` |
 | Security | Login lockout, security headers, metrics, JSON logs with correlation, secret scrubbing | `tests/test_security_observability.py` |
+| AI | Triage agent suggests, abstains, is audited, owner-only review, LLM guardrails, no money-moving capability | `tests/test_ai_triage.py` |
 
 ## Evidence tools
 
@@ -110,6 +111,7 @@ The suite covers the 10 scenarios the brief requires plus 3 from the Week 9 lect
 python docs/architecture/tools/recovery_drill.py   # crash, DB restart, backup/restore drill against the Compose stack
 PAYA_VELOCITY_MAX_PAYMENTS=100000 make up           # (load test only) then:
 python docs/architecture/tools/load_test.py         # writes evidence/performance/
+python docs/architecture/tools/ai_eval.py           # AI triage evaluation -> evidence/ai/evaluation.md
 ```
 
 ## Repository map

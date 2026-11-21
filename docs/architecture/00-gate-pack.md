@@ -1,4 +1,4 @@
-# Gate pack: Paya (Weeks 10, 12 and 13)
+# Gate pack: Paya (Weeks 10, 12, 13 and the AI extension)
 
 **Course:** CS3017 Enterprise Systems & Applications, Fall 2026.
 **Submitted:** 2026-11-20.
@@ -48,6 +48,17 @@ The brief (section 11) defines two Week 10 gates. Each item below points to its 
 | | (brief §2) SLO/SLI | [12](12-observability-and-slos.md) §2, eight SLOs with measured values from [evidence/performance](../../evidence/performance/) |
 | | (brief §2) Runbooks / exception handling | [14: Runbooks](14-runbooks.md) RB-1 to RB-7 |
 
+## Responsible AI extension (Week 14 gate: "AI extension bounded")
+
+| Brief requirement (§7) | Where it is |
+|---|---|
+| One extension chosen, with reasons | [15: AI governance](15-ai-governance.md) §1. Reconciliation-exception triage |
+| Allowed tools/data, prohibited actions | [15](15-ai-governance.md) §3; structural proof `test_ai_has_no_money_moving_capability` |
+| Confidence/abstention threshold, human approval boundary | 0.75 plus the Week 4 abstention triggers; owner-only accept/override/resolve |
+| Audit logging | `ai_suggestions` and hash-chained audit; `GET /v1/ai/metrics` audit completeness 100% |
+| At least 4 metrics | [evidence/ai/evaluation.md](../../evidence/ai/evaluation.md). 8 metrics on 120 labelled cases |
+| Deterministic fallback | Rules engine is the default and the fallback; LLM guardrails tested with a mock server |
+
 ## Delivered early (later gates)
 
 | Item | Gate | Where |
@@ -61,7 +72,6 @@ The brief (section 11) defines two Week 10 gates. Each item below points to its 
 
 ## Still to do
 
-- **Week 14:** AI extension with governance and evaluation.
 
 ## Questions for the instructor
 

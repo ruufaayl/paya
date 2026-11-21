@@ -303,6 +303,32 @@ Constraints:
 | `correlation_id` | varchar | no |  |
 | `created_at` | timestamptz | no |  |
 
+## `ai_suggestions`
+
+| Column | Type | Null | Key |
+|---|---|---|---|
+| `id` | uuid | no | PK |
+| `case_id` | uuid | no | FK → cases.id |
+| `engine` | varchar | no |  |
+| `prompt_hash` | varchar | no |  |
+| `input_refs` | jsonb | no |  |
+| `output` | jsonb | no |  |
+| `next_action` | varchar | no |  |
+| `confidence` | float | no |  |
+| `abstained` | bool | no |  |
+| `latency_ms` | float | no |  |
+| `fallback_reason` | text | yes |  |
+| `reviewer_decision` | varchar | yes |  |
+| `reviewer` | varchar | yes |  |
+| `override_reason` | varchar | yes |  |
+| `review_note` | text | yes |  |
+| `created_at` | timestamptz | no |  |
+| `decided_at` | timestamptz | yes |  |
+
+Constraints:
+- `ck_ai_confidence`: `confidence >= 0 AND confidence <= 1`
+- `ck_ai_decision`: `reviewer_decision IS NULL OR reviewer_decision IN ('ACCEPTED','OVERRIDDEN')`
+
 ## `ledger_entries`
 
 | Column | Type | Null | Key |

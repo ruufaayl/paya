@@ -76,6 +76,12 @@ def run(s: Session) -> dict:
                 if ledger.ledger_balance(s, a) < 0]
     out.append(_check("financial", "no_negative_wallets", not negative, len(negative),
                       "a customer wallet liability below zero means money was spent twice"))
+    unreconciled = s.execute(select(func.count()).select_from(Transaction).where(
+        Transaction.type == "PAYMENT", Transaction.status == "SETTLED", Transaction.recon_result.is_(None),
+        Transaction.updated_at < t - timedelta(hours=36))).scalar_one()
+    out.append(_check("financial", "settled_but_unreconciled_after_d1", unreconciled == 0, unreconciled,
+                      "settled payments no settlement file has covered after D+1 (a file may be missing or identical "
+                      "to one already processed)", warn=True))
     stale_holds = s.execute(select(func.count()).select_from(Hold).where(
         Hold.status == "ACTIVE", Hold.expires_at < t)).scalar_one()
     out.append(_check("financial", "expired_holds_released", stale_holds == 0, stale_holds,

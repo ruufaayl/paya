@@ -367,3 +367,30 @@ class AuditLog(Base):
     prev_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     row_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     created_at: Mapped[datetime] = TS()
+
+
+# ---------------------------------------------------------------- AI (suggestions only - never authority)
+class AISuggestion(Base):
+    """Every AI output, its inputs (by reference), engine, prompt hash and the human decision on it."""
+    __tablename__ = "ai_suggestions"
+    id: Mapped[uuid.UUID] = UUIDPK()
+    case_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("cases.id"), nullable=False, index=True)
+    engine: Mapped[str] = mapped_column(String(64), nullable=False)
+    prompt_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    input_refs: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    output: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    next_action: Mapped[str] = mapped_column(String(32), nullable=False)
+    confidence: Mapped[float] = mapped_column(nullable=False)
+    abstained: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    latency_ms: Mapped[float] = mapped_column(nullable=False)
+    fallback_reason: Mapped[str | None] = mapped_column(Text)
+    reviewer_decision: Mapped[str | None] = mapped_column(String(12))  # ACCEPTED | OVERRIDDEN
+    reviewer: Mapped[str | None] = mapped_column(String(64))
+    override_reason: Mapped[str | None] = mapped_column(String(48))
+    review_note: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = TS()
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    __table_args__ = (
+        CheckConstraint("reviewer_decision IS NULL OR reviewer_decision IN ('ACCEPTED','OVERRIDDEN')", name="ck_ai_decision"),
+        CheckConstraint("confidence >= 0 AND confidence <= 1", name="ck_ai_confidence"),
+    )

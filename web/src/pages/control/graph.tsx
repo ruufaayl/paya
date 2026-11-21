@@ -31,7 +31,7 @@ export const NODES: NodeDef[] = [
   { id: "notification", title: "Notifier", sub: "consumes facts only", icon: Bell, kind: "service", x: 1080, y: 480 },
   { id: "recon", title: "Reconciliation agent", sub: "ledger vs Raast file", icon: FileCheck2, kind: "agent", x: 1350, y: 300 },
   { id: "ops", title: "Ops & Finance", sub: "maker-checker gate", icon: UserCheck, kind: "human", x: 1350, y: 90 },
-  { id: "ai", title: "AI triage", sub: "planned - suggests, never decides", icon: BrainCircuit, kind: "planned", x: 1350, y: 500 },
+  { id: "ai", title: "AI triage agent", sub: "suggests - never decides", icon: BrainCircuit, kind: "agent", x: 1620, y: 300 },
 ];
 
 export interface EdgeDef { id: string; source: string; target: string; sh?: string; th?: string; dashed?: boolean }
@@ -54,7 +54,8 @@ export const EDGES: EdgeDef[] = [
   { id: "recon-ops", source: "recon", target: "ops", sh: "t", th: "b" },
   { id: "ops-ledger", source: "ops", target: "ledger", sh: "l", th: "t" },
   { id: "rail-ops", source: "rail", target: "ops" },
-  { id: "recon-ai", source: "recon", target: "ai", sh: "b", th: "t", dashed: true },
+  { id: "recon-ai", source: "recon", target: "ai" },
+  { id: "ai-ops", source: "ai", target: "ops", sh: "t", th: "r", dashed: true },
 ];
 
 type Hop = { edge: string; color: string; reverse?: boolean };
@@ -118,6 +119,10 @@ export function effectOf(m: StreamMsg): Effect {
     case "security:access_denied": hop("gateway-audit", COLORS.error); node("gateway", "error", `${d.user} denied ${d.permission}`); node("audit", "error", "denial recorded"); break;
     case "chaos:rail_mode_changed": hop("chaos-rail", d.mode === "NORMAL" ? COLORS.info : COLORS.error); node("chaos", d.mode === "NORMAL" ? "info" : "error", d.mode); break;
     case "chaos:duplicate_event_injected": hop("outbox-notification", COLORS.warn); node("chaos", "warn", "duplicate event injected"); break;
+    case "ai:suggested": hop("recon-ai", COLORS.human); hop("ai-ops", COLORS.human); node("ai", "info", `${d.action} (${Math.round((d.confidence || 0) * 100)}%)`); break;
+    case "ai:abstained": hop("ai-ops", COLORS.warn); node("ai", "warn", "abstained - human decides"); break;
+    case "ai:error": node("ai", "error", "agent error - payments unaffected"); break;
+    case "human_gate:case_resolved": node("ops", "info", `closed: ${d.resolution} by ${d.by}`); break;
     case "dlq:consumer_error": node("outbox", "error", "consumer error - parked"); break;
     case "worker:error": node("enquiry", "error", "worker error"); break;
     default: break;

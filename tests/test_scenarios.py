@@ -382,3 +382,13 @@ def test_concurrent_dispatch_callbacks_and_enquiries_settle_exactly_once(client,
         assert s.execute(select(func.count()).select_from(RailPayment).where(RailPayment.e2e_id.in_(e2es))).scalar_one() == 4
     assert_ledger_invariants()
     assert results  # every job completed without raising
+
+
+def test_integrity_flags_settled_payments_no_file_ever_covered(client, as_):
+    """Safety net: if the rail never sends a file containing a settled payment, it must not stay silent."""
+    ref = pay(client, as_, new_request(client, as_, 7_000)).json()["txn_ref"]
+    with session_scope() as s:
+        s.execute(text("UPDATE transactions SET updated_at = now() - interval '2 days' WHERE txn_ref = :r"), {"r": ref})
+    r = client.get("/v1/finance/integrity", headers=as_("auditor")).json()
+    chk = [c for c in r["checks"] if c["check"] == "settled_but_unreconciled_after_d1"][0]
+    assert chk["status"] == "WARN" and chk["value"] == 1

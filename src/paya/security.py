@@ -38,6 +38,9 @@ PERMISSIONS: dict[str, set[str]] = {
     "finance:read": {"FINANCE", "AUDITOR"},
     "audit:read": {"AUDITOR", "COMPLIANCE"},
     "chaos:control": {"SYSADMIN", "OPS"},
+    "ai:triage": {"OPS", "FINANCE"},
+    "ai:review": {"OPS", "FINANCE"},
+    "cases:resolve": {"OPS", "FINANCE"},
 }
 
 

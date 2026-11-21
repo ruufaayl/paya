@@ -213,6 +213,25 @@ erDiagram
     varchar correlation_id
     timestamptz created_at
   }
+  ai_suggestions {
+    uuid id PK
+    uuid case_id FK
+    varchar engine
+    varchar prompt_hash
+    jsonb input_refs
+    jsonb output
+    varchar next_action
+    float confidence
+    bool abstained
+    float latency_ms
+    text fallback_reason
+    varchar reviewer_decision
+    varchar reviewer
+    varchar override_reason
+    text review_note
+    timestamptz created_at
+    timestamptz decided_at
+  }
   ledger_entries {
     bigint id PK
     uuid journal_id FK
@@ -266,6 +285,7 @@ erDiagram
   transactions ||--o{ notifications : "txn"
   transactions ||--o{ screening_results : "txn"
   transactions ||--o{ transaction_status_history : "txn"
+  cases ||--o{ ai_suggestions : "case"
   journals ||--o{ ledger_entries : "journal"
   accounts ||--o{ ledger_entries : "account"
   cases ||--o{ recon_items : "case"

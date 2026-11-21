@@ -81,7 +81,7 @@ function Control() {
           setStates((cur) => ({ ...cur, [n.id]: { ...cur[n.id], level: "idle" } })), n.level === "error" ? 5000 : 2200);
       });
     }
-    if (m.kind === "event" || m.node === "human_gate" || m.node === "chaos") setTick((t) => t + 1);
+    if (m.kind === "event" || m.node === "human_gate" || m.node === "chaos" || m.node === "ai") setTick((t) => t + 1);
   }, []);
   const connected = useStream("auditor", onMsg);
 
