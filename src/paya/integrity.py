@@ -1,0 +1,93 @@
+"""Continuous integrity checks: the Week 9 reconciliation stack beyond the daily settlement file.
+
+  Layer 1  internal technical recon   - do our own messages agree? (outbox relay, consumers)
+  Layer 2  operational recon          - does what people were told match transaction state?
+  Layer 3  financial recon            - does the ledger agree with itself and with transaction state?
+           (the rail-file comparison lives in recon.py)
+  Layer 4  exception management       - are breaks owned and inside their SLA?
+
+Every check is read-only and returns PASS / WARN / FAIL with the evidence needed to act.
+"""
+from datetime import timedelta
+
+from sqlalchemy import and_, func, select
+from sqlalchemy.orm import Session
+
+from . import ledger
+from .config import get_settings
+from .models import Account, Case, Hold, Notification, OutboxEvent, PaymentRequest, Transaction, now
+
+
+def _check(layer: str, name: str, ok: bool, value, detail: str, warn: bool = False) -> dict:
+    return {"layer": layer, "check": name, "status": "PASS" if ok else ("WARN" if warn else "FAIL"),
+            "value": value, "detail": detail}
+
+
+def run(s: Session) -> dict:
+    cfg = get_settings()
+    t = now()
+    out: list[dict] = []
+
+    # ---- Layer 1: internal technical
+    stale = s.execute(select(func.count()).select_from(OutboxEvent).where(
+        OutboxEvent.published_at.is_(None), OutboxEvent.occurred_at < t - timedelta(seconds=30))).scalar_one()
+    out.append(_check("technical", "outbox_relay_lag", stale == 0, stale,
+                      "events committed but not published for >30 s (relay stalled?)"))
+    undispatched = s.execute(select(func.count()).select_from(Transaction).where(
+        Transaction.status == "PENDING", Transaction.rail_attempts == 0,
+        Transaction.pending_since < t - timedelta(seconds=30))).scalar_one()
+    out.append(_check("technical", "pending_never_sent_to_rail", undispatched == 0, undispatched,
+                      "PENDING payments the worker has not dispatched (worker down?)"))
+
+    # ---- Layer 2: operational
+    paid = select(Transaction.id).where(Transaction.type == "PAYMENT",
+                                        Transaction.status.in_(["SETTLED", "RECONCILED"]),
+                                        Transaction.updated_at < t - timedelta(seconds=30))
+    notified = select(Notification.txn_id).where(Notification.template == "payment.settled",
+                                                 Notification.recipient == "CUSTOMER")
+    silent = s.execute(select(func.count()).select_from(paid.where(Transaction.id.notin_(notified)).subquery())).scalar_one()
+    out.append(_check("operational", "settled_without_customer_notice", silent == 0, silent,
+                      "customer was never told a settled payment succeeded"))
+    pr_mismatch = s.execute(select(func.count()).select_from(PaymentRequest).where(
+        PaymentRequest.status == "PAID",
+        ~select(Transaction.id).where(and_(Transaction.payment_request_id == PaymentRequest.id,
+                                           Transaction.status.in_(["SETTLED", "RECONCILED"]))).exists())).scalar_one()
+    out.append(_check("operational", "till_paid_without_settlement", pr_mismatch == 0, pr_mismatch,
+                      "cashier screen says PAID but no settled payment exists"))
+    overdue_pending = s.execute(select(func.count()).select_from(Transaction).where(
+        Transaction.status == "PENDING",
+        Transaction.pending_since < t - timedelta(seconds=cfg.pending_review_after_seconds + 120))).scalar_one()
+    out.append(_check("operational", "pending_beyond_review_window", overdue_pending == 0, overdue_pending,
+                      "uncertain payments that should already be escalated to a human"))
+
+    # ---- Layer 3: financial (internal)
+    tb = ledger.trial_balance(s)
+    out.append(_check("financial", "trial_balance_balanced", tb["balanced"],
+                      {"debit": tb["total_debit_minor"], "credit": tb["total_credit_minor"]},
+                      "sum of all debits equals sum of all credits"))
+    in_transit = ledger.ledger_balance(s, ledger.house_account(s, "2150"))
+    expected = s.execute(select(func.coalesce(func.sum(Transaction.amount_minor), 0)).where(
+        Transaction.type == "PAYMENT", Transaction.status.in_(["PENDING", "UNDER_REVIEW"]),
+        Transaction.rail_e2e_id.is_not(None))).scalar_one()
+    out.append(_check("financial", "in_transit_equals_open_payments", in_transit == expected,
+                      {"ledger_2150": in_transit, "open_payments": int(expected)},
+                      "money in transit must equal payments still awaiting the rail"))
+    negative = [a.owner_id for a in s.execute(select(Account).where(Account.code == "2100")).scalars()
+                if ledger.ledger_balance(s, a) < 0]
+    out.append(_check("financial", "no_negative_wallets", not negative, len(negative),
+                      "a customer wallet liability below zero means money was spent twice"))
+    stale_holds = s.execute(select(func.count()).select_from(Hold).where(
+        Hold.status == "ACTIVE", Hold.expires_at < t)).scalar_one()
+    out.append(_check("financial", "expired_holds_released", stale_holds == 0, stale_holds,
+                      "expired reservations still reducing available balance", warn=True))
+
+    # ---- Layer 4: exception management
+    overdue = dict(s.execute(select(Case.owner_role, func.count()).where(
+        Case.state != "RESOLVED", Case.sla_due_at < t).group_by(Case.owner_role)).all())
+    out.append(_check("exceptions", "cases_within_sla", not overdue, overdue,
+                      "open human work items past their SLA, by owner", warn=True))
+    unowned = s.execute(select(func.count()).select_from(Case).where(Case.owner_role.is_(None))).scalar_one()
+    out.append(_check("exceptions", "every_case_has_owner", unowned == 0, unowned, "breaks without an owner"))
+
+    worst = "FAIL" if any(c["status"] == "FAIL" for c in out) else ("WARN" if any(c["status"] == "WARN" for c in out) else "PASS")
+    return {"overall": worst, "checked_at": t.isoformat(), "checks": out}

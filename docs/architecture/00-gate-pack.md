@@ -1,4 +1,4 @@
-# Week 10 gate pack: Paya
+# Gate pack: Paya (Weeks 10 and 12)
 
 **Course:** CS3017 Enterprise Systems & Applications, Fall 2026.
 **Submitted:** 2026-11-20.
@@ -25,6 +25,15 @@ The brief (section 11) defines two Week 10 gates. Each item below points to its 
 | Idempotency strategy | [03](03-integration-contracts.md) §4, [ADR-003](adr/ADR-003-idempotency-store.md) |
 | Sequence diagram | [04](04-sequence-diagrams.md): normal flow, timeout recovery and duplicate handling. Rendered: `rendered/seq-*.svg` |
 
+## Gate 3 (Week 12): data and control
+
+| Minimum evidence required | Where it is |
+|---|---|
+| ERD | [07: Data model](07-data-model.md) (core view) and [generated/erd-full.md](generated/erd-full.md) (all 23 tables, generated from code), plus [table dictionary](generated/table-dictionary.md) |
+| Source-of-truth rules | [08: Source of truth and lineage](08-source-of-truth.md). Attribute-level ownership, ledger-vs-rail conflict rules, lineage chain |
+| Ledger/reconciliation logic | [09: Ledger and reconciliation](09-ledger-and-reconciliation.md). Chart of accounts, posting rules, exception taxonomy, 4-layer reconciliation stack. System-generated postings in [evidence/ledger/worked-examples.md](../../evidence/ledger/worked-examples.md) |
+| Identity/consent or KYC controls | [10: Identity, KYC/AML and consent controls](10-identity-kyc-consent-controls.md). Permission matrix, SoD rules, joiner-mover-leaver, KYC/AML rules, consent and data minimisation, audit chain |
+
 ## Delivered early (later gates)
 
 | Item | Gate | Where |
@@ -38,7 +47,6 @@ The brief (section 11) defines two Week 10 gates. Each item below points to its 
 
 ## Still to do
 
-- **Week 12:** ERD, ledger posting rules document, threat model, KYC/consent controls write-up.
 - **Week 13:** SLO/SLI specification, RTO/RPO note, runbooks.
 - **Week 14:** AI extension with governance and evaluation.
 

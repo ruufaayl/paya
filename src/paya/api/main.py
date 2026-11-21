@@ -397,6 +397,14 @@ def trial_balance(p: Principal = Depends(authorised("finance:read"))):
         return ledger.trial_balance(s)
 
 
+@app.get("/v1/finance/integrity", tags=["finance"])
+def integrity_checks(p: Principal = Depends(authorised("finance:read"))):
+    """Week 9 reconciliation stack: technical, operational, financial and exception-management checks."""
+    from .. import integrity
+    with session_scope() as s:
+        return integrity.run(s)
+
+
 @app.get("/v1/finance/recon/runs", tags=["finance"])
 def recon_runs(p: Principal = Depends(authorised("finance:read"))):
     with session_scope() as s:

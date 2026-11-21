@@ -154,6 +154,21 @@ def test_s6_ops_requests_finance_approves_reversal_with_linked_reference(client,
     chaos.reset()
 
 
+def test_s6c_self_approval_is_refused_and_the_denial_is_kept_in_the_audit_chain(client, as_):
+    from paya.errors import SegregationOfDuties
+    chaos.set_mode("TIMEOUT_NO_RECORD")
+    ref = pay(client, as_, new_request(client, as_, 20_000)).json()["txn_ref"]
+    a = payments.request_reversal(txn_ref=ref, actor="sana.ops", actor_role="OPS", reason="test")
+    with pytest.raises(SegregationOfDuties):
+        payments.approve_reversal(approval_id=a.id, actor="sana.ops", actor_role="FINANCE")  # same person
+    with session_scope() as s:
+        denied = s.execute(select(AuditLog).where(AuditLog.action == "REVERSAL_APPROVE",
+                                                  AuditLog.outcome == "DENIED")).scalars().all()
+    assert len(denied) == 1 and denied[0].actor == "sana.ops"
+    assert status(ref) == "PENDING"
+    chaos.reset()
+
+
 def test_s6b_database_refuses_maker_as_checker(client, as_):
     from paya.models import Approval
     with pytest.raises(Exception):
@@ -322,3 +337,21 @@ def detail_ref_of_open_hold() -> str:
     with session_scope() as s:
         return s.execute(select(Transaction.txn_ref).join(Case, Case.txn_id == Transaction.id)
                          .where(Case.kind == "COMPLIANCE_HOLD", Case.state == "OPEN")).scalar_one()
+
+
+# ---------------------------------------------------------------- Week 9 reconciliation stack (integrity checks)
+def test_integrity_checks_pass_on_healthy_system_and_catch_a_silent_customer(client, as_):
+    ref = pay(client, as_, new_request(client, as_, 15_000)).json()["txn_ref"]
+    events.relay_once()
+    r = client.get("/v1/finance/integrity", headers=as_("rabia.finance")).json()
+    assert r["overall"] == "PASS", [c for c in r["checks"] if c["status"] != "PASS"]
+    assert {c["layer"] for c in r["checks"]} == {"technical", "operational", "financial", "exceptions"}
+
+    # Simulate an operational break: the notification was lost and 60 s have passed.
+    with session_scope() as s:
+        s.execute(text("DELETE FROM notifications"))
+        s.execute(text("UPDATE transactions SET updated_at = now() - interval '60 seconds' WHERE txn_ref = :r"), {"r": ref})
+    r = client.get("/v1/finance/integrity", headers=as_("rabia.finance")).json()
+    failed = {c["check"]: c for c in r["checks"] if c["status"] == "FAIL"}
+    assert r["overall"] == "FAIL" and failed["settled_without_customer_notice"]["value"] == 1
+    assert client.get("/v1/finance/integrity", headers=as_("ayesha.cashier")).status_code == 403

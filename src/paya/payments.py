@@ -403,13 +403,22 @@ def request_reversal(*, txn_ref: str, actor: str, actor_role: str, reason: str) 
 def approve_reversal(*, approval_id: uuid.UUID, actor: str, actor_role: str) -> Transaction:
     """Checker step (FINANCE). The maker can never approve their own request (app + DB check)."""
     with session_scope() as s:
+        a = s.execute(select(Approval).where(Approval.id == approval_id)).scalar_one_or_none()
+        if a is None or a.status != "REQUESTED":
+            raise NotFound("open approval not found")
+        self_approval = a.requested_by == actor
+    if self_approval:
+        # Recorded in its own transaction so the denial survives the rollback of the refused action.
+        with session_scope() as s:
+            audit.record(s, actor=actor, actor_role=actor_role, action="REVERSAL_APPROVE", object_type="approval",
+                         object_id=str(approval_id), outcome="DENIED", reason="maker cannot be checker")
+        events.telemetry("security", "access_denied", detail={"user": actor, "role": actor_role,
+                                                               "permission": "approve own reversal (SoD)"}, level="error")
+        raise SegregationOfDuties("the person who requested a reversal cannot approve it")
+    with session_scope() as s:
         a = s.execute(select(Approval).where(Approval.id == approval_id).with_for_update()).scalar_one_or_none()
         if a is None or a.status != "REQUESTED":
             raise NotFound("open approval not found")
-        if a.requested_by == actor:
-            audit.record(s, actor=actor, actor_role=actor_role, action="REVERSAL_APPROVE", object_type="approval",
-                         object_id=str(a.id), outcome="DENIED", reason="maker cannot be checker")
-            raise SegregationOfDuties("the person who requested a reversal cannot approve it")
         txn = s.execute(select(Transaction).where(Transaction.id == a.txn_id).with_for_update()).scalar_one()
         if txn.status not in ("PENDING", "UNDER_REVIEW"):
             raise InvalidState(f"transaction is now {txn.status}")
