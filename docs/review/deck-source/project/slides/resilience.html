@@ -5,15 +5,15 @@
 <div class="grow" style="display:flex; flex-direction:column; gap:28px;">
 <div class="row" style="gap:40px;">
 <div class="grow rise" style="--i:0; display:flex; flex-direction:column; gap:8px;"><p class="big" style="color:#08703F; font-size:88px;">1.3 s</p><p class="bignote">API healthy after kill -9 with payments in flight</p></div>
-<div class="grow rise" style="--i:1; display:flex; flex-direction:column; gap:8px;"><p class="big" style="color:#08703F; font-size:88px;">6.0 s</p><p class="bignote">all in-flight payments settled, exactly once</p></div>
+<div class="grow rise" style="--i:1; display:flex; flex-direction:column; gap:8px;"><p class="big" style="color:#08703F; font-size:88px;">0 / 400</p><p class="bignote">duplicate settlements under load, incl. a duplicate-ack storm</p></div>
 </div>
 <div class="row" style="gap:40px;">
-<div class="grow rise" style="--i:2; display:flex; flex-direction:column; gap:8px;"><p class="big" style="color:#08703F; font-size:88px;">0 / 400</p><p class="bignote">duplicate settlements under load, incl. a duplicate-ack storm</p></div>
-<div class="grow rise" style="--i:3; display:flex; flex-direction:column; gap:8px;"><p class="big" style="color:#08703F; font-size:88px;">32</p><p class="bignote">automated tests, CI green, fresh clone reproduces</p></div>
+<div class="grow rise" style="--i:2; display:flex; flex-direction:column; gap:8px;"><p class="big" style="color:#08703F; font-size:88px;">66</p><p class="bignote">backend tests, CI green, fresh clone reproduces</p></div>
+<div class="grow rise" style="--i:3; display:flex; flex-direction:column; gap:8px;"><p class="big" style="color:#08703F; font-size:88px;">33 / 33</p><p class="bignote">browser acceptance checks; demo rehearsal 8 / 8 scenes</p></div>
 </div>
 </div>
-<img class="shot" src="/_blob/4fe724871eb9544fb113cfef74be1ed8" alt="Mission Control live map during a lost-reply rail failure: the rail and recovery-agent nodes glow amber while the ledger stays balanced" style="width:760px; height:430px;">
+<img class="shot" src="/_blob/fe378020e01bc12cc454832fe566355a" alt="Mission Control system topology: real components with observed activity counts and errors in words; the inspector for the simulated Raast rail separates static architecture from observed runtime" style="width:760px; height:475px;">
 </div>
-<div class="footer"><p>p95 pay 792 ms at 10 concurrent · ~16 payments/s per process · evidence/resilience, evidence/performance</p><p class="page"></p></div>
-<aside>Speaker E. The drill kills the API with SIGKILL while three payments wait behind a lost-request fault; it is healthy in 1.3 seconds and the worker settles all three exactly once in six. Database restart: 0.7 seconds. Restore: identical balances. Under load, 400 payments with zero duplicate settlements. Honest limit: one Python process saturates near 16 payments a second, because each costs about 60 ms of CPU. Mission Control shows real events only.</aside>
+<div class="footer"><p>p95 pay 792 ms at 10 concurrent · ~16 payments/s per process · evidence/resilience, performance, revamp, demo</p><p class="page"></p></div>
+<aside>Speaker E (Mudaser). The drill kills the API with SIGKILL while payments wait behind a lost-request fault; it is healthy in 1.3 seconds and every payment settles exactly once within six. Under load, 400 payments with zero duplicate settlements. The whole demo is rehearsed by a script that asserts each claim against the API. Mission Control’s topology never shows a component as healthy because it is green: it separates what the system is from what we actually observed. Honest limit: one Python process saturates near 16 payments a second.</aside>
 </section>

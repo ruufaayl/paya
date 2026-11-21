@@ -10,13 +10,15 @@ Pakistan's instant payment system has crossed into everyday commerce. SBP's FY26
 
 Paya is designed as a **technology service provider** to a licensed partner EMI, which is synthetic in this prototype. It never holds funds or claims a licence. The implemented journey is the brief's *merchant payment* with its linked *reversal*. It runs from channel to gateway, then identity and AML controls, ledger, rail, posting, settlement, reconciliation, notification and finance reporting.
 
-The prototype runs locally with one command. It is covered by 32 automated tests (all ten scenarios the brief requires, plus concurrency, security and AI tests) and by GitHub Actions continuous integration. It has been measured:
+The prototype runs locally with one command. It is covered by 66 automated backend tests (all ten scenarios the brief requires, plus concurrency, security, AI, onboarding and assistant tests), by browser acceptance runs, and by GitHub Actions continuous integration. It has been measured:
 
 - **Recovery:** after a forced crash with payments in flight, the API was healthy in 1.3 s, and every payment settled exactly once within 6 s.
 - **Load:** 400 payments, including a storm of duplicate acknowledgements, with zero duplicate settlements.
 - **AI:** a bounded triage agent reaches 94.1% accuracy on the cases it acts on, with zero unsafe autonomy.
 
-We recommend a **conditional go**. The conditions, stated in section 11, are the controls a real pilot would need and a classroom prototype cannot provide.
+Two of the semester's thematic areas are also built on the same core: **digital onboarding and KYC**, and **conversational banking** (section 11).
+
+We recommend a **conditional go**. The conditions, stated in section 12, are the controls a real pilot would need and a classroom prototype cannot provide.
 
 ## 2. Context, journey and scope
 
@@ -45,9 +47,10 @@ Week 9's lecture is blunt about the consequence: *"a user-facing success screen 
 - nine simulated rail failure modes;
 - reconciliation with owned exception cases;
 - an AI triage agent;
-- a live operations view, *Mission Control*.
+- an operations console, *Mission Control*;
+- digital onboarding with KYC checks, and a read-only conversational assistant (section 11).
 
-Out of scope, and stated as such: cards and chargebacks; real identity verification; connectivity to any real bank, EMI or Raast endpoint; refunds after settlement; production high availability.
+Out of scope, and stated as such: cards and chargebacks; real identity verification (NADRA) or certified liveness; connectivity to any real bank, EMI or Raast endpoint; refunds after settlement; production high availability.
 
 **Ethical boundaries.**
 
@@ -93,6 +96,8 @@ Nine architecture decision records capture the main choices with their alternati
 | 007 | Row locks plus database constraints | Serialisable isolation everywhere: harder to reason about |
 | 008 | AI triage rules-first, LLM optional, suggestion-only | Hosted LLM: data leaves the machine; free tiers unstable |
 | 009 | One PWA plus a live stream for Mission Control | Grafana only: cannot show human gates or explain a payment |
+| 010 | Onboarding: machines approve clear cases, people decide the rest; no biometric data at rest | Auto-reject on face non-match: unfair under biometric error rates |
+| 011 | Assistant: deterministic, read-only, cannot move money | LLM with payment tools: one manipulated message could move money |
 
 ## 4. Transaction model and integrity
 
@@ -154,7 +159,7 @@ Following Week 5, one journey uses several patterns, each chosen for its latency
 | Settlement file | **Batch file** with a control trailer |
 | Screens | **WebSocket stream**, display only |
 
-The synchronous contract is the generated `openapi.json`: 30 operations with roles, a single error shape (stable machine-readable code, human message, recovery hints, correlation ID) and documented status codes. Paying returns `202 Accepted`, not `200 OK`: the money is in transit, not settled, and the contract says so.
+The synchronous contract is the generated `openapi.json`: 55 operations with roles, a single error shape (stable machine-readable code, human message, recovery hints, correlation ID) and documented status codes. Paying returns `202 Accepted`, not `200 OK`: the money is in transit, not settled, and the contract says so.
 
 The asynchronous contract is a set of JSON Schemas for the four event types. Every envelope carries:
 
@@ -211,7 +216,7 @@ A rail rejection posts a reversal: debit in transit, credit the wallet. Keeping 
 | Timing difference | none; expected in the next file |
 
   Every break becomes a case with an owner and an SLA. A later file that resolves it closes the case automatically with evidence.
-- **Technical, operational and exception-management layers.** Twelve continuous integrity checks verify, for example:
+- **Technical, operational and exception-management layers.** Fourteen continuous integrity checks (two added for onboarding) verify, for example:
   - that the outbox relay is not stalled;
   - that no settled payment left the customer uninformed;
   - that the till never shows PAID without a settled payment;
@@ -284,7 +289,7 @@ Reproducibility is part of resilience. A fresh clone from GitHub passes every te
 - outbox backlog;
 - per-route request counts and latency histograms.
 
-**Mission Control** is the operational dashboard. Every service is a node, and every real event animates a packet along the wires. Human gates pulse until someone with the right role decides. A chaos panel injects real failures. An inspector shows any payment's references, timeline, balanced journals, risk decision, approvals and audit hashes. Nothing on it is scripted; an automated rehearsal of the demo asserts every on-screen claim against the API.
+**Mission Control** is the operations console. An operator signs in as a named staff member, and every action runs as that person and is checked by the server. Its pages cover an overview of payments, rail and human work; transaction search with a full evidence drawer; a system topology that separates static architecture from observed telemetry (it never shows a component as healthy merely because it is green); an event stream from the outbox; cases and maker-checker approvals; KYC review; reconciliation; AI operations; a rail lab that injects real failures; and the audit log. Nothing on it is scripted: an automated rehearsal of the demo asserts every on-screen claim against the API.
 
 **SLOs.** Eight service-level objectives pair business meaning with measured values. They are stated as one-machine prototype numbers, not production capacity:
 
@@ -321,7 +326,33 @@ Governance is enforced structurally, not by promise:
 
 The report names the main error: an omission that settled near cut-off looks like a timing difference. Live metrics (acceptance, override and abstention rates, fallbacks, audit completeness) are exposed for monitoring. No LLM was evaluated in this environment, and one must pass the same evaluation before being enabled.
 
-## 11. Limitations, risks and recommendation
+## 11. Product experience and thematic extensions
+
+**Paya 2.0.** A product review found that the first interface used one neon green for everything, so "rail accepted" looked the same as "settled". The console also hid who was acting. Both surfaces were rebuilt on one design system:
+
+- a light, calm wallet and a dark, dense console, built from shared tokens;
+- self-hosted fonts, so the PWA works offline;
+- a single status language in which **green means confirmed by the ledger**; uncertainty is shown as *processing*, never as success.
+
+The payment result is driven only by server status. A browser test samples the screen and the database together and fails if the screen says "Paid" before the ledger has settled. Accessibility was evaluated against WCAG 2.2 AA: zero automated violations on thirteen screens, and computed contrast for every colour pairing. The backend gained read-only operations endpoints (search, time series, event history, reconciliation lines, audit log) and one control, case assignment, which moves no money. The financial modules were not modified.
+
+**Theme 1: digital onboarding and KYC (ADR-010).** A customer opens a tier-1 wallet in about two minutes:
+
+- consent;
+- a synthetic SPECIMEN identity card with a signed code;
+- a randomised head-turn liveness challenge;
+- a face match using permissively licensed models (YuNet, MIT; SFace, Apache 2.0);
+- a simulated identity registry;
+- fuzzy watch-list screening;
+- one-identity-one-wallet checks and device location.
+
+Machines approve only when every check passes; **only people reject**. An unanswered registry call or a missing model becomes a referral, never a decision. Approving a possible sanctions match needs two different compliance officers, enforced by the service and by a database constraint. The applicant is never told that screening caused a referral. Photos and face templates exist only in memory for one request: a test scans every column of the database for image data.
+
+**Theme 3: conversational banking (ADR-011).** The Paya Assistant answers questions about the customer's own wallet in English and Roman Urdu, from the ledger: balance, recent payments, a payment's status and why, limits, and verification. It is deliberately deterministic and read-only. It imports no payment or posting function (a test reads its source), so "send money" or "refund me" returns an explanation and a link into the normal review-and-authorise flow. Card numbers, CNIC-like numbers, IBANs and OTPs are redacted before a message is classified or stored. "Talk to a person" opens an owned support case, and staff reads of a transcript are audited.
+
+Both themes reuse the integrity core: cases, roles, the audit chain and the live stream. They add controls, not exceptions to them.
+
+## 12. Limitations, risks and recommendation
 
 **Limits we accept for a prototype, each with an owner in the technical-debt register:**
 
@@ -331,6 +362,8 @@ The report names the main error: an omission that settled near cut-off looks lik
 - the simulated rail has no message signing, and its behaviour rests on assumptions A3 and A4 rather than Raast specifications;
 - the login lockout resets on restart;
 - the AI's LLM path is untested against a real model;
+- onboarding liveness is a basic active check, not certified presentation-attack detection, and the face recogniser has not been evaluated for accuracy or fairness on consented real faces;
+- the assistant understands a fixed set of intents only;
 - the evidence is synthetic, including the core user problem (A1).
 
 **Reflection.** What the project demonstrates most strongly is the course's central claim: enterprise systems are operating-model architectures. Paya's value is not in any single screen. It is in decisions that connect process, data and control:
@@ -361,16 +394,17 @@ Several of our best design improvements came from evidence rather than foresight
 | Duplicate event/message | `test_s3_*`, `test_concurrent_*` | Scene 2 (replay) |
 | Downstream timeout | `test_s4_*` | Scene 2 |
 | Partial failure | `test_s5_*`, `test_s10_*` | Scene 5 |
-| Reversal/refund | `test_s6_*`, `test_s6b_*`, `test_s6c_*` | Mission Control human gates |
+| Reversal/refund | `test_s6_*`, `test_s6b_*`, `test_s6c_*` | Cases & approvals (maker-checker) |
 | KYC/AML/fraud hold | `test_s7_*`, `test_s7b_*` | Scene 3 |
-| Unauthorised role attempt | `test_s8_*`, login lockout test | Scene 3 |
-| Service restart | `test_s9_*`, recovery drill D1 | Scene 4 (optional) |
+| Unauthorised role attempt | `test_s8_*`, login lockout test, `test_o7_*` | Scenes 3 and 6 |
+| Service restart | `test_s9_*`, recovery drill D1 | Optional (terminal) |
 | Reconciliation break | `test_s10_*`, `test_s13_*`, integrity tests | Scene 5 |
 
 ## Appendix B: Where everything is
 
 - Gate pack: `docs/architecture/00-gate-pack.md`
-- Design documents 01–15: `docs/architecture/`
+- Design documents 01–17: `docs/architecture/` (16 onboarding and KYC, 17 conversational banking)
+- Paya 2.0 product, design system, UX, accessibility and testing: `docs/revamp/`
 - ADRs: `docs/architecture/adr/`
 - API contract and collection: `api/`
 - Evidence pack: `evidence/README.md`

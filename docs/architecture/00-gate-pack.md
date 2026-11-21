@@ -53,7 +53,7 @@ The brief (section 11) defines two Week 10 gates. Each item below points to its 
 | Deliverable (brief §10) | Where it is |
 |---|---|
 | Architecture brief (2 pages) | [docs/deliverables/dist/architecture-brief.pdf](../deliverables/dist/architecture-brief.pdf) (2 pages; `.docx` alongside); source `architecture-brief.md` |
-| Architecture/design dossier (3,500–5,000 words) | [docs/deliverables/dist/design-dossier.pdf](../deliverables/dist/design-dossier.pdf) (3,930-word body, 12 pages incl. appendices; `.docx` alongside) |
+| Architecture/design dossier (3,500–5,000 words) | [docs/deliverables/dist/design-dossier.pdf](../deliverables/dist/design-dossier.pdf) (4,538-word body, 14 pages incl. appendices; `.docx` alongside) |
 | Version-controlled repository | This repo; CI on every push; `make verify` |
 | Technical demo (8–10 min) | [docs/demo/demo-script.md](../demo/demo-script.md); rehearsal evidence in [evidence/demo](../../evidence/demo/) |
 | Engineering evidence pack | [evidence/README.md](../../evidence/README.md). Tests, Bruno API collection run (16/16), load test, recovery drill, log trace, screenshots, AI evaluation |

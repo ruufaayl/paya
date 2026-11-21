@@ -1,18 +1,26 @@
 flowchart LR
-  subgraph PAY["Money path - one ACID transaction, then the rail"]
+  subgraph PAY["Money path: one ACID transaction, then the rail"]
     direction LR
-    C["Customer wallet / Cashier till<br/>(PWA)"] --> G["API gateway<br/>JWT · RBAC · idempotency<br/>correlation ID"]
+    C["Paya Wallet / Cashier till<br/>(PWA)"] --> G["API gateway<br/>JWT · RBAC · idempotency<br/>correlation ID"]
     G --> R["Risk rules<br/>KYC tier · velocity · watch-list"]
     R -- "PASS" --> L[("Double-entry ledger<br/>append-only · balanced")]
     L -- "credit, E2E id" --> RA["Raast rail<br/>simulated, RailPort"]
   end
-  subgraph CTRL["Controls, recovery and evidence"]
+  subgraph CTRL["Controls, recovery, evidence"]
     direction LR
     H(["Compliance officer<br/>release / reject"])
     W["Recovery worker<br/>status enquiry, same E2E"]
     RC["Reconciliation<br/>control totals · 7 categories"] --> AI["AI triage<br/>suggest only"] --> OF(["Ops maker · Finance checker"])
-    O[("Outbox")] --> N["Notifier · Mission Control"]
+    O[("Outbox")] --> N["Notifier · Mission Control<br/>(operator console)"]
   end
+  subgraph EXT["Themes 1 and 3"]
+    direction TB
+    K["Onboarding & KYC<br/>liveness · face match<br/>registry (simulated)"]
+    AS["Paya Assistant<br/>reads own ledger data<br/>redacts secrets"]
+  end
+  C --> K
+  K -- "referral" --> H
+  AS -- "handoff" --> OF
   R -- "HOLD" --> H
   H -- "release" --> L
   RA -- "ack / enquiry" --> W
@@ -25,3 +33,4 @@ flowchart LR
   class H,OF human
   class L,O store
   class RA ext
+  class K,AS ext

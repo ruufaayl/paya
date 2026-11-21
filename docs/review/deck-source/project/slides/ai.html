@@ -1,20 +1,19 @@
 <section id="ai" class="dark">
-<p class="eyebrow">Responsible AI extension</p>
-<h2>The triage agent suggests. A human decides.</h2>
-<div class="row" style="gap:56px; align-items:flex-start;">
-<img class="shot" src="/_blob/f4560f1e4e72ee43eeadeb814f34fbde" alt="Mission Control human gate: a reconciliation break card with an AI suggestion to raise the issue with the rail operator at 80 percent confidence, with Accept and Override buttons for the Ops owner" style="width:860px; height:484px;">
-<div class="grow" style="display:flex; flex-direction:column; gap:20px;">
+<p class="eyebrow">Responsible AI</p>
+<h2>Bounded AI: it suggests, people decide</h2>
+<div class="row" style="gap:40px; align-items:flex-start;">
+<img class="shot" src="/_blob/d5ceb231e29449867eb7c9e53d08e8db" alt="Case drawer for a reconciliation break: the AI suggests raising it with the rail operator at 80 percent confidence, marked advisory only, with Accept and Override buttons for the Ops owner" style="width:400px; height:414px;">
+<img class="shot" src="/_blob/4d6216c88d9a4faf003c3894642f3b05" alt="Paya Assistant on a phone: answers that a Rs 845 payment to Chai Junction is Paid, with a card linking to the payment details" style="width:300px; height:414px; background:#F5F6F3;">
+<div class="grow" style="display:flex; flex-direction:column; gap:16px;">
 <table class="data">
-<tr><th style="width:62%;">Metric (120 labelled cases)</th><th style="width:38%; text-align:right;">Result</th></tr>
+<tr><th style="width:62%;">Triage agent (120 cases)</th><th style="width:38%; text-align:right;">Result</th></tr>
 <tr><td>Accuracy when it acts</td><td style="text-align:right;">94.1%</td></tr>
 <tr><td>Unsafe autonomy</td><td style="text-align:right;">0%</td></tr>
-<tr><td>Policy violations</td><td style="text-align:right;">0</td></tr>
-<tr><td>Correct or handed to a human</td><td style="text-align:right;">95.8%</td></tr>
 <tr><td>Injection cases safe</td><td style="text-align:right;">20 / 20</td></tr>
 </table>
-<p style="font-size:28px; color:#B9C6D6;">No money-moving code (a test reads its source). Abstains under 0.75 confidence, when rail status is unknown, above PKR 100k, or with a compliance link. Owner-only accept or override.</p>
+<p style="font-size:28px; color:#B9C6D6;">Neither the triage agent nor the Paya Assistant can move money: tests read their source. The assistant answers from the customer’s own ledger, in English or Roman Urdu, and redacts secrets.</p>
 </div>
 </div>
-<div class="footer"><p>ADR-008 · evidence/ai/evaluation.md · rules engine default; local LLM optional and guarded</p><p class="page"></p></div>
-<aside>Speaker C. We chose reconciliation triage because a wrong suggestion costs time, not money. Governance is structural: the agent’s modules import no posting or approval function, and a test proves it. It abstains by the Week 4 list. Every suggestion is audited with a prompt hash. The evaluation’s main error is an omission near cut-off that looks like a timing difference; the cost is a day’s delay, and an integrity check catches it. No LLM was evaluated here; one must pass this same evaluation first.</aside>
+<div class="footer"><p>ADR-008 · ADR-011 · evidence/ai/evaluation.md · tests C1–C10</p><p class="page"></p></div>
+<aside>Speaker C (Harris). Reconciliation triage was chosen because a wrong suggestion costs time, not money. It abstains under 0.75 confidence, above PKR 100k or with a compliance link, and only the case owner can accept or override. The Paya Assistant is the customer-facing side: deterministic intents over read-only, customer-scoped tools, so there is nothing to prompt-inject. “Send money” returns a link into the normal review-and-authorise flow. Card numbers, CNICs and OTPs are removed before anything is stored, and “talk to a person” opens an audited case. AI is never used on identity decisions.</aside>
 </section>

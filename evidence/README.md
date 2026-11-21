@@ -5,7 +5,7 @@ The brief (§10) asks for: test results, API collection, performance/resilience 
 
 | Evidence | File(s) | How to regenerate |
 |---|---|---|
-| Automated test results (32 tests: the 10 brief scenarios, 3 Week 9 scenarios, concurrency, security, AI) | [tests/](tests/) | `make test` |
+| Automated test results (66 tests: the 10 brief scenarios, 3 Week 9 scenarios, concurrency, security, AI, onboarding/KYC K1–K15, operations API O1–O9, assistant C1–C10) | [tests/](tests/) | `make test` |
 | Continuous integration | [GitHub Actions](https://github.com/ruufaayl/paya/actions) (green on every push) | push to `main` |
 | API collection and run (16 requests, all assertions pass) | [api/bruno-run.txt](api/bruno-run.txt), [api/bruno-junit.xml](api/bruno-junit.xml); collection in [`/api/bruno`](../api/bruno/) | `cd api/bruno && npx @usebruno/cli run --env local` |
 | API contract | [`/api/openapi.json`](../api/openapi.json), [`/api/events/`](../api/events/) | `make openapi` |
