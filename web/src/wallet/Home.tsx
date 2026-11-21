@@ -1,7 +1,7 @@
 // Wallet home: the balance experience first, then the one thing people do most (pay), then recent activity.
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronRight, Eye, EyeOff, Info, Lock, QrCode, ShieldCheck, Store } from "lucide-react";
+import { Bot, ChevronRight, Eye, EyeOff, Info, Lock, QrCode, ShieldCheck, Store } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fadeUp, stagger } from "../ds/motion";
@@ -85,6 +85,13 @@ export default function HomeScreen({ user }: { user: string }) {
           <Store className="h-6 w-6 text-fg" aria-hidden /><span><span className="block text-body font-semibold text-fg">Pay a shop</span><span className="block text-caption text-fg-2">Pick a nearby till</span></span>
         </button>
       </motion.div>
+
+      {/* Conversational banking */}
+      <motion.button variants={fadeUp} onClick={() => nav("/app/assistant")} className="mt-3 flex w-full items-center gap-3 rounded-lg border border-line bg-surface p-3.5 text-left shadow-e1 hover:bg-hover">
+        <span aria-hidden className="grid h-10 w-10 place-items-center rounded-full bg-night text-night-fg"><Bot className="h-5 w-5" /></span>
+        <span className="min-w-0 flex-1"><span className="block text-body font-semibold text-fg">Ask Paya</span><span className="block truncate text-caption text-fg-2">"Did my payment go through?" · "mera balance kitna hai"</span></span>
+        <ChevronRight className="h-4 w-4 text-fg-muted" aria-hidden />
+      </motion.button>
 
       {/* Verification + insight */}
       <motion.div variants={fadeUp} className="mt-3 grid grid-cols-2 gap-3">

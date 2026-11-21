@@ -365,3 +365,39 @@ def staff(role: str = Query(..., pattern="^(OPS|COMPLIANCE|FINANCE)$"), p: Princ
         return [{"username": u.username, "display_name": u.display_name}
                 for u in s.execute(select(User).where(User.role == role, User.active.is_(True))
                                    .order_by(User.username)).scalars()]
+
+
+# ------------------------------------------------------------------ conversational banking (Theme 3)
+class ChatIn(BaseModel):
+    text: str = Field(min_length=1, max_length=500)
+    conversation_ref: str | None = Field(default=None, max_length=24)
+
+
+@router.post("/v1/assistant/messages", tags=["assistant"])
+def assistant_message(body: ChatIn, p: Principal = Depends(authorised("assistant:use"))):
+    """Ask the Paya Assistant about your own wallet. Read-only; it cannot move money."""
+    from .. import assistant
+    return assistant.respond(p.customer_id, body.text, body.conversation_ref)
+
+
+@router.get("/v1/assistant/conversations/{ref}", tags=["assistant"])
+def assistant_conversation(ref: str, p: Principal = Depends(authorised("assistant:use"))):
+    from .. import assistant
+    return assistant.transcript(ref, customer_id=p.customer_id)
+
+
+@router.get("/v1/ops/assistant/conversations/{ref}", tags=["assistant"])
+def assistant_transcript_staff(ref: str, request: Request, p: Principal = Depends(authorised("cases:read"))):
+    """Staff read a transcript (already redacted) - every read is audited."""
+    from .. import assistant
+    out = assistant.transcript(ref)
+    with session_scope() as s:
+        audit.record(s, actor=p.username, actor_role=p.role, action="CHAT_TRANSCRIPT_READ", object_type="conversation",
+                     object_id=ref, correlation_id=request.state.correlation_id)
+    return out
+
+
+@router.get("/v1/ops/assistant/metrics", tags=["assistant"])
+def assistant_metrics(p: Principal = Depends(authorised("backoffice:read"))):
+    from .. import assistant
+    return assistant.metrics()

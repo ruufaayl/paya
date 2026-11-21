@@ -49,6 +49,8 @@ PERMISSIONS: dict[str, set[str]] = {
     # Paya 2.0 operations console
     "cases:assign": {"OPS", "COMPLIANCE", "FINANCE"},
     "access:read": {"AUDITOR", "SYSADMIN", "COMPLIANCE"},
+    # Conversational banking: customers chat about their OWN data; staff read transcripts of handed-off chats.
+    "assistant:use": {"CUSTOMER"},
 }
 
 

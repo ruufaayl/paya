@@ -86,6 +86,10 @@ Open a wallet from the phone: tap **Open a new Paya wallet**, consent, enter syn
 
 Run `make models` once to fetch the face models (YuNet, MIT licence; SFace, Apache 2.0; checksums pinned). Without them, every application is referred to a person. Design: `docs/architecture/16-digital-onboarding-kyc.md`, ADR-010. Evidence: `evidence/kyc/`.
 
+## Conversational banking (Theme 3)
+
+**Ask Paya** in the wallet answers questions about your own money in English or Roman Urdu ("mera balance kitna hai", "did my payment to Chai Junction go through?"), using read-only data from the ledger. It cannot move money; for actions it links into the normal review-and-authorise flow. Card numbers, CNICs, OTPs and passwords are removed before anything is stored. "Talk to a person" opens a case for Operations, who can read the redacted transcript (each read is audited). Design: `docs/architecture/17-conversational-banking.md`, ADR-011.
+
 ## Test
 
 ```bash

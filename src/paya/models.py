@@ -460,3 +460,29 @@ class KYCCheck(Base):
     input_digest: Mapped[str | None] = mapped_column(String(64))  # keyed hash of the image, not the image
     created_at: Mapped[datetime] = TS()
     __table_args__ = (CheckConstraint("outcome IN ('PASS','REFER','FAIL','ERROR')", name="ck_kyc_check_outcome"),)
+
+
+# ---------------------------------------------------------------- Conversational banking (Theme 3)
+class Conversation(Base):
+    """A customer's chat with the Paya Assistant. Text is stored only AFTER redaction; purged after retention."""
+    __tablename__ = "conversations"
+    id: Mapped[uuid.UUID] = UUIDPK()
+    ref: Mapped[str] = mapped_column(String(24), unique=True, nullable=False)
+    customer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("customers.id"), nullable=False, index=True)
+    handoff_case_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("cases.id"))
+    message_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    started_at: Mapped[datetime] = TS()
+    last_at: Mapped[datetime] = TS()
+
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+    id: Mapped[uuid.UUID] = UUIDPK()
+    conversation_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False, index=True)
+    role: Mapped[str] = mapped_column(String(10), nullable=False)  # USER | ASSISTANT
+    text: Mapped[str] = mapped_column(Text, nullable=False)        # redacted
+    intent: Mapped[str | None] = mapped_column(String(24))
+    tools: Mapped[list] = mapped_column(JSONB, default=list, nullable=False)       # read-only tools used
+    redactions: Mapped[list] = mapped_column(JSONB, default=list, nullable=False)  # kinds removed, never values
+    created_at: Mapped[datetime] = TS()
+    __table_args__ = (CheckConstraint("role IN ('USER','ASSISTANT')", name="ck_chat_role"),)

@@ -1,6 +1,6 @@
 // Mission Control graph: every node is a real Paya component; every packet is a real event from the live stream.
 import {
-  Bell, Bot, BrainCircuit, Database, FileCheck2, Fingerprint, Gavel, IdCard, Landmark, ScrollText, ShieldCheck, Smartphone, Store,
+  Bell, Bot, BrainCircuit, MessagesSquare, Database, FileCheck2, Fingerprint, Gavel, IdCard, Landmark, ScrollText, ShieldCheck, Smartphone, Store,
   UserCheck, Workflow, Zap,
 } from "lucide-react";
 import type { StreamMsg } from "../lib/stream";
@@ -20,6 +20,7 @@ export const NODE_INFO: Record<string, { layer: Layer; what: string; owns?: stri
   phone: { layer: "channel", what: "Customer wallet PWA: onboarding, scan, review, authorise, receipts.", code: "web/src/wallet" },
   cashier: { layer: "channel", what: "Merchant till: dynamic QR and PAID only after settlement.", code: "web/src/wallet/Cashier.tsx" },
   registry: { layer: "simulated", what: "Simulated identity registry with synthetic SPECIMEN identities; chaos modes TIMEOUT/DOWN.", owns: "schema registry", code: "src/paya/registry.py" },
+  assistant: { layer: "agent", what: "Conversational banking: deterministic intents (EN + Roman Urdu) over read-only, customer-scoped tools; redacts secrets before storage; hands off to Ops with a case. Cannot move money.", owns: "conversations, chat_messages", code: "src/paya/assistant.py" },
   kyc: { layer: "core", what: "Document checks, head-turn liveness, face match, screening, duplicates, location; refers anything unclear.", owns: "kyc_applications, kyc_checks", code: "src/paya/kyc.py" },
   gateway: { layer: "core", what: "FastAPI gateway: JWT auth, RBAC, idempotency keys, correlation ids, security headers.", owns: "idempotency_records", code: "src/paya/api" },
   risk: { layer: "core", what: "Deterministic KYC/AML/velocity rules, versioned and evidenced.", owns: "screening_results", code: "src/paya/risk.py" },
@@ -39,12 +40,13 @@ export const NODE_INFO: Record<string, { layer: Layer; what: string; owns?: stri
 export const TELEMETRY_NODE: Record<string, string> = {
   merchant: "cashier", gateway: "gateway", risk: "risk", ledger: "ledger", rail: "rail", transaction: "ledger", notification: "notification",
   "notification-service": "notification", "rail-ack-consumer": "outbox", recon: "recon", human_gate: "ops", security: "gateway", chaos: "chaos",
-  ai: "ai", dlq: "outbox", worker: "enquiry", kyc: "kyc",
+  ai: "ai", dlq: "outbox", worker: "enquiry", kyc: "kyc", assistant: "assistant",
 };
 
 export const NODES: NodeDef[] = [
   { id: "phone", title: "Customer wallet", sub: "PWA on phone", icon: Smartphone, kind: "channel", x: 0, y: 80 },
   { id: "registry", title: "Identity registry", sub: "simulated - synthetic IDs only", icon: IdCard, kind: "service", x: 0, y: -130 },
+  { id: "assistant", title: "Paya Assistant", sub: "chat - read-only - can't move money", icon: MessagesSquare, kind: "agent", x: 270, y: 60 },
   { id: "kyc", title: "Onboarding & KYC", sub: "document - liveness - face - screening", icon: Fingerprint, kind: "service", x: 270, y: -130 },
   { id: "cashier", title: "Merchant till", sub: "Cashier screen", icon: Store, kind: "channel", x: 0, y: 430 },
   { id: "gateway", title: "API gateway", sub: "auth - idempotency - correlation", icon: ShieldCheck, kind: "service", x: 270, y: 250 },
@@ -66,7 +68,9 @@ export interface EdgeDef { id: string; source: string; target: string; sh?: stri
 // sh/th = source/target handle side: r(ight) b(ottom) t(op) l(eft)
 export const EDGES: EdgeDef[] = [
   { id: "phone-gateway", source: "phone", target: "gateway" },
-  { id: "phone-kyc", source: "phone", target: "kyc", sh: "r", th: "b" },
+  { id: "phone-kyc", source: "phone", target: "kyc", sh: "t", th: "l" },
+  { id: "phone-assistant", source: "phone", target: "assistant" },
+  { id: "assistant-risk", source: "assistant", target: "ops", sh: "t", th: "t", dashed: true },
   { id: "kyc-registry", source: "kyc", target: "registry", sh: "l", th: "r" },
   { id: "kyc-compliance", source: "kyc", target: "compliance" },
   { id: "cashier-gateway", source: "cashier", target: "gateway" },
@@ -142,6 +146,7 @@ export function effectOf(m: StreamMsg): Effect {
     case "recon:missing_external": case "recon:missing_internal": case "recon:duplicate_external": case "recon:amount_mismatch": case "recon:status_mismatch":
       hop("recon-ops", COLORS.error); hop("recon-ai", COLORS.human); node("recon", "error", m.phase!.replace(/_/g, " ")); node("ops", "human", "break needs an owner"); break;
     case "recon:duplicate_file_refused": node("recon", "warn", "same file twice - refused"); break;
+    case "assistant:replied": hop("phone-assistant", d.redacted?.length ? COLORS.warn : COLORS.flow); node("assistant", d.handoff ? "human" : d.redacted?.length ? "warn" : "info", `${String(d.intent).toLowerCase()}${d.redacted?.length ? " · redacted" : ""}`); if (d.handoff) { hop("assistant-risk", COLORS.human); node("ops", "human", "chat handed to a person"); } break;
     case "kyc:started": hop("phone-kyc", COLORS.flow); node("kyc", "info", `application ${d.ref}`); break;
     case "kyc:check":
       if (d.check === "REGISTRY") { hop("kyc-registry", COLORS.flow); node("registry", d.outcome === "PASS" ? "info" : "warn", d.outcome === "PASS" ? "identity matched" : d.reason); }

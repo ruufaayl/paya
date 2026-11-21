@@ -58,6 +58,8 @@ flowchart LR
 | T-17 | Information disclosure | Breach exposes applicants' photos or face templates | Onboarding | Nothing biometric is stored; keyed digests only; abandoned data purged after 72 h | Test K9 scans every column | n/a | **Low** |
 | T-18 | Elevation of privilege | One compliance officer approves a possible sanctions match alone | Compliance | Two-person rule in service and DB `CHECK`; denial audited separately | Audit chain | n/a | **Low** (K7) |
 | T-19 | Repudiation / fairness | An applicant is refused by an algorithm with unequal error rates | Onboarding | No automatic rejection; every non-pass goes to a person with evidence | Referral and override rates | n/a | **Low** for refusal; fairness of auto-approval still needs evaluation on consented data |
+| T-20 | Tampering / EoP | Prompt injection or social engineering in chat makes the assistant move money or reveal data | Paya Assistant | No money-moving imports (source-checked); deterministic intents; customer-scoped tools; actions are links into confirmed flows | Intent and tools logged per message; handoff and transcript reads audited | Disable the assistant route | **Low** (C3, C4, C9) |
+| T-21 | Information disclosure | Customers paste card, CNIC or OTP into chat and it is logged | Paya Assistant | Redaction before classification and storage; 30-day retention; staff reads audited | Redaction count monitored | n/a | **Low** (C5) |
 | T-14 | Supply chain | Vulnerable dependency | Python / npm | Exact or narrow version pins | `pip-audit` (0 known); `npm audit` (2 moderate, compensated) in `evidence/security/` | Upgrade path recorded | **Low–medium.** Re-run audits before the final defence |
 
 ## 3. Top attack paths, and the two we prioritised

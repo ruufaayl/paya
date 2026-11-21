@@ -9,7 +9,7 @@ import { call } from "../../lib/api";
 import { ago, fmtDateTime, useAction, useApi } from "../../lib/hooks";
 import { Page, Restricted, useCan, useInspector, useOperator } from "../core";
 
-const KINDS = ["COMPLIANCE_HOLD", "PENDING_REVIEW", "RECON_BREAK", "KYC_REVIEW"];
+const KINDS = ["COMPLIANCE_HOLD", "PENDING_REVIEW", "RECON_BREAK", "KYC_REVIEW", "SUPPORT_HANDOFF"];
 
 export default function Cases() { return <Restricted perm="cases:read"><Inner /></Restricted>; }
 
@@ -35,7 +35,7 @@ function Inner() {
 
   const columns: Column<any>[] = [
     { key: "ref", header: "Case", cell: (c) => <Ref className="text-fg">{c.case_ref}</Ref>, width: "170px" },
-    { key: "kind", header: "Type", cell: (c) => <Badge tone={c.kind === "RECON_BREAK" ? "danger" : c.kind === "PENDING_REVIEW" ? "warning" : "review"}>{c.kind.replace(/_/g, " ").toLowerCase()}</Badge>, width: "150px" },
+    { key: "kind", header: "Type", cell: (c) => <Badge tone={c.kind === "RECON_BREAK" ? "danger" : c.kind === "PENDING_REVIEW" ? "warning" : c.kind === "SUPPORT_HANDOFF" ? "info" : "review"}>{c.kind.replace(/_/g, " ").toLowerCase()}</Badge>, width: "150px" },
     { key: "summary", header: "Summary", cell: (c) => <span className="line-clamp-2 text-fg">{c.summary}</span> },
     { key: "owner", header: "Owner", cell: (c) => <span className="text-fg-2">{c.owner_role}</span>, width: "110px" },
     { key: "ai", header: "AI", cell: (c) => c.ai ? <Badge tone={c.ai.abstained ? "warning" : "review"}>{c.ai.abstained ? "abstained" : "suggested"}</Badge> : <span className="text-fg-muted">—</span>, width: "100px" },

@@ -8,7 +8,7 @@ import time
 
 from sqlalchemy import select
 
-from . import events, kyc, payments
+from . import assistant, events, kyc, payments
 from .db import session_scope
 from .models import Transaction
 
@@ -30,6 +30,7 @@ def tick() -> dict:
         "enquiries": payments.run_status_enquiries(),
         "expired": payments.expire_stale(),
         "kyc_abandoned": kyc.abandon_stale(),
+        "chats_purged": assistant.purge_expired(),
     }
     out["relayed"] = events.relay_once()
     return out

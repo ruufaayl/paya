@@ -6,7 +6,8 @@ Run on 2026-11-21 against PostgreSQL 16 and the real face models (YuNet/SFace), 
 
 | Suite | Tool | Result | Evidence |
 |---|---|---|---|
-| Backend unit and integration (financial integrity S1–S13, security, AI, KYC K1–K15, **new ops API O1–O9**) | pytest | **56 passed**, 0 failed (47 before the revamp + 9 new) | `pytest -q` |
+| Backend unit and integration (financial integrity S1–S13, security, AI, KYC K1–K15, **ops API O1–O9**, **assistant C1–C10**) | pytest | **66 passed**, 0 failed (47 before the revamp + 9 ops + 10 assistant) | `pytest -q` |
+| Conversational banking in a real browser (wallet chat → handoff → Ops transcript → close) | Playwright | **8 / 8** | `evidence/revamp/assistant-e2e.json`, `docs/revamp/tools/assistant_e2e.cjs` |
 | End-to-end acceptance (wallet + Mission Control, real backend) | Playwright | **33 / 33 checks passed** | `evidence/revamp/e2e-results.json`, `docs/revamp/tools/revamp_e2e.cjs` |
 | Accessibility (axe-core 4.10, WCAG 2.x A/AA rules, 13 screens) | axe | **0 violations** (2 found and fixed) | `evidence/revamp/a11y-axe.json` |
 | Colour contrast (both themes) | `contrast_check.py` | **0 of 56 pairs fail** | `docs/revamp/contrast-report.md` |

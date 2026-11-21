@@ -9,6 +9,7 @@ import { forget, session } from "../lib/api";
 import { useTheme } from "../lib/hooks";
 import Account from "./Account";
 import Activity from "./Activity";
+import Assistant from "./Assistant";
 import Cashier from "./Cashier";
 import HomeScreen from "./Home";
 import Onboarding from "./Onboarding";
@@ -35,7 +36,7 @@ export default function WalletApp() {
   if (s.role === "CASHIER" || s.role === "MERCHANT_ADMIN") return <Cashier user={user} onSignOut={signOut} />;
   if (s.role !== "CUSTOMER") return <SignIn onSignedIn={signIn} notice="Staff accounts use Mission Control, not the wallet." />;
 
-  const hideNav = /^\/app\/(pay\/|txn\/)/.test(loc.pathname);
+  const hideNav = /^\/app\/(pay\/|txn\/|assistant)/.test(loc.pathname);
   return (
     <div className="mx-auto flex h-full max-w-[480px] flex-col bg-canvas">
       <a href="#wallet-main" className="sr-only-focusable absolute left-2 top-2 z-50 rounded bg-surface px-3 py-2 text-label">Skip to content</a>
@@ -50,6 +51,7 @@ export default function WalletApp() {
               <Route path="pay/:prId" element={<Review user={user} />} />
               <Route path="txn/:ref" element={<Txn user={user} />} />
               <Route path="account" element={<Account user={user} onSignOut={signOut} />} />
+              <Route path="assistant" element={<div className="h-[100dvh]"><Assistant user={user} /></div>} />
               <Route path="*" element={<Navigate to="/app" replace />} />
             </Routes>
           </motion.div>

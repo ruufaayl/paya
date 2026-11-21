@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-21T12:57:23.166Z",
+  "at": "2026-11-21T13:12:49.518Z",
   "passed": 33,
   "failed": 0,
   "results": [
@@ -86,17 +86,17 @@
     {
       "name": "rail lab: DUPLICATE_ACK → SETTLED",
       "ok": true,
-      "note": "PAYA-20261121-DFD5E6"
+      "note": "PAYA-20261121-CC7BA0"
     },
     {
       "name": "rail lab: REJECT → REVERSED",
       "ok": true,
-      "note": "PAYA-20261121-E5EE6B"
+      "note": "PAYA-20261121-770F01"
     },
     {
       "name": "rail lab: PARTIAL → SETTLED",
       "ok": true,
-      "note": "PAYA-20261121-71071A"
+      "note": "PAYA-20261121-C98904"
     },
     {
       "name": "reconciliation: run recorded",
@@ -111,7 +111,7 @@
     {
       "name": "reconciliation: unmatched record has an owned case",
       "ok": true,
-      "note": "MISSING_EXTERNAL → CASE-20261121-42759F"
+      "note": "MISSING_EXTERNAL → CASE-20261121-65424E"
     },
     {
       "name": "exception assignment: case assigned to the operator, audited",

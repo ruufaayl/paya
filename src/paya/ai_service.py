@@ -117,6 +117,7 @@ def review(suggestion_id: uuid.UUID, *, decision: str, reviewer: str, reviewer_r
         return {"suggestion_id": str(row.id), "decision": decision, "case_ref": case.case_ref}
 
 
+HANDOFF_RESOLUTIONS = {"CUSTOMER_CONTACTED", "NO_ACTION_NEEDED"}
 RESOLUTIONS = {"MATCHED_IN_LATER_FILE", "RAIL_CONFIRMED_AND_REISSUED", "CLAIM_RAISED_WITH_PARTNER",
                "FEE_CONFIG_CORRECTED", "NO_ACTION_FALSE_BREAK", "WRITTEN_OFF_APPROVED"}
 
@@ -124,14 +125,17 @@ RESOLUTIONS = {"MATCHED_IN_LATER_FILE", "RAIL_CONFIRMED_AND_REISSUED", "CLAIM_RA
 def resolve_case(case_ref: str, *, resolution: str, actor: str, actor_role: str, note: str) -> dict:
     """The case owner closes a reconciliation break with evidence. No money moves here: any correcting
     journal is a separate, approved posting."""
-    if resolution not in RESOLUTIONS:
-        raise InvalidState(f"resolution must be one of {sorted(RESOLUTIONS)}")
+    if resolution not in RESOLUTIONS | HANDOFF_RESOLUTIONS:
+        raise InvalidState(f"resolution must be one of {sorted(RESOLUTIONS | HANDOFF_RESOLUTIONS)}")
     with session_scope() as s:
         case = s.execute(select(Case).where(Case.case_ref == case_ref).with_for_update()).scalar_one_or_none()
         if case is None:
             raise NotFound("case not found")
-        if case.kind != "RECON_BREAK":
-            raise InvalidState("only reconciliation breaks are closed here")
+        if case.kind not in ("RECON_BREAK", "SUPPORT_HANDOFF"):
+            raise InvalidState("only reconciliation breaks and chat handoffs are closed here")
+        allowed = HANDOFF_RESOLUTIONS if case.kind == "SUPPORT_HANDOFF" else RESOLUTIONS
+        if resolution not in allowed:
+            raise InvalidState(f"resolution must be one of {sorted(allowed)}")
         if actor_role != case.owner_role:
             raise Forbidden(f"only the case owner ({case.owner_role}) may resolve it")
         if case.state == "RESOLVED":

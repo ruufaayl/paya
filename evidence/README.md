@@ -33,3 +33,5 @@ The brief (§10) asks for: test results, API collection, performance/resilience 
 | Technical communication and viva (5) | `docs/deliverables/`, `docs/demo/`, `docs/viva/` |
 
 **Theme 1, onboarding & KYC:** see [`kyc/README.md`](kyc/README.md).
+
+**Paya 2.0 and Theme 3 (conversational banking):** `revamp/e2e-results.json` (33/33), `revamp/assistant-e2e.json` (8/8), `revamp/a11y-axe.json` (0 violations), screenshots in `screenshots/revamp/` and `screenshots/assistant/`. See `docs/revamp/TESTING_REPORT.md`.

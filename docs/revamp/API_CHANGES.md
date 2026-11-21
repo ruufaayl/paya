@@ -1,6 +1,6 @@
 # API changes (Paya 2.0)
 
-All changes are **additive**. No existing endpoint changed its path, input, or meaning. Financial domain modules (`ledger`, `payments`, `state`, `rail`, `recon`, `kyc`, `idempotency`) were **not modified**. The new endpoints live in `src/paya/api/ops.py`; tests are in `tests/test_ops_api.py` (O1–O9). OpenAPI: 41 → 51 operations (`api/openapi.json`).
+All changes are **additive**. No existing endpoint changed its path, input, or meaning. Financial domain modules (`ledger`, `payments`, `state`, `rail`, `recon`, `kyc`, `idempotency`) were **not modified**. The new endpoints live in `src/paya/api/ops.py`; tests are in `tests/test_ops_api.py` (O1–O9). OpenAPI: 41 → 55 operations (`api/openapi.json`).
 
 ## New endpoints
 
@@ -16,6 +16,10 @@ All changes are **additive**. No existing endpoint changed its path, input, or m
 | `GET /v1/audit/log?actor&action&outcome&object_id&before_id&limit` | `audit:read` (AUDITOR, COMPLIANCE) | Audit rows with hashes, plus a chain verification result | No |
 | `GET /v1/admin/access` | `access:read` (AUDITOR, SYSADMIN, COMPLIANCE) | Permission matrix and users (names and roles only) | No |
 | `GET /v1/ops/staff?role` | `cases:read` | Names of active staff in a role (assignment picker) | No |
+| `POST /v1/assistant/messages` `{text, conversation_ref?}` | `assistant:use` (CUSTOMER) | Theme 3: the Paya Assistant replies from the customer's own data; returns reply, cards, suggestions, handoff, redaction kinds | **No** (source-checked) |
+| `GET /v1/assistant/conversations/{ref}` | `assistant:use` (owner only) | The customer's own transcript (redacted) | No |
+| `GET /v1/ops/assistant/conversations/{ref}` | `cases:read` | Staff transcript for a handoff; **each read audited** | No |
+| `GET /v1/ops/assistant/metrics` | `backoffice:read` | Conversations, intents, handoff, unknown and redaction counts | No |
 
 ## Changed responses (additive fields)
 
@@ -26,7 +30,7 @@ All changes are **additive**. No existing endpoint changed its path, input, or m
 
 ## Data model change
 
-`cases.assigned_to varchar(64)` and `cases.assigned_at timestamptz`, both nullable. They are added by idempotent `ALTER TABLE … ADD COLUMN IF NOT EXISTS` statements at startup (`db.py: INTEGRITY_DDL`), so existing databases upgrade in place with no data loss. Nothing is dropped or rewritten.
+`cases.assigned_to varchar(64)` and `cases.assigned_at timestamptz`, both nullable. Theme 3 adds two new tables, `conversations` and `chat_messages` (created by `create_all`; existing tables untouched). `POST /v1/cases/{ref}/resolve` now also closes `SUPPORT_HANDOFF` cases, with their own resolutions (`CUSTOMER_CONTACTED`, `NO_ACTION_NEEDED`). They are added by idempotent `ALTER TABLE … ADD COLUMN IF NOT EXISTS` statements at startup (`db.py: INTEGRITY_DDL`), so existing databases upgrade in place with no data loss. Nothing is dropped or rewritten.
 
 ## New permissions (`security.py`)
 

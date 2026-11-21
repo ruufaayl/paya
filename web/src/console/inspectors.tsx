@@ -155,7 +155,7 @@ export function CaseInspector() {
   const assign = useAction((assignee: string) => call(op.username, `/v1/cases/${ref}/assign`, { method: "POST", body: JSON.stringify({ assignee }) }), { success: (_r, a) => `Assigned to ${a}` });
   const triage = useAction(() => call(op.username, `/v1/ai/cases/${ref}/triage`, { method: "POST" }), { success: () => "AI triage requested. The suggestion appears when ready." });
   const review = useAction((v: { id: string; decision: string }) => call(op.username, `/v1/ai/suggestions/${v.id}/review`, { method: "POST", body: JSON.stringify({ decision: v.decision }) }), { success: (_r, v) => `Suggestion ${v.decision.toLowerCase()}` });
-  const resolve = useAction(() => call(op.username, `/v1/cases/${ref}/resolve`, { method: "POST", body: JSON.stringify({ resolution, note: "Resolved from Mission Control with evidence reviewed" }) }), { success: () => "Case resolved" });
+  const resolve = useAction(() => call(op.username, `/v1/cases/${ref}/resolve`, { method: "POST", body: JSON.stringify({ resolution: c?.kind === "SUPPORT_HANDOFF" ? "CUSTOMER_CONTACTED" : resolution, note: "Resolved from Mission Control with evidence reviewed" }) }), { success: () => "Case resolved" });
   const hold = useAction((v: { decision: string; reason: string }) => call(op.username, `/v1/compliance/holds/${c?.txn?.txn_ref}/decision`, { method: "POST", body: JSON.stringify(v) }),
     { success: (_r, v) => v.decision === "RELEASE" ? "Hold released; payment continues" : "Payment rejected; funds released to the customer", onDone: () => setDlg(null) });
   const reversal = useAction((reason: string) => call(op.username, `/v1/ops/transactions/${c?.txn?.txn_ref}/reversal-requests`, { method: "POST", body: JSON.stringify({ reason }) }),
@@ -206,6 +206,8 @@ export function CaseInspector() {
                     <Button loading={resolve.isPending} onClick={() => resolve.mutate()}>Resolve with evidence</Button>
                   </div>) : <p className="text-body-sm text-fg-2">Only the owning role ({c.owner_role}) closes this break. Resolving moves no money.</p>)}
                 {c.kind === "KYC_REVIEW" && <p className="text-body-sm text-fg-2">Decide on the KYC application itself (button above). AI is never used on identity decisions.</p>}
+                {c.kind === "SUPPORT_HANDOFF" && (can("cases:resolve") && isOwner ? <Button loading={resolve.isPending} onClick={() => resolve.mutate()}>Mark as handled</Button>
+                  : <p className="text-body-sm text-fg-2">Owned by {c.owner_role}. Read the transcript, contact the customer, then mark it handled.</p>)}
               </Section>
             )}
 
@@ -223,6 +225,7 @@ export function CaseInspector() {
               </Section>
             )}
 
+            {c.details?.conversation_ref && <Transcript convRef={c.details.conversation_ref} />}
             {c.approvals?.length > 0 && <Section title="Approvals">{c.approvals.map((a: any) => <p key={a.id} className="text-body-sm text-fg-2">{a.action}: maker <b className="text-fg">{a.maker}</b>, checker <b className="text-fg">{a.checker || "waiting"}</b> · {a.status.toLowerCase()}</p>)}</Section>}
             <Section title="Details"><pre className="overflow-x-auto rounded-md bg-sunken p-3 font-mono text-[11.5px] text-fg-2">{JSON.stringify(c.details, null, 2)}</pre></Section>
             <Section title={`Decision trail (${c.audit.length})`}>
@@ -238,6 +241,26 @@ export function CaseInspector() {
       <ReasonDialog open={dlg === "REJECT"} onClose={() => setDlg(null)} title="Reject the payment" description="The reserved funds return to the customer's available balance." confirm="Reject" tone="danger" busy={hold.isPending} onConfirm={(reason) => hold.mutate({ decision: "REJECT", reason })} />
       <ReasonDialog open={dlg === "REVERSAL"} onClose={() => setDlg(null)} title="Request a reversal" description="You are the maker. A different person in Finance must approve." confirm="Request" busy={reversal.isPending} onConfirm={(r) => reversal.mutate(r)} />
     </Drawer>
+  );
+}
+
+function Transcript({ convRef }: { convRef: string }) {
+  const { op } = useOperator();
+  const [show, setShow] = useState(false);
+  const t = useApi<any>(op.username, show ? `/v1/ops/assistant/conversations/${convRef}` : null);
+  return (
+    <Section title="Chat transcript (redacted)" aside={!show && <Button size="sm" variant="secondary" onClick={() => setShow(true)}>Read transcript</Button>}>
+      {!show ? <p className="text-body-sm text-fg-2">Opening the transcript is recorded in the audit chain. Secrets were removed before storage.</p> : !t.data ? <Skeleton className="h-24" /> : (
+        <ol className="space-y-2">
+          {t.data.messages.map((m: any, i: number) => (
+            <li key={i} className={cx("rounded-md border px-3 py-2 text-body-sm", m.role === "USER" ? "border-line bg-sunken" : "border-line bg-raised")}>
+              <p className="text-caption text-fg-muted">{m.role === "USER" ? "Customer" : "Assistant"} · {fmtTime(m.at)} · intent {m.intent?.toLowerCase()}{m.redactions?.length ? ` · removed ${m.redactions.join(", ").toLowerCase()}` : ""}</p>
+              <p className="text-fg">{m.text}</p>
+            </li>
+          ))}
+        </ol>
+      )}
+    </Section>
   );
 }
 
