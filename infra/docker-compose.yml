@@ -9,6 +9,7 @@ services:
       POSTGRES_DB: paya
     ports: ["5432:5432"]
     volumes: ["paya-db:/var/lib/postgresql/data"]   # survives restarts: transaction truth is preserved
+    restart: unless-stopped   # after a host reboot the DB must come back too, or the API crash-loops
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U paya"]
       interval: 5s

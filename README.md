@@ -105,6 +105,13 @@ The suite covers the 10 scenarios the brief requires plus 3 from the Week 9 lect
 | Security | Login lockout, security headers, metrics, JSON logs with correlation, secret scrubbing | `tests/test_security_observability.py` |
 | AI | Triage agent suggests, abstains, is audited, owner-only review, LLM guardrails, no money-moving capability | `tests/test_ai_triage.py` |
 
+## Demo
+
+- Script: [docs/demo/demo-script.md](docs/demo/demo-script.md).
+- Rehearse: `make demo-reset && make rehearse`.
+- Viva preparation: [docs/viva/](docs/viva/README.md).
+- Deck outline: [docs/review/](docs/review/architecture-review-deck-outline.md).
+
 ## Evidence tools
 
 ```bash

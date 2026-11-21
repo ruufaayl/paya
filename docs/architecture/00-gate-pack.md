@@ -1,4 +1,4 @@
-# Gate pack: Paya (Weeks 10, 12, 13 and the AI extension)
+# Gate pack: Paya (Weeks 10, 12, 13 and 14)
 
 **Course:** CS3017 Enterprise Systems & Applications, Fall 2026.
 **Submitted:** 2026-11-20.
@@ -47,6 +47,17 @@ The brief (section 11) defines two Week 10 gates. Each item below points to its 
 | | Recovery assumptions | [13](13-resilience-and-recovery.md) §2 RTO/RPO with business justification; **measured** drill in [evidence/resilience](../../evidence/resilience/) |
 | | (brief §2) SLO/SLI | [12](12-observability-and-slos.md) §2, eight SLOs with measured values from [evidence/performance](../../evidence/performance/) |
 | | (brief §2) Runbooks / exception handling | [14: Runbooks](14-runbooks.md) RB-1 to RB-7 |
+
+## Gate 5 (Week 14): architecture review
+
+| Minimum evidence required | Where it is |
+|---|---|
+| ADRs complete | [adr/README.md](adr/README.md). 9 ADRs (brief asks for at least 4), each with context, alternatives and consequences |
+| Demo rehearsed | [docs/demo/demo-script.md](../demo/demo-script.md) (8–10 min, 4 failure/recovery scenes plus reconciliation and AI). Automated rehearsal `make rehearse` asserts every claim. Results in [evidence/demo](../../evidence/demo/) |
+| AI extension bounded | See the next section and [15: AI governance](15-ai-governance.md) |
+| Repository reproducible | [evidence/reproducibility](../../evidence/reproducibility/clean-clone-2026-11-21.md). Fresh clone passes all tests on an empty DB; CI green on GitHub Actions |
+| (Week 15 prep) Review deck | [docs/review/architecture-review-deck-outline.md](../review/architecture-review-deck-outline.md). 10-slide outline with visuals and speakers |
+| (Week 15 prep) Individual viva | [docs/viva/](../viva/README.md). Common core plus one pack per member |
 
 ## Responsible AI extension (Week 14 gate: "AI extension bounded")
 

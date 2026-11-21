@@ -1,4 +1,4 @@
-.PHONY: setup test run up down openapi verify web
+.PHONY: setup test run up down openapi verify web demo-reset rehearse
 setup:            ## create virtualenv and install
 	python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
 test:             ## run all scenario tests (needs Postgres; see README)
@@ -14,3 +14,8 @@ openapi:          ## export the OpenAPI contract to /api
 web:              ## build the PWA and Mission Control
 	cd web && npm ci && npm run build
 verify: test web  ## everything a reviewer needs: all tests plus a production web build
+demo-reset:       ## wipe demo data and start fresh (synthetic seed only) - run before every demo
+	docker compose -f infra/docker-compose.yml --env-file .env down -v
+	docker compose -f infra/docker-compose.yml --env-file .env up -d
+rehearse:         ## automated demo rehearsal. Run `make demo-reset` first (and the web preview on :4173)
+	node docs/architecture/tools/demo_rehearsal.cjs
