@@ -1374,6 +1374,534 @@
         }
       }
     },
+    "/v1/onboarding/start": {
+      "post": {
+        "tags": [
+          "onboarding"
+        ],
+        "summary": "Onboarding Start",
+        "description": "Begin opening a wallet. Returns a 30-minute token that can only complete this application.",
+        "operationId": "onboarding_start_v1_onboarding_start_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingStartIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/onboarding/specimen": {
+      "post": {
+        "tags": [
+          "onboarding"
+        ],
+        "summary": "Onboarding Specimen",
+        "description": "Issue a SYNTHETIC specimen identity (and its signed code) so no real ID card is ever photographed.",
+        "operationId": "onboarding_specimen_v1_onboarding_specimen_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/onboarding/document": {
+      "post": {
+        "tags": [
+          "onboarding"
+        ],
+        "summary": "Onboarding Document",
+        "operationId": "onboarding_document_v1_onboarding_document_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImageIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/onboarding/liveness/challenge": {
+      "post": {
+        "tags": [
+          "onboarding"
+        ],
+        "summary": "Onboarding Challenge",
+        "operationId": "onboarding_challenge_v1_onboarding_liveness_challenge_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/onboarding/verify": {
+      "post": {
+        "tags": [
+          "onboarding"
+        ],
+        "summary": "Onboarding Verify",
+        "operationId": "onboarding_verify_v1_onboarding_verify_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/onboarding/status": {
+      "get": {
+        "tags": [
+          "onboarding"
+        ],
+        "summary": "Onboarding Status",
+        "operationId": "onboarding_status_v1_onboarding_status_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/kyc/applications": {
+      "get": {
+        "tags": [
+          "backoffice"
+        ],
+        "summary": "Kyc Applications",
+        "operationId": "kyc_applications_v1_kyc_applications_get",
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/kyc/applications/{ref}": {
+      "get": {
+        "tags": [
+          "backoffice"
+        ],
+        "summary": "Kyc Application",
+        "operationId": "kyc_application_v1_kyc_applications__ref__get",
+        "parameters": [
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Ref"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/compliance/kyc/{ref}/decision": {
+      "post": {
+        "tags": [
+          "backoffice"
+        ],
+        "summary": "Kyc Decision",
+        "operationId": "kyc_decision_v1_compliance_kyc__ref__decision_post",
+        "parameters": [
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Ref"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KYCDecisionIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/kyc/engine": {
+      "get": {
+        "tags": [
+          "backoffice"
+        ],
+        "summary": "Kyc Engine",
+        "operationId": "kyc_engine_v1_kyc_engine_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/chaos/rail": {
       "get": {
         "tags": [
@@ -1450,6 +1978,63 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ChaosIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/chaos/registry": {
+      "post": {
+        "tags": [
+          "chaos"
+        ],
+        "summary": "Chaos Registry",
+        "operationId": "chaos_registry_v1_chaos_registry_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistryChaosIn"
               }
             }
           }
@@ -1645,6 +2230,26 @@
         ],
         "title": "DecisionIn"
       },
+      "FrameIn": {
+        "properties": {
+          "step": {
+            "type": "string",
+            "pattern": "^(CENTER|LEFT|RIGHT)$",
+            "title": "Step"
+          },
+          "image": {
+            "type": "string",
+            "maxLength": 4300000,
+            "title": "Image"
+          }
+        },
+        "type": "object",
+        "required": [
+          "step",
+          "image"
+        ],
+        "title": "FrameIn"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1657,6 +2262,49 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "ImageIn": {
+        "properties": {
+          "image": {
+            "type": "string",
+            "maxLength": 4300000,
+            "title": "Image",
+            "description": "JPEG/PNG/WebP as a data URL or base64. Never stored."
+          }
+        },
+        "type": "object",
+        "required": [
+          "image"
+        ],
+        "title": "ImageIn"
+      },
+      "KYCDecisionIn": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "pattern": "^(APPROVE|REJECT|MORE_INFO)$",
+            "title": "Decision"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 5,
+            "title": "Reason"
+          },
+          "tier": {
+            "type": "integer",
+            "maximum": 2.0,
+            "minimum": 1.0,
+            "title": "Tier",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision",
+          "reason"
+        ],
+        "title": "KYCDecisionIn"
       },
       "LoginIn": {
         "properties": {
@@ -1675,6 +2323,58 @@
           "password"
         ],
         "title": "LoginIn"
+      },
+      "OnboardingStartIn": {
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 3,
+            "title": "Full Name"
+          },
+          "date_of_birth": {
+            "type": "string",
+            "format": "date",
+            "title": "Date Of Birth"
+          },
+          "mobile": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 10,
+            "title": "Mobile"
+          },
+          "username": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 3,
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 10,
+            "title": "Password"
+          },
+          "accept_terms": {
+            "type": "boolean",
+            "title": "Accept Terms"
+          },
+          "biometric_consent": {
+            "type": "boolean",
+            "title": "Biometric Consent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "full_name",
+          "date_of_birth",
+          "mobile",
+          "username",
+          "password",
+          "accept_terms",
+          "biometric_consent"
+        ],
+        "title": "OnboardingStartIn"
       },
       "PayIn": {
         "properties": {
@@ -1757,6 +2457,20 @@
         "type": "object",
         "title": "ReconIn"
       },
+      "RegistryChaosIn": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "pattern": "^(NORMAL|TIMEOUT|DOWN)$",
+            "title": "Mode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode"
+        ],
+        "title": "RegistryChaosIn"
+      },
       "ResolveIn": {
         "properties": {
           "resolution": {
@@ -1816,6 +2530,48 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VerifyIn": {
+        "properties": {
+          "nonce": {
+            "type": "string",
+            "maxLength": 64,
+            "title": "Nonce"
+          },
+          "document_image": {
+            "type": "string",
+            "maxLength": 4300000,
+            "title": "Document Image"
+          },
+          "frames": {
+            "items": {
+              "$ref": "#/components/schemas/FrameIn"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 3,
+            "title": "Frames"
+          },
+          "geolocation": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geolocation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nonce",
+          "document_image",
+          "frames"
+        ],
+        "title": "VerifyIn"
       }
     }
   }

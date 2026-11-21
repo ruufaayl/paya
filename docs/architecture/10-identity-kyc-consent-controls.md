@@ -95,3 +95,5 @@ Rules engine `risk.screen`, version `rules.v1`. Every decision stores the rules 
   - every compliance decision;
   - every reversal request and approval, including a refused self-approval;
   - every chaos-mode change.
+
+> **Update (Theme 1):** wallet opening is now built end to end: document checks, liveness, face match, simulated registry, screening, duplicate detection and a two-person compliance review. See [16-digital-onboarding-kyc.md](16-digital-onboarding-kyc.md) and ADR-010.

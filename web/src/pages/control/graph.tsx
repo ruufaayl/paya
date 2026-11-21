@@ -2,7 +2,7 @@
 import { BaseEdge, getBezierPath, Handle, Position, type EdgeProps, type NodeProps } from "@xyflow/react";
 import { motion } from "framer-motion";
 import {
-  Bell, Bot, BrainCircuit, Database, FileCheck2, Gavel, Landmark, ScrollText, ShieldCheck, Smartphone, Store,
+  Bell, Bot, BrainCircuit, Database, FileCheck2, Fingerprint, Gavel, IdCard, Landmark, ScrollText, ShieldCheck, Smartphone, Store,
   UserCheck, Workflow, Zap,
 } from "lucide-react";
 import type { StreamMsg } from "../../lib/stream";
@@ -18,6 +18,8 @@ export interface NodeDef { id: string; title: string; sub: string; icon: any; ki
 
 export const NODES: NodeDef[] = [
   { id: "phone", title: "Customer wallet", sub: "PWA on phone", icon: Smartphone, kind: "channel", x: 0, y: 80 },
+  { id: "registry", title: "Identity registry", sub: "simulated - synthetic IDs only", icon: IdCard, kind: "service", x: 0, y: -130 },
+  { id: "kyc", title: "Onboarding & KYC", sub: "document - liveness - face - screening", icon: Fingerprint, kind: "service", x: 270, y: -130 },
   { id: "cashier", title: "Merchant till", sub: "Cashier screen", icon: Store, kind: "channel", x: 0, y: 430 },
   { id: "gateway", title: "API gateway", sub: "auth - idempotency - correlation", icon: ShieldCheck, kind: "service", x: 270, y: 250 },
   { id: "risk", title: "Risk engine", sub: "KYC - AML - velocity rules", icon: Gavel, kind: "service", x: 540, y: 80 },
@@ -38,6 +40,9 @@ export interface EdgeDef { id: string; source: string; target: string; sh?: stri
 // sh/th = source/target handle side: r(ight) b(ottom) t(op) l(eft)
 export const EDGES: EdgeDef[] = [
   { id: "phone-gateway", source: "phone", target: "gateway" },
+  { id: "phone-kyc", source: "phone", target: "kyc", sh: "r", th: "b" },
+  { id: "kyc-registry", source: "kyc", target: "registry", sh: "l", th: "r" },
+  { id: "kyc-compliance", source: "kyc", target: "compliance" },
   { id: "cashier-gateway", source: "cashier", target: "gateway" },
   { id: "gateway-risk", source: "gateway", target: "risk" },
   { id: "risk-compliance", source: "risk", target: "compliance", sh: "t", th: "b" },
@@ -111,6 +116,22 @@ export function effectOf(m: StreamMsg): Effect {
     case "recon:missing_external": case "recon:missing_internal": case "recon:duplicate_external": case "recon:amount_mismatch": case "recon:status_mismatch":
       hop("recon-ops", COLORS.error); hop("recon-ai", COLORS.human); node("recon", "error", m.phase!.replace(/_/g, " ")); node("ops", "human", "break needs an owner"); break;
     case "recon:duplicate_file_refused": node("recon", "warn", "same file twice - refused"); break;
+    case "kyc:started": hop("phone-kyc", COLORS.flow); node("kyc", "info", `application ${d.ref}`); break;
+    case "kyc:check":
+      if (d.check === "REGISTRY") { hop("kyc-registry", COLORS.flow); node("registry", d.outcome === "PASS" ? "info" : "warn", d.outcome === "PASS" ? "identity matched" : d.reason); }
+      if (d.check === "DOCUMENT_QUALITY" || d.check === "LIVENESS") hop("phone-kyc", d.outcome === "PASS" ? COLORS.flow : COLORS.warn);
+      node("kyc", d.outcome === "PASS" ? "info" : d.outcome === "ERROR" ? "error" : "warn",
+        `${String(d.check).toLowerCase().replace(/_/g, " ")}: ${d.outcome}${d.score != null ? ` ${d.score}` : ""}${d.reason ? ` (${d.reason})` : ""}`);
+      break;
+    case "kyc:state_changed":
+      if (d.to === "REFERRED") { hop("kyc-compliance", COLORS.human); node("kyc", "warn", "referred to a person"); node("compliance", "human", `KYC ${d.ref}`); }
+      if (d.to === "APPROVED") { hop("phone-kyc", COLORS.info, true); node("kyc", "info", `wallet opened (${d.reason?.startsWith("MANUAL") ? "by Compliance" : "auto"})`); node("phone", "info", "new wallet"); }
+      if (d.to === "REJECTED") node("kyc", "error", "application rejected");
+      if (d.to === "ABANDONED") node("kyc", "warn", "abandoned - personal data purged");
+      break;
+    case "human_gate:kyc_recommended": node("compliance", "human", `${d.by} recommends - second officer needed`); break;
+    case "human_gate:kyc_decided": hop("kyc-compliance", d.decision === "APPROVE" ? COLORS.info : COLORS.error, true); node("compliance", d.decision === "REJECT" ? "error" : "info", `KYC ${d.decision.toLowerCase()} by ${d.by}`); break;
+    case "chaos:registry_mode_changed": hop("kyc-registry", d.mode === "NORMAL" ? COLORS.info : COLORS.error); node("registry", d.mode === "NORMAL" ? "info" : "error", d.mode === "NORMAL" ? "healthy" : d.mode.toLowerCase()); node("chaos", d.mode === "NORMAL" ? "info" : "error", `registry ${d.mode}`); break;
     case "human_gate:case_opened": node(d.owner === "COMPLIANCE" ? "compliance" : "ops", "human", `${d.kind} ${d.case_ref}`); break;
     case "human_gate:compliance_release": hop("compliance-ledger", COLORS.info); node("compliance", "info", `released by ${d.by}`); break;
     case "human_gate:compliance_reject": node("compliance", "error", `rejected by ${d.by}`); break;

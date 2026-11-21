@@ -81,7 +81,7 @@ function Control() {
           setStates((cur) => ({ ...cur, [n.id]: { ...cur[n.id], level: "idle" } })), n.level === "error" ? 5000 : 2200);
       });
     }
-    if (m.kind === "event" || m.node === "human_gate" || m.node === "chaos" || m.node === "ai") setTick((t) => t + 1);
+    if (m.kind === "event" || m.node === "human_gate" || m.node === "chaos" || m.node === "ai" || m.node === "kyc") setTick((t) => t + 1);
   }, []);
   const connected = useStream("auditor", onMsg);
 
@@ -91,7 +91,7 @@ function Control() {
     const oc = summary.open_cases || {};
     setStates((cur) => ({
       ...cur,
-      compliance: { ...cur.compliance, badge: oc.COMPLIANCE_HOLD || 0, level: (oc.COMPLIANCE_HOLD || 0) > 0 ? "human" : cur.compliance.level === "human" ? "idle" : cur.compliance.level },
+      compliance: { ...cur.compliance, badge: (oc.COMPLIANCE_HOLD || 0) + (oc.KYC_REVIEW || 0), level: ((oc.COMPLIANCE_HOLD || 0) + (oc.KYC_REVIEW || 0)) > 0 ? "human" : cur.compliance.level === "human" ? "idle" : cur.compliance.level },
       ops: { ...cur.ops, badge: (oc.PENDING_REVIEW || 0) + (oc.RECON_BREAK || 0), level: ((oc.PENDING_REVIEW || 0) + (oc.RECON_BREAK || 0)) > 0 ? "human" : cur.ops.level === "human" ? "idle" : cur.ops.level },
       rail: summary.rail.breaker !== "CLOSED" ? { ...cur.rail, level: "error", last: `circuit ${summary.rail.breaker}` } : cur.rail,
     }));

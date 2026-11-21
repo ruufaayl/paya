@@ -31,3 +31,5 @@ The brief (§10) asks for: test results, API collection, performance/resilience 
 | Implementation and reproducibility (10) | `reproducibility/`; `make verify`; CI |
 | Responsible AI extension (5) | `ai/evaluation.md`; `tests/test_ai_triage.py`; `docs/architecture/15` |
 | Technical communication and viva (5) | `docs/deliverables/`, `docs/demo/`, `docs/viva/` |
+
+**Theme 1, onboarding & KYC:** see [`kyc/README.md`](kyc/README.md).

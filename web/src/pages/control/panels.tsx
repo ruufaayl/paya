@@ -77,6 +77,17 @@ export function ChaosPanel({ railMode, toast }: { railMode: string; toast: Toast
       </section>
 
       <section>
+        <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Identity registry (onboarding)</h4>
+        <div className="grid grid-cols-3 gap-2">
+          {[{ mode: "NORMAL", label: "Healthy", tone: "paya" }, { mode: "TIMEOUT", label: "Timeout", tone: "amber" }, { mode: "DOWN", label: "Down", tone: "rose" }].map((m) => (
+            <button key={m.mode} onClick={() => run(`reg-${m.mode}`, () => act(() => call("admin", "/v1/chaos/registry", { method: "POST", body: JSON.stringify({ mode: m.mode }) }), toast, `Registry -> ${m.label}`))}
+              className={`rounded-xl px-2 py-2 text-xs font-semibold ring-1 transition hover:bg-white/5 ${TONE[m.tone]}`}>{busy === `reg-${m.mode}` ? "..." : m.label}</button>
+          ))}
+        </div>
+        <p className="mt-1.5 text-[10.5px] leading-snug text-slate-500">A registry that does not answer means a referral, never an approval or a rejection.</p>
+      </section>
+
+      <section>
         <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Operations</h4>
         <div className="grid gap-2">
           <Btn onClick={() => run("enq", () => act(() => call("sana.ops", "/v1/ops/transactions/ALL/enquiry", { method: "POST" }), toast, "Status enquiry sweep done"))} busy={busy === "enq"} icon={<FileSearch size={14} />}>Ask rail about pending payments</Btn>
@@ -197,7 +208,7 @@ export function GatesPanel({ tick, toast, onOpen }: { tick: number; toast: Toast
         )}
         {cases.map((c) => (
           <motion.div key={c.case_ref} layout initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-            className={`rounded-2xl p-3 ring-1 ${c.kind === "RECON_BREAK" ? "bg-rose-500/[0.07] ring-rose-500/30" : "bg-amber-400/[0.07] ring-amber-400/30"}`}>
+            className={`rounded-2xl p-3 ring-1 ${c.kind === "RECON_BREAK" ? "bg-rose-500/[0.07] ring-rose-500/30" : c.kind === "KYC_REVIEW" ? "bg-violet-500/[0.07] ring-violet-400/30" : "bg-amber-400/[0.07] ring-amber-400/30"}`}>
             <div className="flex items-center justify-between gap-2">
               <span className="text-[11px] font-semibold text-slate-300">{c.kind.replace(/_/g, " ")}</span>
               <span className="rounded-full bg-black/30 px-2 py-0.5 text-[10px] text-slate-400">owner: {c.owner_role}{c.overdue ? " - OVERDUE" : ""}</span>
@@ -216,6 +227,7 @@ export function GatesPanel({ tick, toast, onOpen }: { tick: number; toast: Toast
               <button onClick={() => act(() => call("sana.ops", `/v1/ops/transactions/${c.txn_ref}/reversal-requests`, { method: "POST", body: JSON.stringify({ reason: "Rail silent beyond SLA; return funds to customer" }) }), toast, "Reversal requested by Sana (Ops) - needs a checker").then(after)}
                 className="mt-2 w-full rounded-xl bg-amber-400 px-2 py-2 text-[11px] font-semibold text-ink-950">Request reversal as Sana (Ops)</button>
             )}
+            {c.kind === "KYC_REVIEW" && <KYCBox appRef={c.details?.application_ref} tick={tick} toast={toast} after={after} />}
             {c.kind === "RECON_BREAK" && (
               <p className="mt-2 text-[11px] text-slate-400">Category {c.details?.category} - internal {c.details?.internal_minor != null ? pkr(c.details.internal_minor) : "none"} vs Raast {c.details?.external_minor != null ? pkr(c.details.external_minor) : "none"}.</p>
             )}
@@ -224,6 +236,55 @@ export function GatesPanel({ tick, toast, onOpen }: { tick: number; toast: Toast
           </motion.div>
         ))}
       </AnimatePresence>
+    </div>
+  );
+}
+
+interface KYCApp {
+  ref: string; state: string; full_name: string; reasons: string[]; two_person_rule: boolean; recommended_by: string | null;
+  geolocation: { lat?: number; lon?: number }; checks: { check: string; outcome: string; score: number | null; reason: string | null }[];
+}
+const OUTCOME_TONE: Record<string, string> = {
+  PASS: "bg-paya-500/15 text-paya-300 ring-paya-500/30", REFER: "bg-amber-400/15 text-amber-200 ring-amber-400/30",
+  FAIL: "bg-rose-500/15 text-rose-200 ring-rose-500/30", ERROR: "bg-rose-500/15 text-rose-200 ring-rose-500/30",
+};
+
+/** Compliance review of a referred onboarding application. AI is not involved here: people decide. */
+function KYCBox({ appRef, tick, toast, after }: { appRef: string; tick: number; toast: Toast; after: () => void }) {
+  const [app, setApp] = useState<KYCApp | null>(null);
+  useEffect(() => { if (appRef) call<KYCApp>("auditor", `/v1/kyc/applications/${appRef}`).then((r) => setApp(r.data)).catch(() => undefined); }, [appRef, tick]);
+  if (!app) return null;
+  // latest result per check
+  const latest = Object.values(Object.fromEntries(app.checks.map((c) => [c.check, c])));
+  const decide = (who: string, name: string, decision: string, reason: string) =>
+    act(() => call(who, `/v1/compliance/kyc/${app.ref}/decision`, { method: "POST", body: JSON.stringify({ decision, reason }) }), toast,
+      decision === "APPROVE" ? `${name}: approval recorded` : `${name}: ${decision.toLowerCase().replace("_", " ")}`).then(after);
+  return (
+    <div className="mt-2 space-y-2">
+      <p className="text-[11px] text-slate-400">{app.full_name} · <span className="font-mono">{app.ref}</span></p>
+      <div className="flex flex-wrap gap-1">
+        {latest.map((c) => (
+          <span key={c.check} title={c.reason || ""} className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold ring-1 ${OUTCOME_TONE[c.outcome] || ""}`}>
+            {c.check.replace(/_/g, " ").toLowerCase()} {c.score != null ? c.score : ""} {c.outcome !== "PASS" && c.reason ? `· ${c.reason.toLowerCase().replace(/_/g, " ")}` : ""}
+          </span>
+        ))}
+      </div>
+      {app.two_person_rule && (
+        <p className="rounded-lg bg-violet-500/10 px-2 py-1.5 text-[11px] text-violet-200 ring-1 ring-violet-400/30">
+          Two-person rule: possible watch-list match. {app.recommended_by ? `${app.recommended_by} recommended approval; a second officer must confirm.` : "Approval needs two compliance officers."}
+        </p>
+      )}
+      <div className="grid grid-cols-2 gap-2">
+        <button onClick={() => decide("hamza.compliance", "Hamza", "APPROVE", "Checked the evidence; identity confirmed")}
+          className="rounded-xl bg-paya-400 px-2 py-2 text-[11px] font-semibold text-ink-950">Approve as Hamza</button>
+        {app.two_person_rule
+          ? <button onClick={() => decide("nadia.compliance", "Nadia", "APPROVE", "Second review: false positive confirmed")}
+              className="rounded-xl bg-violet-500 px-2 py-2 text-[11px] font-semibold text-white">Confirm as Nadia</button>
+          : <button onClick={() => decide("hamza.compliance", "Hamza", "MORE_INFO", "Please retake the ID card photo")}
+              className="rounded-xl bg-white/5 px-2 py-2 text-[11px] text-slate-200 ring-1 ring-white/10">Ask for new photo</button>}
+        <button onClick={() => decide("hamza.compliance", "Hamza", "REJECT", "Evidence does not support this identity")}
+          className="col-span-2 rounded-xl bg-rose-500/20 px-2 py-2 text-[11px] font-semibold text-rose-200 ring-1 ring-rose-500/40">Reject as Hamza</button>
+      </div>
     </div>
   );
 }

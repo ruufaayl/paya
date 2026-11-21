@@ -11,3 +11,4 @@
 | [007](ADR-007-concurrency-row-locks-plus-constraints.md) | Row locks plus DB constraints as the last line of defence | Transaction integrity; resilience |
 | [008](ADR-008-ai-rules-first.md) | AI triage: rules first, LLM optional, suggestion only | Responsible AI |
 | [009](ADR-009-live-telemetry-and-pwa.md) | One PWA plus a live WebSocket stream for Mission Control | Observability; communication |
+| [010](ADR-010-onboarding-machines-approve-people-decide.md) | Onboarding: machines approve clear cases, people decide the rest; no biometric data at rest | Identity/KYC; responsible AI; data protection |

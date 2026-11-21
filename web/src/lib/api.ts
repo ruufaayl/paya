@@ -69,3 +69,16 @@ export function wsUrl(token: string): string {
 }
 
 export const pkr = (minor: number) => `Rs ${(minor / 100).toLocaleString("en-PK", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+
+/** Onboarding calls use a short-lived applicant token held in memory only (never in storage). */
+export async function onboard<T = any>(path: string, token: string | null, body?: unknown, method = "POST"): Promise<T> {
+  const headers: Record<string, string> = { "content-type": "application/json" };
+  if (token) headers.authorization = `Bearer ${token}`;
+  const r = await fetch(`${apiBase()}${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const detail = Array.isArray(data?.detail) ? data.detail.map((d: any) => d.msg).join("; ") : undefined;
+    throw new ApiError(r.status, data?.error?.code || "ERROR", data?.error?.message || detail || r.statusText, data);
+  }
+  return data as T;
+}

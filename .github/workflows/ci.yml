@@ -25,6 +25,8 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install -e ".[dev]" pip-audit
+      - name: Face models (checksums pinned; lets the real-model KYC tests run)
+        run: python -m paya.fetch_models models
       - run: python -m pytest -p no:warnings -v
       - run: python docs/architecture/tools/ai_eval.py
       - run: pip-audit --skip-editable

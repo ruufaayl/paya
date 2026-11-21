@@ -1,10 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Home, LogOut, ScanLine, Store } from "lucide-react";
+import { Home, LogOut, ScanLine, Store, UserPlus } from "lucide-react";
 import { useState } from "react";
-import { NavLink, Route, Routes, useNavigate } from "react-router-dom";
+import { NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { Logo, Spinner } from "../../components/ui";
-import { ApiError, login } from "../../lib/api";
+import { ApiError, login, session } from "../../lib/api";
 import Cashier from "./Cashier";
+import Onboarding from "./Onboarding";
 import CustomerHome from "./CustomerHome";
 import Pay from "./Pay";
 import Scan from "./Scan";
@@ -25,9 +26,15 @@ export const PERSONAS = [
 
 export default function PhoneApp() {
   const [user, setUser] = useState<string | null>(get());
-  const persona = PERSONAS.find((p) => p.username === user);
+  const loc = useLocation();
+  const nav = useNavigate();
   const signOut = () => { set(null); setUser(null); };
+  // A wallet opened through onboarding is a real (synthetic) customer, not one of the seeded personas.
+  const own = user ? session(user) : undefined;
+  const persona = PERSONAS.find((p) => p.username === user) ||
+    (own && own.role === "CUSTOMER" ? { username: own.username, name: own.display_name, role: "Customer", note: "New wallet", color: "from-paya-300 to-teal-600" } : undefined);
 
+  if (loc.pathname.startsWith("/app/open")) return <Onboarding onDone={(u) => { set(u); setUser(u); nav("/app"); }} />;
   if (!user || !persona) return <PersonaPicker onPick={(u) => { set(u); setUser(u); }} />;
   const isCashier = persona.role === "Cashier";
 
@@ -80,6 +87,7 @@ function TabBar() {
 }
 
 function PersonaPicker({ onPick }: { onPick: (u: string) => void }) {
+  const nav = useNavigate();
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const pick = async (u: string) => {
@@ -110,6 +118,14 @@ function PersonaPicker({ onPick }: { onPick: (u: string) => void }) {
             ))}
           </AnimatePresence>
         </div>
+        <motion.button whileTap={{ scale: 0.98 }} onClick={() => nav("/app/open")}
+          className="mt-4 flex w-full items-center gap-4 rounded-3xl border border-dashed border-paya-400/40 bg-paya-400/[0.06] p-4 text-left">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-paya-400 text-ink-950"><UserPlus size={22} /></span>
+          <span className="flex-1">
+            <span className="block font-semibold text-paya-200">Open a new Paya wallet</span>
+            <span className="block text-xs text-slate-400">Digital onboarding: specimen ID, selfie liveness, instant decision</span>
+          </span>
+        </motion.button>
         {err && <p className="mt-4 rounded-2xl bg-rose-500/10 p-3 text-sm text-rose-300 ring-1 ring-rose-500/30">{err}</p>}
       </div>
     </div>
