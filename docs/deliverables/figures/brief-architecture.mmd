@@ -13,11 +13,13 @@ flowchart LR
     RC["Reconciliation<br/>control totals · 7 categories"] --> AI["AI triage<br/>suggest only"] --> OF(["Ops maker · Finance checker"])
     O[("Outbox")] --> N["Notifier · Mission Control<br/>(operator console)"]
   end
-  subgraph EXT["Themes 1 and 3"]
+  subgraph EXT["Themes 1, 2 and 3"]
     direction TB
     K["Onboarding & KYC<br/>liveness · face match<br/>registry (simulated)"]
     AS["Paya Assistant<br/>reads own ledger data<br/>redacts secrets"]
+    GR["Green pot · offsets<br/>2100 ↔ 2110 journals<br/>offset = normal payment"]
   end
+  GR -- "journal" --> L
   C --> K
   K -- "referral" --> H
   AS -- "handoff" --> OF
@@ -33,4 +35,4 @@ flowchart LR
   class H,OF human
   class L,O store
   class RA ext
-  class K,AS ext
+  class K,AS,GR ext

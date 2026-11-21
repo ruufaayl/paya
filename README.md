@@ -87,6 +87,10 @@ Open a wallet from the phone: tap **Open a new Paya wallet**, consent, enter syn
 
 Run `make models` once to fetch the face models (YuNet, MIT licence; SFace, Apache 2.0; checksums pinned). Without them, every application is referred to a person. Design: `docs/architecture/16-digital-onboarding-kyc.md`, ADR-010. Evidence: `evidence/kyc/`.
 
+## Sustainable and green banking (Theme 2)
+
+**Green** in the wallet shows an *estimate* of the carbon linked to your settled spending (spend-based factors, `green.v1`, with a ±50% range and the method on screen). A **green pot** ring-fences your own money on ledger account 2110, moved by balanced, idempotent journals; round-ups come only from settled payments. **Offsets** are ordinary Raast payments to a synthetic project, reviewed on the normal screen; a certificate appears only after settlement and is labelled simulated. Mission Control's **Green banking** page shows aggregates only. Design: `docs/architecture/18-green-banking.md`, ADR-012.
+
 ## Conversational banking (Theme 3)
 
 **Ask Paya** in the wallet answers questions about your own money in English or Roman Urdu ("mera balance kitna hai", "did my payment to Chai Junction go through?"), using read-only data from the ledger. It cannot move money; for actions it links into the normal review-and-authorise flow. Card numbers, CNICs, OTPs and passwords are removed before anything is stored. "Talk to a person" opens a case for Operations, who can read the redacted transcript (each read is audited). Design: `docs/architecture/17-conversational-banking.md`, ADR-011.

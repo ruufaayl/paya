@@ -1,7 +1,7 @@
 # Paya: technical demo script (Paya 2.0, about 10 minutes)
 
 **The brief asks for:** the normal flow, at least two failure/recovery scenarios, and one reconciliation outcome.
-**This script shows:** a normal flow; **three** failure/recovery scenarios (lost request, compliance hold, Raast outage); a reconciliation break triaged by AI and resolved by its owner; and the two new themes (digital onboarding with the two-person rule, and the Paya Assistant).
+**This script shows:** a normal flow; **three** failure/recovery scenarios (lost request, compliance hold, Raast outage); a reconciliation break triaged by AI and resolved by its owner; and the three themes (digital onboarding with the two-person rule, the green pot and footprint estimate, and the Paya Assistant).
 
 **Rehearsal:** reset the data, then `make rehearse` plays this whole script against the real stack and checks every claim the presenter makes. Results: `evidence/demo/rehearsal-<date>.md` and `evidence/demo/scene-*.png`. (The 1.x rehearsal and screenshots are kept in `evidence/demo/v1/`.)
 
@@ -100,7 +100,7 @@
 
 *Show:* Mission Control **Audit & access** (as Auditor: chain intact, denials listed), then `docs/revamp/TESTING_REPORT.md`.
 
-> "66 backend tests cover the required scenarios and more. The browser acceptance run checks 33 claims on a fresh database, and the rehearsal you just watched is automated too. Accessibility is scanned with zero violations. The limits: one process at about 16 payments a second, no MFA yet, a simulated rail and registry, and liveness that is basic rather than certified. Our recommendation is a **conditional go**."
+> "77 backend tests cover the required scenarios and more. The browser acceptance run checks 33 claims on a fresh database, and the rehearsal you just watched is automated too. Accessibility is scanned with zero violations. The limits: one process at about 16 payments a second, no MFA yet, a simulated rail and registry, and liveness that is basic rather than certified. Our recommendation is a **conditional go**."
 
 ## If something goes wrong live
 

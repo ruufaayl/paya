@@ -55,6 +55,15 @@ INTEGRITY_DDL = [
     # 0. Additive, idempotent column upgrades for databases created before Paya 2.0 (never destructive).
     "ALTER TABLE cases ADD COLUMN IF NOT EXISTS assigned_to varchar(64)",
     "ALTER TABLE cases ADD COLUMN IF NOT EXISTS assigned_at timestamptz",
+    # 0b. Theme 2 (green pot) widens three CHECK lists. Re-creating a CHECK is idempotent and keeps every row.
+    "ALTER TABLE transactions DROP CONSTRAINT IF EXISTS ck_txn_type; ALTER TABLE transactions ADD CONSTRAINT "
+    "ck_txn_type CHECK (type IN ('PAYMENT','REVERSAL','REFUND','TOPUP','ADJUSTMENT','GREEN_POT_IN','GREEN_POT_OUT'))",
+    "ALTER TABLE transactions DROP CONSTRAINT IF EXISTS ck_correction_links_original; ALTER TABLE transactions "
+    "ADD CONSTRAINT ck_correction_links_original CHECK (type IN ('PAYMENT','TOPUP','ADJUSTMENT','GREEN_POT_IN',"
+    "'GREEN_POT_OUT') OR original_txn_id IS NOT NULL)",
+    "ALTER TABLE journals DROP CONSTRAINT IF EXISTS ck_posting_type; ALTER TABLE journals ADD CONSTRAINT "
+    "ck_posting_type CHECK (posting_type IN ('AUTH_POST','SETTLE','FEE','REVERSAL','REFUND','ADJUSTMENT','CLAIM',"
+    "'TOPUP','GREEN_POT_IN','GREEN_POT_OUT'))",
     # 1. Every journal must balance (sum of debits = sum of credits) when the transaction commits.
     """
     CREATE OR REPLACE FUNCTION paya_check_journal_balanced() RETURNS trigger AS $$

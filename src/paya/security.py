@@ -51,6 +51,8 @@ PERMISSIONS: dict[str, set[str]] = {
     "access:read": {"AUDITOR", "SYSADMIN", "COMPLIANCE"},
     # Conversational banking: customers chat about their OWN data; staff read transcripts of handed-off chats.
     "assistant:use": {"CUSTOMER"},
+    # Green banking: a customer's footprint, pot and offsets are their own; staff see portfolio aggregates only.
+    "green:use": {"CUSTOMER"},
 }
 
 

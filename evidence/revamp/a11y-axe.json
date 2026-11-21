@@ -16,6 +16,14 @@
     "violations": []
   },
   {
+    "screen": "wallet: green",
+    "violations": []
+  },
+  {
+    "screen": "wallet: assistant",
+    "violations": []
+  },
+  {
     "screen": "wallet: onboarding intro",
     "violations": []
   },
@@ -49,6 +57,14 @@
   },
   {
     "screen": "console: rail lab",
+    "violations": []
+  },
+  {
+    "screen": "console: ai operations",
+    "violations": []
+  },
+  {
+    "screen": "console: green banking",
     "violations": []
   }
 ]

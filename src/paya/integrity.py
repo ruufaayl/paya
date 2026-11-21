@@ -94,6 +94,18 @@ def run(s: Session) -> dict:
                 if ledger.ledger_balance(s, a) < 0]
     out.append(_check("financial", "no_negative_wallets", not negative, len(negative),
                       "a customer wallet liability below zero means money was spent twice"))
+    # Green banking (Theme 2): pots are customer money too, and each pot movement is exactly one journal.
+    neg_pots = sum(1 for a in s.execute(select(Account).where(Account.code == "2110")).scalars()
+                   if ledger.ledger_balance(s, a) < 0)
+    out.append(_check("financial", "no_negative_green_pots", neg_pots == 0, neg_pots,
+                      "a green pot below zero means money left it that was never in it"))
+    from .models import Journal
+    pot_txns = select(Transaction.id).where(Transaction.type.in_(["GREEN_POT_IN", "GREEN_POT_OUT"]))
+    bad_moves = s.execute(select(func.count()).select_from(
+        select(Transaction.id).where(Transaction.id.in_(pot_txns)).outerjoin(Journal, Journal.txn_id == Transaction.id)
+        .group_by(Transaction.id).having(func.count(Journal.id) != 1).subquery())).scalar_one()
+    out.append(_check("financial", "green_pot_move_has_one_journal", bad_moves == 0, bad_moves,
+                      "every green pot movement is booked as exactly one balanced journal"))
     unreconciled = s.execute(select(func.count()).select_from(Transaction).where(
         Transaction.type == "PAYMENT", Transaction.status == "SETTLED", Transaction.recon_result.is_(None),
         Transaction.updated_at < t - timedelta(hours=36))).scalar_one()

@@ -120,7 +120,8 @@ class Journal(Base):
     __table_args__ = (
         UniqueConstraint("txn_id", "posting_type", name="uq_journal_once_per_posting"),
         CheckConstraint(
-            "posting_type IN ('AUTH_POST','SETTLE','FEE','REVERSAL','REFUND','ADJUSTMENT','CLAIM','TOPUP')",
+            "posting_type IN ('AUTH_POST','SETTLE','FEE','REVERSAL','REFUND','ADJUSTMENT','CLAIM','TOPUP',"
+            "'GREEN_POT_IN','GREEN_POT_OUT')",
             name="ck_posting_type",
         ),
     )
@@ -199,13 +200,15 @@ class Transaction(Base):
     __table_args__ = (
         CheckConstraint("amount_minor > 0", name="ck_txn_amount"),
         CheckConstraint("currency = 'PKR'", name="ck_txn_currency"),
-        CheckConstraint("type IN ('PAYMENT','REVERSAL','REFUND','TOPUP','ADJUSTMENT')", name="ck_txn_type"),
+        CheckConstraint("type IN ('PAYMENT','REVERSAL','REFUND','TOPUP','ADJUSTMENT','GREEN_POT_IN','GREEN_POT_OUT')",
+                        name="ck_txn_type"),
         CheckConstraint(
             "status IN ('CREATED','VALIDATED','AUTHORISED','POSTED','PENDING','SETTLED','RECONCILED',"
             "'UNDER_REVIEW','REVERSED','REJECTED','FAILED','EXPIRED','COMPLETED')",
             name="ck_txn_status",
         ),
-        CheckConstraint("type IN ('PAYMENT','TOPUP','ADJUSTMENT') OR original_txn_id IS NOT NULL", name="ck_correction_links_original"),
+        CheckConstraint("type IN ('PAYMENT','TOPUP','ADJUSTMENT','GREEN_POT_IN','GREEN_POT_OUT') OR original_txn_id IS NOT NULL",
+                        name="ck_correction_links_original"),
         Index("ix_txn_status", "status"),
     )
 

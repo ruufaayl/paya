@@ -22,7 +22,7 @@ The 1.x console read as `auditor` and pressed buttons as hard-coded personas. 2.
 | **Event stream** | What happened, in order, with correlation | WebSocket + `/v1/events` |
 | **Cases & approvals** | Who owns which exception, SLA, assignment, decisions; maker-checker queue | `/v1/cases`, `/v1/cases/{ref}`, assign, holds, reversals, approvals, AI |
 | **Identity & KYC** | Referred applications with every check's evidence; two-person approvals | `/v1/kyc/*`, `/v1/compliance/kyc/*` |
-| **Reconciliation** | Import, match rate, categories, breaks to cases, finance impact; trial balance; 14 integrity checks | `/v1/finance/recon/*`, trial balance, integrity |
+| **Reconciliation** | Import, match rate, categories, breaks to cases, finance impact; trial balance; 16 integrity checks | `/v1/finance/recon/*`, trial balance, integrity |
 | **AI operations** | Is the agent behaving? Abstention, acceptance, overrides, audit completeness | `/v1/ai/metrics`, cases |
 | **Rail lab** | Does recovery work? Scenario → expected → trigger → observed | `/v1/chaos/*`, payments, enquiry |
 | **Audit & access** | Who did what (incl. denials), chain integrity, who may do what | `/v1/audit/log`, `/v1/admin/access` |

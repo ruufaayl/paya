@@ -32,7 +32,7 @@ FAILED = ("REJECTED", "FAILED", "REVERSED", "EXPIRED")
 def search_transactions(
     q: str | None = Query(None, max_length=64, description="Reference, rail E2E id or correlation id (contains)"),
     status: str | None = Query(None, description="Comma-separated statuses"),
-    type: str | None = Query(None, pattern="^(PAYMENT|REVERSAL|REFUND|TOPUP|ADJUSTMENT)$"),
+    type: str | None = Query(None, pattern="^(PAYMENT|REVERSAL|REFUND|TOPUP|ADJUSTMENT|GREEN_POT_IN|GREEN_POT_OUT)$"),
     merchant: str | None = Query(None, max_length=64), customer: str | None = Query(None, max_length=64),
     min_amount_minor: int | None = Query(None, ge=0), max_amount_minor: int | None = Query(None, ge=0),
     date_from: datetime | None = None, date_to: datetime | None = None,

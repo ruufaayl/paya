@@ -5,7 +5,7 @@ The brief (§10) asks for: test results, API collection, performance/resilience 
 
 | Evidence | File(s) | How to regenerate |
 |---|---|---|
-| Automated test results (66 tests: the 10 brief scenarios, 3 Week 9 scenarios, concurrency, security, AI, onboarding/KYC K1–K15, operations API O1–O9, assistant C1–C10) | [tests/](tests/) | `make test` |
+| Automated test results (77 tests: the 10 brief scenarios, 3 Week 9 scenarios, concurrency, security, AI, onboarding/KYC K1–K15, operations API O1–O9, assistant C1–C10, green banking G1–G11) | [tests/](tests/) | `make test` |
 | Continuous integration | [GitHub Actions](https://github.com/ruufaayl/paya/actions) (green on every push) | push to `main` |
 | API collection and run (16 requests, all assertions pass) | [api/bruno-run.txt](api/bruno-run.txt), [api/bruno-junit.xml](api/bruno-junit.xml); collection in [`/api/bruno`](../api/bruno/) | `cd api/bruno && npx @usebruno/cli run --env local` |
 | API contract | [`/api/openapi.json`](../api/openapi.json), [`/api/events/`](../api/events/) | `make openapi` |
@@ -35,3 +35,5 @@ The brief (§10) asks for: test results, API collection, performance/resilience 
 **Theme 1, onboarding & KYC:** see [`kyc/README.md`](kyc/README.md).
 
 **Paya 2.0 and Theme 3 (conversational banking):** `revamp/e2e-results.json` (33/33), `revamp/assistant-e2e.json` (8/8), `revamp/a11y-axe.json` (0 violations), screenshots in `screenshots/revamp/` and `screenshots/assistant/`. See `docs/revamp/TESTING_REPORT.md`.
+
+**Theme 2 (green banking):** `revamp/green-e2e.json` (14/14), screenshots in `screenshots/green/`; the axe scan now covers 17 screens with 0 violations.

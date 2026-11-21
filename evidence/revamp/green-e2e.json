@@ -1,0 +1,77 @@
+{
+  "at": "2026-11-21T13:58:31.257Z",
+  "passed": 14,
+  "failed": 0,
+  "results": [
+    {
+      "n": "footprint is labelled an estimate, from settled payments",
+      "ok": true,
+      "note": "7.23 kg"
+    },
+    {
+      "n": "method and factor set are disclosed",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "double-tapped deposit moves money once",
+      "ok": true,
+      "note": "1 move(s)"
+    },
+    {
+      "n": "double tap shows no error",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "wallet ledger balance down by exactly the deposit",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "round-ups offered from settled payments (Rs 50 + Rs 70)",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "dialog is centred on a phone",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "round-up deposit booked; no further round-up offered",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "offset opens the normal payment review",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "certificate recorded only after Raast settles",
+      "ok": true,
+      "note": "OFS-20261121-455B88"
+    },
+    {
+      "n": "offset requests are not offered to other customers",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "Mission Control shows pot total from ledger 2110 and settled offsets",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "Mission Control shows aggregates only (no customer names)",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "n": "integrity: pots non-negative, one journal per move, trial balance",
+      "ok": true,
+      "note": ""
+    }
+  ]
+}

@@ -204,7 +204,7 @@ def list_payment_requests(status: str = "OPEN", p: Principal = Depends(principal
     if p.role not in ("CUSTOMER", "CASHIER", "MERCHANT_ADMIN") or not get_settings().demo_mode:
         raise Forbidden("not available")
     with session_scope() as s:
-        q = select(PaymentRequest.id).where(PaymentRequest.status == status,
+        q = select(PaymentRequest.id).where(PaymentRequest.status == status, PaymentRequest.kind != "GREEN_OFFSET",
                                             PaymentRequest.expires_at > datetime.now(timezone.utc))
         if p.merchant_id:
             q = q.where(PaymentRequest.merchant_id == uuid.UUID(p.merchant_id))
@@ -218,6 +218,10 @@ def get_payment_request(pr_id: uuid.UUID, p: Principal = Depends(principal)):
     view = _payment_request_view(pr_id)
     if p.role in ("CASHIER", "MERCHANT_ADMIN") and view["merchant"]["id"] != p.merchant_id:
         raise Forbidden("not your merchant")
+    if view["kind"] == "GREEN_OFFSET":
+        with session_scope() as s:
+            if s.get(PaymentRequest, pr_id).created_by != p.username and not can(p, "backoffice:read"):
+                raise NotFound("payment request not found")  # a customer's offset request is theirs alone
     return view
 
 
@@ -356,7 +360,9 @@ def transaction_detail(txn_ref: str, p: Principal = Depends(principal)):
                                                   .order_by(AuditLog.id)).scalars()]
         # Customer-safe money trail: what happened to the customer's money, from the ledger itself.
         trail_text = {"AUTH_POST": "Taken from your wallet and held in transit", "SETTLE": "Raast confirmed: paid to the shop",
-                      "REVERSAL": "Returned to your wallet"}
+                      "REVERSAL": "Returned to your wallet",
+                      "GREEN_POT_IN": "Moved from your wallet into your green pot",
+                      "GREEN_POT_OUT": "Moved from your green pot back to your wallet"}
         trail = s.execute(select(Journal).where(Journal.txn_id.in_(ids)).order_by(Journal.created_at)).scalars().all()
         detail["money_trail"] = [{"posting_type": j.posting_type, "at": j.created_at.isoformat(),
                                   "description": trail_text[j.posting_type], "journal_ref": str(j.id)[:8]}
@@ -790,3 +796,7 @@ def prometheus():
 from .ops import router as ops_router  # noqa: E402
 
 app.include_router(ops_router)
+
+from .green_api import router as green_router  # noqa: E402
+
+app.include_router(green_router)

@@ -48,8 +48,8 @@ export function Dialog({ open, onClose, title, description, children, footer, wi
               <motion.div className="fixed inset-0 z-40 bg-black/45" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
             </D.Overlay>
             <D.Content asChild forceMount>
-              <motion.div style={{ width: `min(${width}px, calc(100vw - 32px))` }}
-                className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-line bg-surface p-5 text-fg shadow-e3 outline-none"
+              <motion.div style={{ width: `min(${width}px, calc(100vw - 32px))`, x: "-50%", y: "-50%" }}
+                className="fixed left-1/2 top-1/2 z-50 rounded-xl border border-line bg-surface p-5 text-fg shadow-e3 outline-none"
                 initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1, transition: { duration: dur.base, ease: ease.enter } }} exit={{ opacity: 0, scale: 0.98, transition: { duration: dur.fast } }}>
                 <D.Title className="text-title-3 text-fg">{title}</D.Title>
                 {description ? <D.Description className="mt-1 text-body-sm text-fg-2">{description}</D.Description> : <D.Description className="sr-only">Dialog</D.Description>}

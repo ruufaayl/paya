@@ -13,3 +13,4 @@
 | [009](ADR-009-live-telemetry-and-pwa.md) | One PWA plus a live WebSocket stream for Mission Control | Observability; communication |
 | [010](ADR-010-onboarding-machines-approve-people-decide.md) | Onboarding: machines approve clear cases, people decide the rest; no biometric data at rest | Identity/KYC; responsible AI; data protection |
 | [011](ADR-011-assistant-bounded-deterministic.md) | Conversational banking: bounded, deterministic assistant that cannot move money | Channels; responsible AI; data protection |
+| [012](ADR-012-green-banking-ledger-native-and-honest.md) | Green banking: labelled estimates, green pot on ledger 2110, offsets as ordinary payments | Products; ledger; responsible claims |

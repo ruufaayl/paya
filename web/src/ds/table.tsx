@@ -10,7 +10,7 @@ export function DataTable<T>({ rows, columns, rowKey, onRowClick, loading, empty
   empty?: ReactNode; caption: string; selectedKey?: string | null;
 }) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-line bg-surface scrollbar-thin">
+    <div role="region" aria-label={caption} tabIndex={0} className="overflow-x-auto rounded-lg border border-line bg-surface scrollbar-thin focus-visible:outline focus-visible:outline-2 focus-visible:outline-focus">
       <table className="w-full min-w-[720px] border-collapse text-body-sm">
         <caption className="sr-only">{caption}</caption>
         <thead className="sticky top-0 z-[1] bg-sunken">

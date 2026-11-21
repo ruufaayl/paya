@@ -1,7 +1,7 @@
 // Wallet home: the balance experience first, then the one thing people do most (pay), then recent activity.
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { Bot, ChevronRight, Eye, EyeOff, Info, Lock, QrCode, ShieldCheck, Store } from "lucide-react";
+import { Bot, ChevronRight, Eye, EyeOff, Info, Leaf, Lock, QrCode, ShieldCheck, Store } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fadeUp, stagger } from "../ds/motion";
@@ -90,6 +90,13 @@ export default function HomeScreen({ user }: { user: string }) {
       <motion.button variants={fadeUp} onClick={() => nav("/app/assistant")} className="mt-3 flex w-full items-center gap-3 rounded-lg border border-line bg-surface p-3.5 text-left shadow-e1 hover:bg-hover">
         <span aria-hidden className="grid h-10 w-10 place-items-center rounded-full bg-night text-night-fg"><Bot className="h-5 w-5" /></span>
         <span className="min-w-0 flex-1"><span className="block text-body font-semibold text-fg">Ask Paya</span><span className="block truncate text-caption text-fg-2">"Did my payment go through?" · "mera balance kitna hai"</span></span>
+        <ChevronRight className="h-4 w-4 text-fg-muted" aria-hidden />
+      </motion.button>
+
+      {/* Green banking (Theme 2) */}
+      <motion.button variants={fadeUp} onClick={() => nav("/app/green")} className="mt-3 flex w-full items-center gap-3 rounded-lg border border-line bg-surface p-3.5 text-left shadow-e1 hover:bg-hover">
+        <span aria-hidden className="grid h-10 w-10 place-items-center rounded-full bg-brand-soft text-brand-accent"><Leaf className="h-5 w-5" /></span>
+        <span className="min-w-0 flex-1"><span className="block text-body font-semibold text-fg">Green</span><span className="block truncate text-caption text-fg-2">Your footprint estimate, green pot and offsets</span></span>
         <ChevronRight className="h-4 w-4 text-fg-muted" aria-hidden />
       </motion.button>
 

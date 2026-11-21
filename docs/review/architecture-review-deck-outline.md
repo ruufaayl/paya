@@ -4,18 +4,18 @@
 
 ## Outline
 
-**Updated for Paya 2.0 and Themes 1 and 3 (version 7+ of the deck).** **Brief:** 8–10 slides covering business context, architecture, transaction integrity, risks, controls, resilience, and a go / conditional-go recommendation.
+**Updated for Paya 2.0 and Themes 1, 2 and 3 (version 10+ of the deck).** **Brief:** 8–10 slides covering business context, architecture, transaction integrity, risks, controls, resilience, and a go / conditional-go recommendation.
 **Style:** one message per slide, real screenshots and diagrams from the repo (no stock art), and every number cited to an evidence file.
 
 | # | Title (the message) | Content | Visual (file) | Speaker |
 |---|---|---|---|---|
 | 1 | **Paya: payment pakka hai** | Raast P2M cashier confirmation problem; Paya as a technology service provider to a licensed partner; synthetic data and no real money; the team | Paya 2.0 till PAID (`evidence/demo/scene-1-till.png`) | A (Rufayl) |
 | 2 | **The problem is trust in "paid"** | Raast P2M grew from 4.9m to ~180m transactions, FY25–FY26 (SBP Governor's Annual Reports 2024–25 and 2025–26, p. 58); registered ≠ active merchants; reconciliation is still manual. Journey: dynamic-QR merchant payment and linked reversal | Journey strip: QR → pay → PAID → reconciled | A (Rufayl) |
-| 3 | **Architecture: one money path** | C4 container incl. Themes 1 and 3; modular monolith (ADR-001); ledger is truth; simulators and bounded themes (ADR-005/010/011) | `docs/deliverables/figures/brief-architecture.png` | B (Taha) |
+| 3 | **Architecture: one money path** | C4 container incl. Themes 1, 2 and 3; modular monolith (ADR-001); ledger is truth; simulators and bounded themes (ADR-005/010/011/012) | `docs/deliverables/figures/brief-architecture.png` | B (Taha) |
 | 4 | **Transaction integrity: designed for the unhappy path** | State machine (timeout = PENDING, ADR-006); idempotency at four layers (ADR-003); append-only, balanced ledger (ADR-002); row locks plus constraints (ADR-007) | `rendered/state-model.png` + `rendered/seq-timeout.png` | B (Taha) |
-| 5 | **Ledger and reconciliation** | Posting rules (worked example E1); 4-layer recon stack; exception taxonomy with owners; 14 integrity checks | Table from `evidence/ledger/worked-examples.md`; break card screenshot | C (Harris) |
+| 5 | **Ledger and reconciliation** | Posting rules (worked example E1); 4-layer recon stack; exception taxonomy with owners; 16 integrity checks | Table from `evidence/ledger/worked-examples.md`; break card screenshot | C (Harris) |
 | 6 | **Security, KYC/AML and access governance** | Maker ≠ checker; holds move no money; onboarding two-person rule; hash-chained audit incl. transcript reads; 21 STRIDE threats | Cards | D (Kanz) |
-| 7 | **Resilience, observability and evidence** | Recovery 1.3 s; 0/400 duplicates; 66 tests; 33/33 browser acceptance; rehearsal 8/8; truthful topology | `evidence/screenshots/revamp/console-topology-inspector-1440.png` | E (Mudaser) |
+| 7 | **Resilience, observability and evidence** | Recovery 1.3 s; 0/400 duplicates; 77 tests; 33/33 browser acceptance; rehearsal 8/8; truthful topology | `evidence/screenshots/revamp/console-topology-inspector-1440.png` | E (Mudaser) |
 | 8 | **Bounded AI: it suggests, people decide** | Triage agent metrics (94.1%, 0% unsafe, 20/20 injection); Paya Assistant (read-only, Roman Urdu, redaction); neither can move money | Case drawer + assistant phone screenshots | C (Harris) |
 | 9 | **Risks and limits we accept, and those we don't** | Single process ~16/s; no MFA or revocation; DB roles; simulated rail; A1 unvalidated; AI and biometrics not evaluated on real data | Risk table | D (Kanz) |
 | 10 | **Recommendation: CONDITIONAL GO** | Six conditions (adds certified liveness and a consented fairness study before onboarding real customers) | Checklist | A (Rufayl) |

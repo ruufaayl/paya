@@ -1,67 +1,16 @@
-tests/test_ai_triage.py::test_recon_break_is_auto_triaged_suggestion_audited_and_no_money_moves PASSED
-tests/test_ai_triage.py::test_only_the_case_owner_reviews_and_resolves_and_overrides_need_a_reason PASSED
-tests/test_ai_triage.py::test_agent_abstains_when_rail_status_is_unknown_and_for_high_value PASSED
-tests/test_ai_triage.py::test_ai_has_no_money_moving_capability PASSED
-tests/test_ai_triage.py::test_llm_output_is_used_only_when_it_passes_the_guardrails PASSED
-tests/test_ai_triage.py::test_pending_review_case_gets_reversal_recommendation_but_reversal_still_needs_maker_checker PASSED
-tests/test_assistant.py::test_c1_balance_comes_from_the_ledger_in_english_and_roman_urdu PASSED
-tests/test_assistant.py::test_c2_payment_status_by_reference_and_by_merchant_name PASSED
-tests/test_assistant.py::test_c3_cannot_see_other_customers_payments PASSED
-tests/test_assistant.py::test_c4_pay_and_refund_requests_never_move_money PASSED
-tests/test_assistant.py::test_c5_secrets_are_redacted_before_storage PASSED
-tests/test_assistant.py::test_c6_out_of_scope_and_security_guidance PASSED
-tests/test_assistant.py::test_c7_handoff_opens_one_audited_ops_case_and_staff_can_read_the_redacted_transcript PASSED
-tests/test_assistant.py::test_c8_permissions_and_conversation_isolation PASSED
-tests/test_assistant.py::test_c9_assistant_has_no_money_moving_code_path PASSED
-tests/test_assistant.py::test_c10_ops_closes_the_handoff_without_touching_money PASSED
-tests/test_kyc.py::test_k1_happy_path_opens_a_tier1_wallet_that_can_pay PASSED
-tests/test_kyc.py::test_k2_consent_age_and_username_rules PASSED
-tests/test_kyc.py::test_k3_document_problems_are_explained_and_forgery_is_referred PASSED
-tests/test_kyc.py::test_k4_liveness_retries_single_use_nonce_then_referral PASSED
-tests/test_kyc.py::test_k5_face_mismatch_and_grey_zone_go_to_a_person PASSED
-tests/test_kyc.py::test_k6_unknown_answers_refer_never_decide PASSED
-tests/test_kyc.py::test_k7_watchlist_potential_match_needs_two_officers_and_no_tipping_off PASSED
-tests/test_kyc.py::test_k8_one_identity_one_wallet PASSED
-tests/test_kyc.py::test_k9_no_image_or_template_is_ever_stored PASSED
-tests/test_kyc.py::test_k10_abandoned_applications_are_purged PASSED
-tests/test_kyc.py::test_k11_applicant_token_is_narrow_and_staff_roles_are_separated PASSED
-tests/test_kyc.py::test_k12_more_info_lets_the_applicant_retake_the_document PASSED
-tests/test_kyc.py::test_k13_real_models_load_and_never_approve_without_a_face PASSED
-tests/test_kyc.py::test_k14_real_models_end_to_end_with_a_drawn_synthetic_face PASSED
-tests/test_kyc.py::test_k15_integrity_monitor_covers_onboarding PASSED
-tests/test_ops_api.py::test_o1_me_lists_permissions PASSED
-tests/test_ops_api.py::test_o2_transaction_search_filters_and_pagination PASSED
-tests/test_ops_api.py::test_o3_overview_and_timeseries_come_from_the_database PASSED
-tests/test_ops_api.py::test_o4_event_history_is_durable_and_filterable PASSED
-tests/test_ops_api.py::test_o5_recon_items_show_each_break_with_its_case PASSED
-tests/test_ops_api.py::test_o6_assignment_is_owner_only_audited_and_moves_no_money PASSED
-tests/test_ops_api.py::test_o7_audit_log_and_access_matrix_are_restricted PASSED
-tests/test_ops_api.py::test_o8_customer_sees_money_trail_from_the_ledger PASSED
-tests/test_ops_api.py::test_o9_case_detail_includes_trail PASSED
-tests/test_scenarios.py::test_s1_normal_success_end_to_end PASSED
-tests/test_scenarios.py::test_s2_same_idempotency_key_returns_prior_result_without_double_debit PASSED
-tests/test_scenarios.py::test_s3_duplicate_ack_and_duplicate_event_have_no_second_effect PASSED
-tests/test_scenarios.py::test_s4_timeout_goes_pending_then_status_enquiry_resolves_without_blind_replay PASSED
-tests/test_scenarios.py::test_s5_customer_debited_then_rail_rejects_compensating_reversal PASSED
-tests/test_scenarios.py::test_s6_ops_requests_finance_approves_reversal_with_linked_reference PASSED
-tests/test_scenarios.py::test_s6c_self_approval_is_refused_and_the_denial_is_kept_in_the_audit_chain PASSED
-tests/test_scenarios.py::test_s6b_database_refuses_maker_as_checker PASSED
-tests/test_scenarios.py::test_s7_watchlist_hold_blocks_without_moving_money_then_compliance_releases PASSED
-tests/test_scenarios.py::test_s7b_unverified_customer_is_rejected PASSED
-tests/test_scenarios.py::test_s8_unauthorised_attempts_are_denied_and_logged PASSED
-tests/test_scenarios.py::test_s9_restart_preserves_truth_and_worker_resumes_unfinished_work PASSED
-tests/test_scenarios.py::test_s10_recon_break_lands_in_exception_queue_with_owner PASSED
-tests/test_scenarios.py::test_s10b_settled_after_cutoff_is_a_timing_difference_not_a_break PASSED
-tests/test_scenarios.py::test_s11_retry_with_new_key_is_blocked_by_business_idempotency PASSED
-tests/test_scenarios.py::test_s12_circuit_breaker_refuses_new_payments_before_taking_money PASSED
-tests/test_scenarios.py::test_s13_same_settlement_file_twice_is_refused PASSED
-tests/test_scenarios.py::test_ledger_is_append_only_and_unbalanced_journals_are_refused PASSED
-tests/test_scenarios.py::test_conformance_no_settlement_without_authorisation_and_posting PASSED
-tests/test_scenarios.py::test_integrity_checks_pass_on_healthy_system_and_catch_a_silent_customer PASSED
-tests/test_scenarios.py::test_concurrent_dispatch_callbacks_and_enquiries_settle_exactly_once PASSED
-tests/test_scenarios.py::test_integrity_flags_settled_payments_no_file_ever_covered PASSED
-tests/test_security_observability.py::test_login_locks_after_five_failures_and_denials_are_audited PASSED
-tests/test_security_observability.py::test_security_headers_and_correlation_id PASSED
-tests/test_security_observability.py::test_prometheus_metrics_expose_business_and_http_signals PASSED
-tests/test_security_observability.py::test_logs_are_json_with_correlation_and_secrets_are_scrubbed PASSED
-============================= 66 passed in 51.38s ==============================
+============================= test session starts ==============================
+platform linux -- Python 3.13.18, pytest-9.0.3, pluggy-1.7.0
+rootdir: /home/user/paya
+configfile: pyproject.toml
+plugins: platformdirs-4.14.8, anyio-4.16.0
+collected 77 items
+
+tests/test_ai_triage.py ......                                           [  7%]
+tests/test_assistant.py ..........                                       [ 20%]
+tests/test_green.py ...........                                          [ 35%]
+tests/test_kyc.py ...............                                        [ 54%]
+tests/test_ops_api.py .........                                          [ 66%]
+tests/test_scenarios.py ......................                           [ 94%]
+tests/test_security_observability.py ....                                [100%]
+
+============================= 77 passed in 59.27s ==============================

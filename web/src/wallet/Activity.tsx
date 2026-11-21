@@ -1,6 +1,6 @@
 // Activity: every wallet movement, grouped by day, with the server's status in words and an icon.
 import { motion } from "framer-motion";
-import { ArrowDownLeft, ArrowUpRight, RotateCcw } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, PiggyBank, RotateCcw } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { paymentMeta } from "../ds/status";
@@ -9,14 +9,15 @@ import { useWallet } from "./Home";
 
 export interface WalletTxn { txn_ref: string; type: string; amount: { minor: number }; status: string; display_status: string; merchant: string | null; created_at: string }
 
-const INCOMING = new Set(["TOPUP", "REVERSAL", "REFUND"]);
+const INCOMING = new Set(["TOPUP", "REVERSAL", "REFUND", "GREEN_POT_OUT"]);
 
 export function ActivityRow({ t }: { t: WalletTxn }) {
   const nav = useNavigate();
   const incoming = INCOMING.has(t.type);
   const meta = paymentMeta(t.status);
-  const title = t.type === "TOPUP" ? "Wallet top-up" : t.type === "REVERSAL" ? "Returned to wallet" : t.merchant || "Payment";
-  const Icon = t.type === "REVERSAL" ? RotateCcw : incoming ? ArrowDownLeft : ArrowUpRight;
+  const title = t.type === "TOPUP" ? "Wallet top-up" : t.type === "REVERSAL" ? "Returned to wallet"
+    : t.type === "GREEN_POT_IN" ? "Into your green pot" : t.type === "GREEN_POT_OUT" ? "From your green pot" : t.merchant || "Payment";
+  const Icon = t.type.startsWith("GREEN_POT") ? PiggyBank : t.type === "REVERSAL" ? RotateCcw : incoming ? ArrowDownLeft : ArrowUpRight;
   const clickable = t.type === "PAYMENT";
   const Tag: any = clickable ? "button" : "div";
   return (

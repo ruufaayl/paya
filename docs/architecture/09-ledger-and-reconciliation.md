@@ -14,7 +14,7 @@ These are the Partner EMI's books as Paya records them. All figures are syntheti
 | 1300 | Merchant fee receivable | Asset | Debit | Merchant discount fees owed to the EMI (one account per merchant) |
 | 1400 | Claim receivable – rail/partner | Asset | Debit | Money that left 1010 without a matching payment; under investigation |
 | 2100 | Customer wallet balances | Liability | Credit | What the EMI owes each customer (one account per customer) |
-| 2110 | Customer green pots | Liability | Credit | Ring-fenced savings pots (theme 2, roadmap) |
+| 2110 | Customer green pots | Liability | Credit | Customer money ring-fenced in a green pot (Theme 2, ADR-012); moved only by GREEN_POT_IN / GREEN_POT_OUT journals against the same customer's 2100 |
 | 2150 | Payments in transit | Liability | Credit | Debited from customers, not yet confirmed by Raast |
 | 2190 | Suspense – unmatched rail items | Liability | Credit | Inbound items that cannot be identified yet |
 | 3000 | Funding equity (synthetic seed) | Equity | Credit | Synthetic capital for the demo |

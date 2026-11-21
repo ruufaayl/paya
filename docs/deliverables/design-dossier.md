@@ -10,7 +10,7 @@ Pakistan's instant payment system has crossed into everyday commerce. SBP's annu
 
 Paya is designed as a **technology service provider** to a licensed partner EMI, which is synthetic in this prototype. It never holds funds or claims a licence. The implemented journey is the brief's *merchant payment* with its linked *reversal*. It runs from channel to gateway, then identity and AML controls, ledger, rail, posting, settlement, reconciliation, notification and finance reporting.
 
-The prototype runs locally with one command. It is covered by 66 automated backend tests (all ten scenarios the brief requires, plus concurrency, security, AI, onboarding and assistant tests), by browser acceptance runs, and by GitHub Actions continuous integration. It has been measured:
+The prototype runs locally with one command. It is covered by 77 automated backend tests (all ten scenarios the brief requires, plus concurrency, security, AI, onboarding, green banking and assistant tests), by browser acceptance runs, and by GitHub Actions continuous integration. It has been measured:
 
 - **Recovery:** after a forced crash with payments in flight, the API was healthy in 1.3 s, and every payment settled exactly once within 6 s.
 - **Load:** 400 payments, including a storm of duplicate acknowledgements, with zero duplicate settlements.
@@ -334,7 +334,7 @@ The report names the main error: an omission that settled near cut-off looks lik
 - self-hosted fonts, so the PWA works offline;
 - a single status language in which **green means confirmed by the ledger**; uncertainty is shown as *processing*, never as success.
 
-The payment result is driven only by server status. A browser test samples the screen and the database together and fails if the screen says "Paid" before the ledger has settled. Accessibility was evaluated against WCAG 2.2 AA: zero automated violations on thirteen screens, and computed contrast for every colour pairing. The backend gained read-only operations endpoints (search, time series, event history, reconciliation lines, audit log) and one control, case assignment, which moves no money. The financial modules were not modified.
+The payment result is driven only by server status. A browser test samples the screen and the database together and fails if the screen says "Paid" before the ledger has settled. Accessibility was evaluated against WCAG 2.2 AA: zero automated violations on seventeen screens, and computed contrast for every colour pairing. The backend gained read-only operations endpoints (search, time series, event history, reconciliation lines, audit log) and one control, case assignment, which moves no money. The financial modules were not modified.
 
 **Theme 1: digital onboarding and KYC (ADR-010).** A customer opens a tier-1 wallet in about two minutes:
 
@@ -350,7 +350,9 @@ Machines approve only when every check passes; **only people reject**. An unansw
 
 **Theme 3: conversational banking (ADR-011).** The Paya Assistant answers questions about the customer's own wallet in English and Roman Urdu, from the ledger: balance, recent payments, a payment's status and why, limits, and verification. It is deliberately deterministic and read-only. It imports no payment or posting function (a test reads its source), so "send money" or "refund me" returns an explanation and a link into the normal review-and-authorise flow. Card numbers, CNIC-like numbers, IBANs and OTPs are redacted before a message is classified or stored. "Talk to a person" opens an owned support case, and staff reads of a transcript are audited.
 
-Both themes reuse the integrity core: cases, roles, the audit chain and the live stream. They add controls, not exceptions to them.
+**Theme 2: sustainable and green banking (ADR-012).** The wallet shows a spend-based *estimate* of the carbon linked to the customer's settled payments, with its range, method and factor version (`green.v1`, illustrative). A green pot ring-fences the customer's own money on chart account 2110: each move is one balanced journal against their wallet (2100), under the payment's own row lock, balance checks and idempotency key, and round-ups are capped at what settled payments earned. An offset is an ordinary Raast payment to a synthetic project, so screening, recovery and reconciliation apply unchanged; its certificate exists only after settlement and says no real credit is retired. Staff see aggregates only, and two integrity checks were added.
+
+All three themes reuse the integrity core: cases, roles, the ledger, the audit chain and the live stream. Themes 1 and 3 move no money; Theme 2 moves it only through the ledger's existing controls. They add controls, not exceptions to them.
 
 ## 12. Limitations, risks and recommendation
 
