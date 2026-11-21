@@ -1,3 +1,4 @@
+// NOTE: written for the Paya 1.x UI. Superseded for Paya 2.0 by docs/revamp/tools/revamp_e2e.cjs; kept with its recorded 1.x evidence.
 // End-to-end onboarding run in a real browser against the real API and the real face models.
 //
 // The phone's camera is replaced by a canvas that draws a DRAWN, entirely synthetic face (no real person).

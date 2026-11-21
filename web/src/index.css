@@ -1,35 +1,53 @@
+@import "./ds/tokens.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
-html, body, #root { height: 100%; }
-body {
-  @apply bg-ink-950 text-slate-100 font-sans antialiased;
-  -webkit-tap-highlight-color: transparent;
-  overscroll-behavior: none;
+@layer base {
+  html, body, #root { height: 100%; }
+  body {
+    @apply bg-canvas text-fg font-sans antialiased;
+    font-size: 15px; line-height: 1.45;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+    font-feature-settings: "cv11", "ss01";
+  }
+  h1, h2, h3, .font-display { font-family: var(--font-display); }
+  /* Visible, consistent keyboard focus everywhere (WCAG 2.4.7 / 2.4.11). Never removed without a replacement. */
+  :focus-visible { outline: 2px solid rgb(var(--focus)); outline-offset: 2px; border-radius: 6px; }
+  ::selection { background: rgb(var(--brand) / 0.25); }
 }
+
+@layer utilities {
+  /* Money and references: tabular figures so columns of amounts line up. */
+  .num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1, "cv11"; }
+  .ref { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .safe-top { padding-top: max(env(safe-area-inset-top), 12px); }
+  .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 12px); }
+  .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: rgb(var(--line-strong)); border-radius: 9999px; }
+  .sr-only-focusable:not(:focus) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .skeleton {
+    background: linear-gradient(90deg, rgb(var(--sunken)) 0, rgb(var(--hover)) 50%, rgb(var(--sunken)) 100%);
+    background-size: 800px 100%; @apply animate-shimmer rounded-md;
+  }
+  .grid-dots { background-image: radial-gradient(circle at 1px 1px, rgb(var(--fg) / 0.07) 1px, transparent 0); background-size: 24px 24px; }
+}
+
+/* Legacy (Paya 1.x) helpers, still used by the cashier and landing pages. */
 .glass { @apply bg-white/[0.04] backdrop-blur-xl ring-1 ring-white/10; }
 .card { @apply rounded-3xl bg-ink-900/80 ring-1 ring-white/[0.07]; }
-.num { font-variant-numeric: tabular-nums; }
-.safe-top { padding-top: max(env(safe-area-inset-top), 12px); }
-.safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 12px); }
-.grid-bg {
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0);
-  background-size: 22px 22px;
-}
+.grid-bg { background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0); background-size: 22px 22px; }
 .aurora {
   background:
     radial-gradient(60% 50% at 20% 0%, rgba(46,229,140,0.22), transparent 60%),
-    radial-gradient(50% 40% at 100% 10%, rgba(92,200,255,0.16), transparent 60%),
-    radial-gradient(60% 50% at 50% 100%, rgba(167,139,250,0.10), transparent 60%);
+    radial-gradient(50% 40% at 100% 10%, rgba(92,200,255,0.16), transparent 60%);
 }
-.scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
-.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 9999px; }
 @keyframes pulse-ring { 0% { transform: scale(.9); opacity: .7 } 100% { transform: scale(1.6); opacity: 0 } }
-.pulse-ring::after {
-  content: ""; position: absolute; inset: 0; border-radius: inherit;
-  border: 2px solid currentColor; animation: pulse-ring 1.4s ease-out infinite;
-}
+.pulse-ring::after { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 2px solid currentColor; animation: pulse-ring 1.4s ease-out 3; }
 .react-flow__attribution { display: none; }
+
+/* Reduced motion: keep state changes, drop movement (WCAG 2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; scroll-behavior: auto !important; }
+}

@@ -1,3 +1,4 @@
+// NOTE: written for the Paya 1.x UI. Superseded for Paya 2.0 by docs/revamp/tools/revamp_e2e.cjs; kept with its recorded 1.x evidence.
 // Automated rehearsal of the 8-10 minute technical demo (docs/demo/demo-script.md).
 // Drives two emulated iPhones (cashier + customer) and Mission Control against the real stack,
 // asserts every outcome the presenter will claim, times each scene and saves a screenshot per scene.

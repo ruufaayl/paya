@@ -1,0 +1,54 @@
+[
+  {
+    "screen": "wallet: sign in",
+    "violations": []
+  },
+  {
+    "screen": "wallet: home",
+    "violations": []
+  },
+  {
+    "screen": "wallet: activity",
+    "violations": []
+  },
+  {
+    "screen": "wallet: account",
+    "violations": []
+  },
+  {
+    "screen": "wallet: onboarding intro",
+    "violations": []
+  },
+  {
+    "screen": "console: overview",
+    "violations": []
+  },
+  {
+    "screen": "console: transactions",
+    "violations": []
+  },
+  {
+    "screen": "console: cases",
+    "violations": []
+  },
+  {
+    "screen": "console: kyc",
+    "violations": []
+  },
+  {
+    "screen": "console: recon",
+    "violations": []
+  },
+  {
+    "screen": "console: events",
+    "violations": []
+  },
+  {
+    "screen": "console: audit",
+    "violations": []
+  },
+  {
+    "screen": "console: rail lab",
+    "violations": []
+  }
+]

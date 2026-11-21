@@ -57,10 +57,10 @@ Demo logins all use the password `paya-demo-2026` (synthetic, demo mode only):
 
 ## Phone app and Mission Control (`/web`)
 
-`/web` is one React app with two experiences:
+`/web` is one React app with two surfaces that share one design system (**Paya 2.0**, see `docs/revamp/`):
 
-- **`/app`** is the phone app, a PWA. It has customer wallets (scan, slide to pay, a live payment tracker) and the cashier till (keypad, Raast QR, a full-screen **PAID** confirmation with a spoken announcement once settlement is confirmed).
-- **`/control`** is Mission Control, a live map of every Paya component. Each payment shows up as a packet moving along the wires. Failures light up the nodes they hit, and human gates pulse until someone with the right role decides. The screen also has a chaos panel, a live event feed and a transaction inspector showing ledger entries, risk decisions, approvals and the audit hash chain. Every animation comes from a real backend event.
+- **`/app` (Paya Wallet)** is a light, mobile-first PWA for customers. It covers sign-in, digital onboarding, home (available, ledger and reserved balances), activity, scan or pick a till, review and authorise, an authoritative payment result with timeline, money trail and receipt, and the account screen. Cashiers get the till: keypad, Raast QR, and **PAID** only after settlement.
+- **`/control` (Mission Control)** is a dark operations console. You sign in as a synthetic staff member, and every action runs as that person and is checked by the server. Pages: Overview, Transactions, System topology, Event stream, Cases & approvals, Identity & KYC, Reconciliation, AI operations, Rail lab, Audit & access.
 
 ```bash
 cd web && npm install && npm run dev      # http://localhost:5173  (API defaults to http://localhost:8000)
@@ -75,6 +75,10 @@ cd web && npm install && npm run dev      # http://localhost:5173  (API defaults
 2. Deploy `/web` to Vercel (free Hobby plan): import the repo, set **Root Directory = `web`**, and optionally set `VITE_API_URL` to the tunnel URL. Alternatively, paste the tunnel URL into the start page. It is saved on each device.
 3. On the iPhone, open the Vercel URL, go to `/app`, then tap **Share → Add to Home Screen**. Open Mission Control on the laptop.
 4. Only ever show synthetic data on a public URL. Close the tunnel after the demo.
+
+### Paya 2.0 documentation
+
+`docs/revamp/`: audit of the 1.x product, product experience, design system (with a generated contrast report), wallet UX, Mission Control UX, motion system, frontend architecture, backend integration, API changes, accessibility review, testing report and changelog. The acceptance run is `docs/revamp/tools/revamp_e2e.cjs`; screenshots are in `evidence/screenshots/revamp/`.
 
 ## Digital onboarding and KYC (Theme 1)
 

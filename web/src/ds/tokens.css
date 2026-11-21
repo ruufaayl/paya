@@ -1,0 +1,94 @@
+/* Paya design tokens — the single source of truth for colour, type, radius, elevation and motion.
+   Colours are RGB triplets so Tailwind can apply opacity: rgb(var(--fg) / 0.6).
+   Two themes share one vocabulary: "wallet" (light, calm, roomy) and "console" (dark, dense, precise).
+   Contrast of every text pairing is checked by docs/revamp/tools/contrast_check.py. */
+
+:root,
+[data-theme="wallet"] {
+  color-scheme: light;
+  /* surfaces */
+  --canvas: 245 246 243;        /* #F5F6F3 warm paper */
+  --surface: 255 255 255;       /* #FFFFFF */
+  --raised: 255 255 255;
+  --sunken: 237 239 235;        /* #EDEFEB */
+  --hover: 238 241 237;         /* #EEF1ED */
+  --line: 226 229 224;          /* #E2E5E0 */
+  --line-strong: 199 205 198;   /* #C7CDC6 */
+  --control-line: 128 138 133;  /* #808A85 input borders: 3:1 non-text contrast */
+  /* text */
+  --fg: 13 27 22;               /* #0D1B16 night ink */
+  --fg-2: 69 82 77;             /* #45524D */
+  --fg-muted: 98 110 105;       /* #626E69 */
+  --fg-disabled: 160 168 164;
+  /* brand: Jade */
+  --brand: 10 125 86;           /* #0A7D56 jade 600 — primary actions */
+  --brand-strong: 7 99 69;      /* #076345 */
+  --brand-soft: 228 246 238;    /* #E4F6EE */
+  --brand-fg: 255 255 255;      /* text on brand */
+  --brand-accent: 10 125 86;    /* brand used as text/icon on canvas */
+  --night: 12 27 36;            /* #0C1B24 brand secondary (wordmark, balance card) */
+  --night-fg: 240 247 244;
+  --focus: 22 103 214;          /* #1667D6 — focus ring, never confused with status */
+  /* status (fg = text/icon, soft = background, line = border) */
+  --success: 21 118 62;   --success-soft: 230 245 236; --success-line: 160 214 182;   /* #15763E settled, confirmed */
+  --processing: 26 92 196; --processing-soft: 232 240 253; --processing-line: 168 197 245; /* #1A5CC4 in flight */
+  --review: 103 57 196;   --review-soft: 241 236 253;  --review-line: 205 187 246;   /* #6739C4 waiting for a person */
+  --warning: 150 84 0;    --warning-soft: 255 243 222; --warning-line: 240 200 130;   /* #965400 uncertainty */
+  --danger: 185 32 40;    --danger-soft: 253 235 235;  --danger-line: 243 176 178;    /* #B92028 failed, denied */
+  --info: 14 104 128;     --info-soft: 228 244 248;    --info-line: 160 210 222;      /* #0E6880 neutral information */
+  --neutral: 98 110 105;  --neutral-soft: 237 239 235; --neutral-line: 210 214 209;
+  /* elevation */
+  --shadow-1: 0 1px 2px rgb(13 27 22 / 0.06), 0 1px 1px rgb(13 27 22 / 0.04);
+  --shadow-2: 0 4px 16px rgb(13 27 22 / 0.08), 0 1px 3px rgb(13 27 22 / 0.06);
+  --shadow-3: 0 18px 48px rgb(13 27 22 / 0.16), 0 4px 12px rgb(13 27 22 / 0.08);
+}
+
+[data-theme="console"] {
+  color-scheme: dark;
+  --canvas: 9 13 18;            /* #090D12 */
+  --surface: 15 21 28;          /* #0F151C */
+  --raised: 21 29 38;           /* #151D26 */
+  --sunken: 7 10 14;
+  --hover: 27 37 48;            /* #1B2530 */
+  --line: 33 44 56;             /* #212C38 */
+  --line-strong: 48 62 77;      /* #303E4D */
+  --control-line: 92 108 124;   /* #5C6C7C */
+  --fg: 232 237 242;            /* #E8EDF2 */
+  --fg-2: 168 180 192;          /* #A8B4C0 */
+  --fg-muted: 132 145 158;      /* #84919E */
+  --fg-disabled: 82 94 106;
+  --brand: 52 199 140;          /* #34C78C jade 400 on dark */
+  --brand-strong: 86 216 162;
+  --brand-soft: 16 46 36;
+  --brand-fg: 4 22 15;          /* text on brand */
+  --brand-accent: 92 214 164;
+  --night: 9 13 18;
+  --night-fg: 232 237 242;
+  --focus: 120 170 255;         /* #78AAFF */
+  --success: 88 207 140;  --success-soft: 15 44 30;  --success-line: 36 96 64;
+  --processing: 118 168 255; --processing-soft: 17 33 61; --processing-line: 40 72 128;
+  --review: 180 156 255;  --review-soft: 35 27 64;   --review-line: 76 60 138;
+  --warning: 245 185 75;  --warning-soft: 52 37 10;  --warning-line: 110 80 24;
+  --danger: 255 128 128;  --danger-soft: 58 19 22;   --danger-line: 122 42 46;
+  --info: 98 200 222;     --info-soft: 13 42 51;     --info-line: 32 88 104;
+  --neutral: 132 145 158; --neutral-soft: 24 32 42;  --neutral-line: 48 62 77;
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-2: 0 6px 20px rgb(0 0 0 / 0.45);
+  --shadow-3: 0 24px 64px rgb(0 0 0 / 0.6);
+}
+
+:root {
+  /* type */
+  --font-display: "Manrope Variable", "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-text: "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* radius */
+  --r-xs: 6px; --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 20px; --r-2xl: 28px;
+  /* motion (mirrored in src/ds/motion.ts) */
+  --dur-instant: 80ms; --dur-fast: 140ms; --dur-base: 220ms; --dur-slow: 320ms; --dur-deliberate: 480ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  /* layout */
+  --control-sm: 32px; --control-md: 40px; --control-lg: 52px;
+}

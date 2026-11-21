@@ -1,0 +1,172 @@
+{
+  "at": "2026-11-21T12:57:23.166Z",
+  "passed": 33,
+  "failed": 0,
+  "results": [
+    {
+      "name": "onboarding: clean applicant auto-approved",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "wallet activation: new wallet shows synthetic Rs 5,000 from the ledger",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "payment: success shown only after backend SETTLED",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "receipt: opens with reference",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "client retry: same key returns the same payment (no double debit)",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "refresh during processing: still Processing after reload (read from the server)",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "pending: never shows Paid before the backend settles",
+      "ok": true,
+      "note": "10 samples"
+    },
+    {
+      "name": "pending: shows Processing while the backend is PENDING",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "pending: recovery agent settles it exactly once, then the screen says Paid",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "rejected: unverified customer sees Declined and no money moved",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "onboarding: near watch-list name is referred, no tipping off",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "wallet 360px: no horizontal overflow",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "wallet 430px: no horizontal overflow",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "unauthorised: cashier is refused by the console",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "overview: loads real metrics",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "transaction explorer: search by reference and open full detail with ledger postings",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "rail lab: DUPLICATE_ACK → SETTLED",
+      "ok": true,
+      "note": "PAYA-20261121-DFD5E6"
+    },
+    {
+      "name": "rail lab: REJECT → REVERSED",
+      "ok": true,
+      "note": "PAYA-20261121-E5EE6B"
+    },
+    {
+      "name": "rail lab: PARTIAL → SETTLED",
+      "ok": true,
+      "note": "PAYA-20261121-71071A"
+    },
+    {
+      "name": "reconciliation: run recorded",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "reconciliation: identical file refused",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "reconciliation: unmatched record has an owned case",
+      "ok": true,
+      "note": "MISSING_EXTERNAL → CASE-20261121-42759F"
+    },
+    {
+      "name": "exception assignment: case assigned to the operator, audited",
+      "ok": true,
+      "note": "sana.ops"
+    },
+    {
+      "name": "AI triage: suggestion recorded, advisory only",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "exception resolution: case resolved by its owner",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "two-person rule: same officer cannot confirm own recommendation",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "two-person rule: second officer approves",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "unauthorised finance action: 403 from the server",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "audit page restricted for Ops",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "audit log: chain intact and denials visible",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "console 1280px: pages render without page-level overflow",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "console 1920px: pages render without page-level overflow",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "name": "event stream: real events listed",
+      "ok": true,
+      "note": ""
+    }
+  ]
+}

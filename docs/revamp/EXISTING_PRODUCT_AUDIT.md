@@ -68,7 +68,7 @@ QR payment (happy path, retry, double tap) · compliance hold → release/reject
 ## 8. Visual and interaction deficiencies
 
 1. **Neon green everywhere.** `#2EE58C` is the brand, the success colour, the primary button, the "info" pulse and the "healthy" node. Positive-looking but non-final states (rail accepted) look the same as final ones.
-2. **Fonts are not loaded.** `Inter` is named in the CSS stack but never loaded, so every device falls back to its system font; there are no tabular numerals on Android.
+2. **Fonts depend on a CDN.** Inter and JetBrains Mono come from Google Fonts at runtime (five weights each), so an installed PWA opened offline falls back to system fonts, and every first load makes third-party requests. Tabular numerals are used only where a `num` class was remembered.
 3. **Tiny type in Mission Control:** 10–11.5 px labels for operational data; graph node text unreadable at fit-to-screen.
 4. **Decorative surfaces:** gradient balance card with a blurred blob, "aurora" backgrounds, glassmorphism tab bar.
 5. **Mission Control has no information architecture.** Everything is on one screen. Reconciliation, audit, integrity, KYC history and AI metrics have no home. The right panel mixes approvals, cases and the feed.

@@ -9,6 +9,11 @@
     "preview": "vite preview --host"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "5.1.1",
+    "@fontsource-variable/manrope": "5.1.1",
+    "@fontsource/jetbrains-mono": "5.1.2",
+    "@radix-ui/react-dialog": "1.1.4",
+    "@tanstack/react-query": "5.62.8",
     "@xyflow/react": "12.3.5",
     "framer-motion": "11.11.17",
     "jsqr": "1.4.0",

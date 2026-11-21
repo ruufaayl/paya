@@ -1,83 +1,56 @@
+// Entry page: two surfaces of one product, and the server address for demos on other devices.
 import { motion } from "framer-motion";
-import { Activity, ArrowRight, Server, Smartphone } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
-import { useEffect, useState } from "react";
+import { ArrowRight, MonitorDot, Server, Smartphone } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Logo } from "../components/ui";
+import { fadeUp, stagger } from "../ds/motion";
+import { Badge, Card, Input, Logo } from "../ds/ui";
 import { apiBase, setApiBase } from "../lib/api";
+import { useTheme } from "../lib/hooks";
 
 export default function Landing() {
+  useTheme("wallet");
   const [base, setBase] = useState(apiBase());
-  const [health, setHealth] = useState<"checking" | "ok" | "down">("checking");
-  const appUrl = `${window.location.origin}/app`;
-
-  useEffect(() => {
-    setHealth("checking");
-    const t = setTimeout(() => {
-      fetch(`${base.replace(/\/$/, "")}/healthz`).then((r) => setHealth(r.ok ? "ok" : "down")).catch(() => setHealth("down"));
-    }, 300);
-    return () => clearTimeout(t);
-  }, [base]);
-
   return (
-    <div className="min-h-full aurora">
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-14">
-        <header className="flex items-center justify-between">
-          <Logo size={34} />
-          <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-400 ring-1 ring-white/10">Synthetic demo - no real money</span>
-        </header>
-
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mt-12 max-w-3xl">
-          <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
-            Payment <span className="bg-gradient-to-r from-paya-300 to-sky-400 bg-clip-text text-transparent">pakka</span> hai.
-          </h1>
-          <p className="mt-5 text-lg text-slate-400">
-            Raast QR payments where the cashier sees <b className="text-slate-200">PAID</b> only when the ledger says so -
-            and every check, failure and recovery happens in plain sight.
-          </p>
+    <div className="min-h-full bg-canvas">
+      <motion.div variants={stagger(0.06)} initial="hidden" animate="show" className="mx-auto max-w-[1080px] px-5 py-8 md:py-14">
+        <motion.header variants={fadeUp} className="flex items-center justify-between">
+          <Logo size={30} />
+          <Badge tone="info">Academic prototype · synthetic data</Badge>
+        </motion.header>
+        <motion.h1 variants={fadeUp} className="mt-12 max-w-3xl font-display text-[2.5rem] font-extrabold leading-[1.05] tracking-[-0.03em] text-fg md:text-[3.5rem]">
+          Raast payments a cashier can trust. <span className="text-brand-accent">Payment, pakka.</span>
+        </motion.h1>
+        <motion.p variants={fadeUp} className="mt-4 max-w-2xl text-body text-fg-2 md:text-[17px] md:leading-7">
+          Paya shows "Paid" only when a double-entry ledger and the Raast rail agree. Timeouts stay pending, retries never charge twice, and people decide what machines shouldn't.
+        </motion.p>
+        <motion.div variants={fadeUp} className="mt-10 grid gap-4 md:grid-cols-2">
+          <Link to="/app" className="group">
+            <Card className="h-full p-6 transition-shadow duration-base group-hover:shadow-e2">
+              <Smartphone className="h-6 w-6 text-brand-accent" aria-hidden />
+              <h2 className="mt-4 font-display text-title-2 text-fg">Paya Wallet</h2>
+              <p className="mt-1 text-body-sm text-fg-2">Open a wallet with digital KYC, scan a Raast QR, pay, and get an authoritative receipt. Includes the merchant till.</p>
+              <span className="mt-5 inline-flex items-center gap-1.5 text-label text-brand-accent">Open on a phone <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden /></span>
+            </Card>
+          </Link>
+          <Link to="/control" className="group">
+            <Card className="h-full bg-night p-6 text-night-fg transition-shadow duration-base group-hover:shadow-e2">
+              <MonitorDot className="h-6 w-6 text-[#5CD6A4]" aria-hidden />
+              <h2 className="mt-4 font-display text-title-2">Mission Control</h2>
+              <p className="mt-1 text-body-sm text-night-fg/75">Operations console: transactions, topology, rail lab, cases with maker-checker, KYC review, reconciliation, AI triage and audit.</p>
+              <span className="mt-5 inline-flex items-center gap-1.5 text-label text-[#5CD6A4]">Open on a laptop <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden /></span>
+            </Card>
+          </Link>
         </motion.div>
-
-        <div className="mt-10 grid gap-5 lg:grid-cols-2">
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card p-6">
-            <div className="flex items-start justify-between gap-6">
-              <div>
-                <div className="flex items-center gap-2 text-paya-300"><Smartphone size={18} /> <span className="text-sm font-semibold">Phone app</span></div>
-                <h2 className="mt-3 text-2xl font-bold">Pay and get paid</h2>
-                <p className="mt-2 text-sm text-slate-400">Scan this with your iPhone camera, then Share &rarr; Add to Home Screen. It opens full-screen like a native app.</p>
-                <Link to="/app" className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-paya-400 px-4 py-3 text-sm font-semibold text-ink-950">
-                  Open here <ArrowRight size={16} />
-                </Link>
-              </div>
-              <div className="hidden rounded-2xl bg-white p-3 sm:block">
-                <QRCodeSVG value={appUrl} size={132} bgColor="#ffffff" fgColor="#05070A" />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="card p-6">
-            <div className="flex items-center gap-2 text-sky-400"><Activity size={18} /> <span className="text-sm font-semibold">Mission Control</span></div>
-            <h2 className="mt-3 text-2xl font-bold">Watch the system think</h2>
-            <p className="mt-2 text-sm text-slate-400">A live map of every service. Payments flow along the wires, failures light up, humans approve what machines must not decide.</p>
-            <Link to="/control" className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-sky-400 px-4 py-3 text-sm font-semibold text-ink-950">
-              Launch on this screen <ArrowRight size={16} />
-            </Link>
-          </motion.div>
-        </div>
-
-        <div className="mt-5 card p-5">
-          <div className="flex flex-wrap items-center gap-3">
-            <Server size={16} className="text-slate-400" />
-            <span className="text-sm text-slate-300">Paya API server</span>
-            <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ${health === "ok" ? "text-paya-300 ring-paya-500/40" : health === "down" ? "text-rose-400 ring-rose-500/40" : "text-slate-400 ring-white/10"}`}>
-              {health === "ok" ? "connected" : health === "down" ? "unreachable" : "checking"}
-            </span>
-            <input value={base} onChange={(e) => { setBase(e.target.value); setApiBase(e.target.value); }}
-              className="min-w-0 flex-1 rounded-xl bg-ink-850 px-3 py-2 font-mono text-xs text-slate-200 ring-1 ring-white/10 outline-none focus:ring-paya-500/50"
-              placeholder="https://your-tunnel.trycloudflare.com" />
-          </div>
-          <p className="mt-2 text-xs text-slate-500">Running the backend on your laptop? Expose it with a free HTTPS tunnel and paste the URL here (saved on this device).</p>
-        </div>
-      </div>
+        <motion.div variants={fadeUp}>
+          <Card className="mt-4 flex flex-wrap items-end gap-3 p-4">
+            <Server className="mb-3 h-5 w-5 text-fg-muted" aria-hidden />
+            <Input className="min-w-[260px] flex-1" size2="md" label="Paya server address" hint="Used by both surfaces on this device. For a phone, use the laptop's LAN or tunnel address."
+              value={base} onChange={(e) => { setBase(e.target.value); setApiBase(e.target.value); }} />
+          </Card>
+        </motion.div>
+        <motion.p variants={fadeUp} className="mt-8 text-caption text-fg-muted">FAST CS3017 Enterprise Systems semester project. Simulated Raast rail and identity registry; no real money, cards, CNICs or biometrics.</motion.p>
+      </motion.div>
     </div>
   );
 }
