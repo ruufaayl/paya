@@ -6,12 +6,13 @@ Run on 2026-11-21 against PostgreSQL 16 and the real face models (YuNet/SFace), 
 
 | Suite | Tool | Result | Evidence |
 |---|---|---|---|
-| Backend unit and integration (financial integrity S1–S13, security, AI, KYC K1–K15, **ops API O1–O9**, **assistant C1–C10**, **green banking G1–G11**, **super app P1–P13**) | pytest | **90 passed**, 0 failed (47 before the revamp + 9 ops + 10 assistant + 11 green + 13 super app) | `pytest -q` |
+| Backend unit and integration (financial integrity S1–S13, security, AI, KYC K1–K15, **ops API O1–O9**, **assistant C1–C10**, **green banking G1–G11**, **super app P1–P13**, **stablecoin sandbox SC1–SC12**) | pytest | **102 passed**, 0 failed (47 before the revamp + 9 ops + 10 assistant + 11 green + 13 super app + 12 sandbox) | `pytest -q` |
 | Conversational banking in a real browser (wallet chat → handoff → Ops transcript → close) | Playwright | **8 / 8** | `evidence/revamp/assistant-e2e.json`, `docs/revamp/tools/assistant_e2e.cjs` |
 | Green banking in a real browser (footprint → pot with double tap → round-ups → offset through the normal review → certificate → Mission Control aggregates → integrity) | Playwright | **14 / 14** | `evidence/revamp/green-e2e.json`, `docs/revamp/tools/green_e2e.cjs`, `evidence/screenshots/green/` |
 | End-to-end acceptance (wallet + Mission Control, real backend) | Playwright | **33 / 33 checks passed** | `evidence/revamp/e2e-results.json`, `docs/revamp/tools/revamp_e2e.cjs` |
 | Super app in a real browser (hub → bill paid through the normal review → same bill refused → shop with offer and consent → Compliance suspends a partner → audit → integrity) | Playwright | **14 / 14** | `evidence/revamp/services-e2e.json`, `docs/revamp/tools/services_e2e.cjs`, `evidence/screenshots/services/` |
-| Accessibility (axe-core 4.10, WCAG 2.x A/AA rules, 20 screens) | axe | **0 violations** (3 found and fixed) | `evidence/revamp/a11y-axe.json` |
+| Stablecoin sandbox in a real browser: flag **off** (no tile, `FEATURE_DISABLED`, console explains) and flag **on** (disclaimer → enrol → faucet pending until 3 confirmations → merchant payment final → screened address blocked with a case → chain down sends nothing → reconciliation matched → rupee balance unchanged) | Playwright | **3 / 3 off, 10 / 10 on** | `evidence/revamp/sandbox-e2e.json`, `docs/revamp/tools/sandbox_e2e.cjs`, `evidence/screenshots/sandbox/` |
+| Accessibility (axe-core 4.10, WCAG 2.x A/AA rules, 22 screens) | axe | **0 violations** (3 found and fixed) | `evidence/revamp/a11y-axe.json` |
 | Colour contrast (both themes) | `contrast_check.py` | **0 of 56 pairs fail** | `docs/revamp/contrast-report.md` |
 | Chart palette colour-blind separation | dataviz validator | All checks pass (dark mode) | `PAYA_DESIGN_SYSTEM.md` §2 |
 | Type check + production build | `tsc -b && vite build` | Pass | |

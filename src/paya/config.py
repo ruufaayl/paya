@@ -46,6 +46,15 @@ class Settings(BaseSettings):
     kyc_session_minutes: int = 30
     kyc_welcome_credit_minor: int = 5_000_00  # demo mode only: synthetic credit so a new wallet can pay
 
+    # Stablecoin sandbox (Theme 5). OFF unless explicitly enabled. Test tokens only; no rupee conversion.
+    stablecoin_sandbox: bool = False
+    token_confirmations: int = 3             # "confirmed" only at this depth (a reorg can undo less)
+    token_block_seconds: float = 2.0         # simulated block interval (worker)
+    token_max_txn_units: int = 10_000_00     # 10,000 test tokens per transfer (hundredths)
+    token_daily_max_units: int = 25_000_00
+    token_faucet_units: int = 1_000_00       # once per 24 h
+    token_travel_rule_units: int = 1_000_00  # external transfers at or above this need beneficiary details
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -120,7 +120,10 @@ def create_schema() -> None:
     with eng.begin() as conn:
         conn.execute(text("CREATE SCHEMA IF NOT EXISTS rail"))
         conn.execute(text("CREATE SCHEMA IF NOT EXISTS registry"))
+        conn.execute(text("CREATE SCHEMA IF NOT EXISTS chain"))
+    from .chain import ChainBase
     Base.metadata.create_all(eng)
+    ChainBase.metadata.create_all(eng)
     RailBase.metadata.create_all(eng)
     RegistryBase.metadata.create_all(eng)
     with eng.begin() as conn:
@@ -134,3 +137,4 @@ def drop_schema() -> None:
         conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;"))
         conn.execute(text("DROP SCHEMA IF EXISTS rail CASCADE;"))
         conn.execute(text("DROP SCHEMA IF EXISTS registry CASCADE;"))
+        conn.execute(text("DROP SCHEMA IF EXISTS chain CASCADE;"))

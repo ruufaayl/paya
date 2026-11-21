@@ -24,6 +24,8 @@ services:
       PAYA_VELOCITY_MAX_PAYMENTS: ${PAYA_VELOCITY_MAX_PAYMENTS:-5}   # raised only for load tests
       # Payments settled after this UTC hour are expected in the NEXT settlement file (timing difference, no case).
       PAYA_SETTLEMENT_CUTOFF_UTC_HOUR: ${PAYA_SETTLEMENT_CUTOFF_UTC_HOUR:-16}   # 16 = 21:00 Pakistan time
+      # Theme 5 stablecoin sandbox: OFF unless set to true. Test tokens on a simulated chain; no rupee conversion.
+      PAYA_STABLECOIN_SANDBOX: ${PAYA_STABLECOIN_SANDBOX:-false}
     ports: ["8000:8000"]
     depends_on:
       db: { condition: service_healthy }

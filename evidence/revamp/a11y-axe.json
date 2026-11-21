@@ -28,6 +28,10 @@
     "violations": []
   },
   {
+    "screen": "wallet: stablecoin sandbox",
+    "violations": []
+  },
+  {
     "screen": "wallet: assistant",
     "violations": []
   },
@@ -77,6 +81,10 @@
   },
   {
     "screen": "console: partners",
+    "violations": []
+  },
+  {
+    "screen": "console: stablecoin sandbox",
     "violations": []
   }
 ]

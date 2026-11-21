@@ -13,12 +13,13 @@ flowchart LR
     RC["Reconciliation<br/>control totals · 7 categories"] --> AI["AI triage<br/>suggest only"] --> OF(["Ops maker · Finance checker"])
     O[("Outbox")] --> N["Notifier · Mission Control<br/>(operator console)"]
   end
-  subgraph EXT["Themes 1–4"]
+  subgraph EXT["Themes 1–5"]
     direction TB
     K["Onboarding & KYC<br/>liveness · face match<br/>registry (simulated)"]
     AS["Paya Assistant<br/>reads own ledger data<br/>redacts secrets"]
     GR["Green pot · offsets<br/>2100 ↔ 2110 journals<br/>offset = normal payment"]
     SV["Super app services<br/>bills · top-up · shop · takaful<br/>order = normal payment"]
+    SB["Stablecoin sandbox · OFF by default<br/>test tokens · simulated chain<br/>no rupee conversion"]
   end
   SV -- "payment request" --> G
   GR -- "journal" --> L
@@ -37,4 +38,4 @@ flowchart LR
   class H,OF human
   class L,O store
   class RA ext
-  class K,AS,GR,SV ext
+  class K,AS,GR,SV,SB ext

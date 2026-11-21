@@ -807,3 +807,7 @@ app.include_router(green_router)
 from .services_api import router as services_router  # noqa: E402
 
 app.include_router(services_router)
+
+from .sandbox_api import router as sandbox_router  # noqa: E402
+
+app.include_router(sandbox_router)

@@ -16,6 +16,7 @@ import HomeScreen from "./Home";
 import Onboarding from "./Onboarding";
 import Review from "./Review";
 import Scan from "./Scan";
+import Sandbox from "./Sandbox";
 import Services, { ServiceScreen } from "./Services";
 import SignIn from "./SignIn";
 import Txn from "./Txn";
@@ -54,6 +55,7 @@ export default function WalletApp() {
               <Route path="txn/:ref" element={<Txn user={user} />} />
               <Route path="services" element={<Services user={user} />} />
               <Route path="services/:code" element={<ServiceScreen user={user} />} />
+              <Route path="sandbox" element={<Sandbox user={user} />} />
               <Route path="green" element={<Green user={user} />} />
               <Route path="account" element={<Account user={user} onSignOut={signOut} />} />
               <Route path="assistant" element={<div className="h-[100dvh]"><Assistant user={user} /></div>} />

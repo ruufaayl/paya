@@ -1,0 +1,85 @@
+{
+  "at": "2026-11-21T18:38:41.098Z",
+  "passed": 13,
+  "failed": 0,
+  "results": [
+    {
+      "phase": "off",
+      "n": "wallet: no sandbox tile when the server has it off",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "off",
+      "n": "API: sandbox endpoints answer FEATURE_DISABLED",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "off",
+      "n": "Mission Control: says it is switched off and why",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "on",
+      "n": "disclaimer shown before anything else",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "on",
+      "n": "faucet tokens are not counted before finality",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "on",
+      "n": "after 3 confirmations the balance counts",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "on",
+      "n": "merchant payment submitted as pending, not final",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "on",
+      "n": "merchant payment becomes final on chain",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "on",
+      "n": "screened address blocked, with a Compliance case",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "on",
+      "n": "chain down: transfer recorded as not sent, nothing reserved",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "on",
+      "n": "Mission Control: chain, transfers and reconciliation matched",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "on",
+      "n": "integrity: chain reconciliation and no tokens in the rupee ledger",
+      "ok": true,
+      "note": ""
+    },
+    {
+      "phase": "on",
+      "n": "rupee wallet balance unchanged by sandbox activity",
+      "ok": true,
+      "note": ""
+    }
+  ]
+}

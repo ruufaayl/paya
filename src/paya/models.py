@@ -540,3 +540,38 @@ class ServiceOrder(Base):
     shared: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)  # exactly what the partner received
     created_at: Mapped[datetime] = TS()
     __table_args__ = (CheckConstraint("amount_minor > 0", name="ck_order_amount"),)
+
+
+# ---------------------------------------------------------------- Stablecoin sandbox (Theme 5, disabled by default)
+class TokenWallet(Base):
+    """A customer's custodial address on the SIMULATED sandbox chain. Holds only worthless test tokens."""
+    __tablename__ = "token_wallets"
+    customer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("customers.id"), primary_key=True)
+    address: Mapped[str] = mapped_column(String(42), unique=True, nullable=False)
+    acknowledged_at: Mapped[datetime] = TS()   # "test tokens, no value, not a payment method"
+
+
+class TokenTransfer(Base):
+    """Paya's record of a sandbox token movement. The chain is the system of record for token balances;
+    this row is the audit and reconciliation mirror. It is never posted to the rupee ledger."""
+    __tablename__ = "token_transfers"
+    id: Mapped[uuid.UUID] = UUIDPK()
+    ref: Mapped[str] = mapped_column(String(32), unique=True, nullable=False)
+    customer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("customers.id"), nullable=False, index=True)
+    kind: Mapped[str] = mapped_column(String(12), nullable=False)       # FAUCET | MERCHANT | ADDRESS
+    from_addr: Mapped[str] = mapped_column(String(42), nullable=False)
+    to_addr: Mapped[str] = mapped_column(String(42), nullable=False)
+    merchant_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("merchants.id"))
+    beneficiary_name: Mapped[str | None] = mapped_column(String(128))   # travel-rule data for external addresses
+    amount_units: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    chain_tx_hash: Mapped[str | None] = mapped_column(String(66), unique=True)
+    status: Mapped[str] = mapped_column(String(12), nullable=False)     # PENDING | CONFIRMED | BLOCKED | FAILED
+    confirmations: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    reason: Mapped[str | None] = mapped_column(String(128))
+    created_at: Mapped[datetime] = TS()
+    updated_at: Mapped[datetime] = TS()
+    __table_args__ = (
+        CheckConstraint("amount_units > 0", name="ck_token_amount"),
+        CheckConstraint("status IN ('PENDING','CONFIRMED','BLOCKED','FAILED')", name="ck_token_status"),
+        CheckConstraint("status <> 'CONFIRMED' OR chain_tx_hash IS NOT NULL", name="ck_token_confirmed_has_tx"),
+    )

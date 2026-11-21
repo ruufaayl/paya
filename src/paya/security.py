@@ -56,6 +56,8 @@ PERMISSIONS: dict[str, set[str]] = {
     # Super app: customers use partner services; Compliance owns third-party risk (suspend / resume a partner).
     "services:use": {"CUSTOMER"},
     "partners:manage": {"COMPLIANCE"},
+    # Stablecoin sandbox (only when enabled): verified customers move worthless test tokens.
+    "sandbox:use": {"CUSTOMER"},
 }
 
 

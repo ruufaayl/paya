@@ -3,15 +3,16 @@ platform linux -- Python 3.13.18, pytest-9.0.3, pluggy-1.7.0
 rootdir: /home/user/paya
 configfile: pyproject.toml
 plugins: platformdirs-4.14.8, anyio-4.16.0
-collected 90 items
+collected 102 items
 
-tests/test_ai_triage.py ......                                           [  6%]
-tests/test_assistant.py ..........                                       [ 17%]
-tests/test_green.py ...........                                          [ 30%]
-tests/test_kyc.py ...............                                        [ 46%]
-tests/test_ops_api.py .........                                          [ 56%]
-tests/test_scenarios.py ......................                           [ 81%]
-tests/test_security_observability.py ....                                [ 85%]
+tests/test_ai_triage.py ......                                           [  5%]
+tests/test_assistant.py ..........                                       [ 15%]
+tests/test_green.py ...........                                          [ 26%]
+tests/test_kyc.py ...............                                        [ 41%]
+tests/test_ops_api.py .........                                          [ 50%]
+tests/test_sandbox.py ............                                       [ 61%]
+tests/test_scenarios.py ......................                           [ 83%]
+tests/test_security_observability.py ....                                [ 87%]
 tests/test_services.py .............                                     [100%]
 
-======================== 90 passed in 61.07s (0:01:01) =========================
+============================= 102 passed in 56.92s =============================

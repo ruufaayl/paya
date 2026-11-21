@@ -1,12 +1,13 @@
 // Theme 4: Services, the super-app hub. Every partner is paid through the same review screen, and an order's
 // status is read from its payment, so "Bill paid" or "Cover active" can only appear once the ledger has settled.
-import { ArrowLeft, Bot, Flame, Leaf, Lock, ReceiptText, Shield, ShoppingBag, Smartphone, Tag, Zap } from "lucide-react";
+import { ArrowLeft, Bot, Flame, FlaskConical, Leaf, Lock, ReceiptText, Shield, ShoppingBag, Smartphone, Tag, Zap } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Dialog } from "../ds/overlay";
 import { Alert, Badge, Button, Card, EmptyState, IconButton, Input, Money, Skeleton, cx, pkr } from "../ds/ui";
 import { ApiError, call } from "../lib/api";
 import { useAction, useApi } from "../lib/hooks";
+import { useSandboxEnabled } from "./Sandbox";
 
 interface Item { sku: string; name: string; price_minor: number }
 interface Service { code: string; name: string; kind: "BILLER" | "TOPUP" | "SHOP" | "INSURER"; tagline: string; icon: string;
@@ -27,6 +28,7 @@ export default function Services({ user }: { user: string }) {
   const nav = useNavigate();
   const hub = useApi<Hub>(user, "/v1/services");
   const orders = useApi<Order[]>(user, "/v1/services/orders", { refetchInterval: 4000 });
+  const sandbox = useSandboxEnabled(user);   // shown only when the server switches the sandbox on
   const tile = (icon: any, title: string, sub: string, onClick: () => void, extra?: React.ReactNode, disabled?: boolean) => {
     const Icon = icon;
     return (
@@ -52,6 +54,8 @@ export default function Services({ user }: { user: string }) {
         {hub.data && <>
           {tile(Leaf, "Green", "Footprint, green pot, offsets", () => nav("/app/green"))}
           {tile(Bot, "Ask Paya", "Questions about your money", () => nav("/app/assistant"))}
+          {sandbox && tile(FlaskConical, "Stablecoin sandbox", "Test tokens only, no value", () => nav("/app/sandbox"),
+            <Badge tone="warning" className="mt-0.5">Sandbox</Badge>)}
         </>}
       </div>
       {hub.data?.not_offered.map((n) => (

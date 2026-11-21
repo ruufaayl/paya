@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-21T18:15:35.471Z",
+  "at": "2026-11-21T18:42:11.626Z",
   "passed": 33,
   "failed": 0,
   "results": [
@@ -36,7 +36,7 @@
     {
       "name": "pending: never shows Paid before the backend settles",
       "ok": true,
-      "note": "10 samples"
+      "note": "9 samples"
     },
     {
       "name": "pending: shows Processing while the backend is PENDING",
@@ -86,17 +86,17 @@
     {
       "name": "rail lab: DUPLICATE_ACK → SETTLED",
       "ok": true,
-      "note": "PAYA-20261121-BCAAEA"
+      "note": "PAYA-20261121-91BED7"
     },
     {
       "name": "rail lab: REJECT → REVERSED",
       "ok": true,
-      "note": "PAYA-20261121-7AE4F0"
+      "note": "PAYA-20261121-A8A5FB"
     },
     {
       "name": "rail lab: PARTIAL → SETTLED",
       "ok": true,
-      "note": "PAYA-20261121-97D53B"
+      "note": "PAYA-20261121-9088EF"
     },
     {
       "name": "reconciliation: run recorded",
@@ -111,7 +111,7 @@
     {
       "name": "reconciliation: unmatched record has an owned case",
       "ok": true,
-      "note": "MISSING_EXTERNAL → CASE-20261121-98894B"
+      "note": "MISSING_EXTERNAL → CASE-20261121-A6EB3D"
     },
     {
       "name": "exception assignment: case assigned to the operator, audited",
