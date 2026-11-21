@@ -19,10 +19,10 @@
 | Show me SoD in the database | `ck_maker_checker: approved_by <> requested_by` in `models.Approval` (`test_s6b_*`) |
 | What if someone tries to approve their own reversal? | Refused with 403 `SEGREGATION_OF_DUTIES`. The denial is audited **in its own transaction**, so it survives the rollback (`test_s6c_*`) |
 | How does the audit chain detect tampering? | Each row stores the SHA-256 of the previous row's hash plus its own content. `/v1/audit/verify` recomputes the chain and reports the first broken row |
-| What stops brute force? | 5 failures in 15 min → 429 `LOGIN_LOCKED` (even with the right password), audited. Limit: the lock state is in-process |
+| What stops brute force? | 5 failures in 15 min → 429 `LOGIN_LOCKED` (even with the right password), audited; plus 30 login attempts a minute per address. Both are in PostgreSQL, so they survive restarts and are shared across processes (ADR-016) |
 | Where could a customer see someone else's data? | Nowhere: a foreign `txn_ref` returns 404, and the stream is filtered by ownership (`test_s8_*`) |
 | What PII do you store? | None real. A synthetic `idv_token`; masked phone and IBAN strings; logs are scrubbed by key |
-| Top residual risks? | Stolen token (no revocation); no general rate limit (T-09); a DB superuser could disable triggers (T-03); unsigned rail callbacks in the mock (T-05) |
+| Top residual risks? | Stolen token (no revocation, no MFA); unsigned rail callbacks in the mock (T-05); a stolen *owner* DB credential (the app role cannot disable triggers, ADR-015) |
 | What did the dependency audit find? | Vulnerable Starlette (upgraded FastAPI 0.115 → 0.165), react-router highs (6.30.6), pytest (9.0.3). Two moderate react-router advisories are mitigated by UUID-only QR routing |
 
 ## Theme 1 and Paya 2.0 additions (also yours)
@@ -30,3 +30,4 @@
 - **Digital onboarding and KYC (Theme 1):** `src/paya/kyc.py`, `kyc_engines.py`, `registry.py`, ADR-010, doc 16, tests K1–K15. Know: machines approve only clear cases, people reject; the two-person rule (service check + DB `CHECK`); no images or face templates stored (K9); licences of YuNet (MIT) and SFace (Apache 2.0).
 - **Operator identity in Mission Control:** every action runs as the signed-in staff member; `/v1/me` returns permissions for display only, and the server enforces them. New permissions: `cases:assign`, `access:read`, `assistant:use`.
 - **Threat model additions:** T-16 to T-21 (liveness spoofing, biometric data, two-person rule, fairness, chat injection, chat data).
+- **Rate limiting (ADR-016), yours:** `src/paya/ratelimit.py`, migration `0003`, tests L1–L9, `evidence/security/rate-limits-2026-11-21.md`. Know the four durable limits (login per address, lockout per username, onboarding per address, chat per customer) and the per-client ceiling; why a sliding window and not a fixed one (L8); why keys are HMAC hashes (L7); why `X-Forwarded-For` is ignored unless configured; and why the whole demo runs with zero refusals. Likely question: "Everyone behind the cloudflared tunnel shares one address. Can one person lock out the demo?" (they could use up the 30 logins a minute for that address, but not lock other users' accounts: the lockout is per username).

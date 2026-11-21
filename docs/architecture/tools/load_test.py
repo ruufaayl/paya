@@ -3,8 +3,9 @@
 Phase A  steady load:        N payments, C concurrent customers, healthy rail
 Phase B  duplicate-ack storm: M payments while the rail acknowledges every credit twice
 
-Run with the velocity rule raised for the test only:
-  PAYA_VELOCITY_MAX_PAYMENTS=100000 docker compose -f infra/docker-compose.yml --env-file .env up -d api
+Run with the velocity rule and the per-client rate ceiling raised for the test only (ADR-016):
+  PAYA_VELOCITY_MAX_PAYMENTS=100000 PAYA_RATE_GENERAL_PER_CLIENT_PER_MINUTE=100000 PAYA_RATE_LOGIN_PER_IP_PER_MINUTE=1000 \
+    docker compose -f infra/docker-compose.yml --env-file .env up -d api
   python docs/architecture/tools/load_test.py
 Writes evidence/performance/load-test-<date>.md
 """

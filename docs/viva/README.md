@@ -34,7 +34,7 @@ The brief (§10): *"Each member must explain design decisions, code ownership, t
 
 | Fact | Value | Source |
 |---|---|---|
-| Automated tests | 115, all passing as the data-only app role (CI green) | `evidence/tests/`, GitHub Actions |
+| Automated tests | 124, all passing as the data-only app role (CI green) | `evidence/tests/`, GitHub Actions |
 | Crash recovery | healthy 1.3 s; in-flight payments settled exactly once in 6.0 s | `evidence/resilience/` |
 | DB restart | API back in 0.7 s | same |
 | Load test | 400 payments, 0 duplicate settlements; p95 792 ms at 10 concurrent; ~16 payments/s per process | `evidence/performance/` |
@@ -60,4 +60,4 @@ The brief (§10): *"Each member must explain design decisions, code ownership, t
 7. **What is the source of truth for "paid"?** The ledger plus transaction state. Notifications and screens are consumers. Raast is truth for what *it* did; reconciliation compares the two.
 8. **What did load testing find?** A race between the background dispatch and the worker. The DB constraint prevented double posting, but an error dropped connections. Fixed with row locks and an atomic claim; regression test added.
 9. **Can the AI move money?** No. Its modules import no posting, reversal or approval functions (a test reads the source), it writes only `ai_suggestions`, and only the case owner accepts or overrides.
-10. **What would you do before a real pilot?** Partner sandbox; MFA, token revocation and rate limiting; merchant interviews (assumption A1); evaluate any LLM on the same dataset. (Separate DB roles were a condition and are now done: ADR-015.)
+10. **What would you do before a real pilot?** Partner sandbox; MFA and token revocation; merchant interviews (assumption A1); evaluate any LLM on the same dataset. (Separate DB roles and rate limiting were conditions and are now done: ADR-015, ADR-016.)

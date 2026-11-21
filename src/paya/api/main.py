@@ -27,7 +27,8 @@ from ..models import (
 from ..rail import MODES, breaker, chaos, rail
 from ..security import Principal, can, decode_token, issue_token, require, verify_password
 from ..state import CUSTOMER_STATUS
-from ..observability import configure_logging, current_correlation, emit, login_guard, metrics as http_metrics
+from ..observability import configure_logging, current_correlation, emit, metrics as http_metrics
+from .. import ratelimit
 from ..worker import Worker
 import time
 
@@ -73,6 +74,21 @@ async def correlation(request: Request, call_next):
     if len(cid) > 64 or not all(c.isalnum() or c in "-_." for c in cid):
         cid = payments.new_correlation_id()  # never trust a malformed client correlation id into logs
     request.state.correlation_id = cid
+    # Layer 2 rate limit (ADR-016): a ceiling per signed-in user, else per client address, on every /v1 call.
+    if request.url.path.startswith("/v1") and get_settings().rate_limit_enabled:
+        who = "ip:" + ratelimit.client_address(request)
+        auth = request.headers.get("authorization", "")
+        if auth.lower().startswith("bearer "):
+            try:
+                who = "u:" + decode_token(auth[7:]).user_id
+            except PayaError:
+                pass
+        ok, wait = ratelimit.ceiling.allow(who, get_settings().rate_general_per_client_per_minute)
+        if not ok:
+            events.telemetry("security", "rate_limited", detail={"scope": "general"}, level="warn")
+            return JSONResponse(status_code=429, headers={"Retry-After": str(wait), "X-Correlation-ID": cid}, content={
+                "error": {"code": "RATE_LIMITED", "message": "too many requests; please wait and try again",
+                          "scope": "general", "retry_after_s": wait}, "correlation_id": cid})
     token = current_correlation.set(cid)
     started = time.perf_counter()
     status = 500
@@ -99,7 +115,8 @@ async def correlation(request: Request, call_next):
 
 @app.exception_handler(PayaError)
 async def paya_error(request: Request, exc: PayaError):
-    return JSONResponse(status_code=exc.http_status, content={
+    headers = {"Retry-After": str(exc.details["retry_after_s"])} if "retry_after_s" in exc.details else None
+    return JSONResponse(status_code=exc.http_status, headers=headers, content={
         "error": {"code": exc.code, "message": exc.message, **exc.details},
         "correlation_id": getattr(request.state, "correlation_id", None)})
 
@@ -136,13 +153,14 @@ class LoginIn(BaseModel):
 
 @app.post("/v1/auth/login", tags=["auth"])
 def login(body: LoginIn, request: Request):
-    if login_guard.locked(body.username):
+    ratelimit.hit("login_ip", ratelimit.client_address(request))   # 30 attempts a minute per address
+    if ratelimit.peek("login_fail", body.username):                   # 5 failures in 15 min locks the username
         with session_scope() as s:
             audit.record(s, actor=body.username[:64], actor_role="UNKNOWN", action="LOGIN", object_type="session",
                          object_id=None, outcome="DENIED", reason="locked: too many failed attempts",
                          correlation_id=request.state.correlation_id)
         events.telemetry("security", "login_locked", detail={"user": body.username[:64]}, level="error")
-        raise LoginLocked("too many failed attempts; try again in 15 minutes")
+        raise LoginLocked("too many failed attempts; try again in 15 minutes", retry_after_s=900)
     failed = False
     with session_scope() as s:
         u = s.execute(select(User).where(User.username == body.username, User.active.is_(True))).scalar_one_or_none()
@@ -152,9 +170,9 @@ def login(body: LoginIn, request: Request):
                          correlation_id=request.state.correlation_id)
             failed = True
     if failed:
-        login_guard.failure(body.username)
+        ratelimit.hit("login_fail", body.username, raise_on_limit=False)
         raise Unauthenticated("invalid username or password")
-    login_guard.success(body.username)
+    ratelimit.clear("login_fail", body.username)
     with session_scope() as s:
         u = s.execute(select(User).where(User.username == body.username)).scalar_one()
         p = Principal(user_id=str(u.id), username=u.username, role=u.role,
@@ -614,6 +632,7 @@ class KYCDecisionIn(BaseModel):
 @app.post("/v1/onboarding/start", status_code=201, tags=["onboarding"])
 def onboarding_start(body: OnboardingStartIn, request: Request):
     """Begin opening a wallet. Returns a 30-minute token that can only complete this application."""
+    ratelimit.hit("onboard_ip", ratelimit.client_address(request))   # application spam (threat T-16)
     return kyc.start(**body.model_dump(), correlation_id=request.state.correlation_id)
 
 

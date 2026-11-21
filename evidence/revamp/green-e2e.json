@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-21T18:42:57.295Z",
+  "at": "2026-11-21T20:53:49.955Z",
   "passed": 14,
   "failed": 0,
   "results": [
@@ -51,7 +51,7 @@
     {
       "n": "certificate recorded only after Raast settles",
       "ok": true,
-      "note": "OFS-20261121-7B8FFA"
+      "note": "OFS-20261121-6ED915"
     },
     {
       "n": "offset requests are not offered to other customers",

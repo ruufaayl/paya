@@ -36,6 +36,8 @@ services:
       PAYA_JWT_SECRET: ${PAYA_JWT_SECRET:?set PAYA_JWT_SECRET in .env (32+ random characters)}
       PAYA_DEMO_MODE: ${PAYA_DEMO_MODE:-true}
       PAYA_VELOCITY_MAX_PAYMENTS: ${PAYA_VELOCITY_MAX_PAYMENTS:-5}   # raised only for load tests
+      PAYA_RATE_GENERAL_PER_CLIENT_PER_MINUTE: ${PAYA_RATE_GENERAL_PER_CLIENT_PER_MINUTE:-600}   # ADR-016; raised only for load tests
+      PAYA_RATE_LOGIN_PER_IP_PER_MINUTE: ${PAYA_RATE_LOGIN_PER_IP_PER_MINUTE:-30}             # the load test signs in 40 customers
       # Payments settled after this UTC hour are expected in the NEXT settlement file (timing difference, no case).
       PAYA_SETTLEMENT_CUTOFF_UTC_HOUR: ${PAYA_SETTLEMENT_CUTOFF_UTC_HOUR:-16}   # 16 = 21:00 Pakistan time
       # Theme 5 stablecoin sandbox: OFF unless set to true. Test tokens on a simulated chain; no rupee conversion.

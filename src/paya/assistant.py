@@ -17,9 +17,7 @@ An LLM could later be used only to phrase replies from these same tool results, 
 """
 import re
 import secrets
-import time
 import uuid
-from collections import defaultdict, deque
 from datetime import timedelta
 
 from sqlalchemy import select
@@ -35,7 +33,6 @@ from .state import CUSTOMER_STATUS
 RULES_VERSION = "assistant.v1"
 RETENTION_DAYS = 30
 MAX_TEXT = 500
-_rate: dict[str, deque] = defaultdict(deque)  # per-customer message timestamps (in-process)
 
 # ------------------------------------------------------------------ redaction (DLP) - runs before anything else
 REDACTORS: list[tuple[str, re.Pattern, str]] = [
@@ -176,13 +173,8 @@ def pkr(minor: int) -> str:
 
 # ------------------------------------------------------------------ conversation
 def _limit(customer_id: str) -> None:
-    q = _rate[customer_id]
-    t = time.monotonic()
-    while q and t - q[0] > 60:
-        q.popleft()
-    if len(q) >= 20:
-        raise ValidationFailed("too many messages; please wait a minute")
-    q.append(t)
+    from . import ratelimit
+    ratelimit.hit("chat", customer_id)   # 20 messages a minute per customer, shared and durable (ADR-016)
 
 
 def respond(customer_id: str, text: str, conversation_ref: str | None = None) -> dict:

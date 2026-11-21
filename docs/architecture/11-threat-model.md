@@ -40,7 +40,7 @@ flowchart LR
 
 | ID | STRIDE | Threat | Where | Preventive control (built) | Detective control (built) | Recovery control | Residual risk |
 |---|---|---|---|---|---|---|---|
-| T-01 | Spoofing | Credential stuffing or brute force on staff accounts | `/v1/auth/login` | Argon2id hashes; lock after 5 failures in 15 min (429) | Every failure and lockout in the audit chain; `security.login_locked` telemetry | Lock expires after 15 min; admin can deactivate the user (`users.active`) | **Medium.** Lock state is in-process (resets on restart); no MFA; shared demo password in demo mode |
+| T-01 | Spoofing | Credential stuffing or brute force on staff accounts | `/v1/auth/login` | Argon2id hashes; lock after 5 failures in 15 min (429) | Every failure and lockout in the audit chain; `security.login_locked` telemetry | Lock expires after 15 min; admin can deactivate the user (`users.active`) | **Medium.** Lockout and a 30/min per-address limit are durable and shared (ADR-016); residual: no MFA; shared demo password in demo mode |
 | T-02 | Spoofing | Stolen JWT replayed (e.g. via XSS) | PWA local storage | 60-min expiry; HS256 secret of 32+ chars from env; strict JSON APIs | Audit trail of actions per user and correlation ID | Rotate `PAYA_JWT_SECRET` to invalidate every token | **Medium.** No revocation list; tokens live in `localStorage`. Production: httpOnly cookies or OIDC with short-lived tokens |
 | T-03 | Tampering | Changing an amount or ledger history after the fact | DB | Append-only triggers on ledger, journals, audit and status history; balanced-journal trigger; app has no UPDATE path | `GET /v1/audit/verify` hash chain; integrity check `trial_balance_balanced` | Restore from backup (drill D3); correcting journals | **Low.** The app connects as `paya_app` (ADR-015): no UPDATE/DELETE on evidence, cannot ALTER or disable triggers. Residual: a stolen *owner* credential, which the API never holds in Compose |
 | T-04 | Tampering | Double spending through concurrent or retried requests | `/v1/payments` | Idempotency key; one live payment per QR; wallet row lock; `UNIQUE(txn_id, posting_type)` | `no_negative_wallets`, `in_transit_equals_open_payments` checks | Compensating reversal | **Low.** Proven by S2, S11 and the concurrency regression test |
@@ -48,7 +48,7 @@ flowchart LR
 | T-06 | Repudiation | Staff deny approving a reversal or releasing a hold | Back office | Named accounts; one role per user | Audit chain (who, what, when, why, how); journals store `actor` and `approved_by` | n/a | **Low** |
 | T-07 | Information disclosure | Customer reads another customer's payments | `/v1/transactions/{ref}`, WebSocket | Ownership checks return 404 (references not revealed); stream filtered by role and ownership | Denied attempts audited | n/a | **Low** (S8 test) |
 | T-08 | Information disclosure | Secrets or PII in logs | JSON logs, telemetry | Key-based scrubbing (`password`, `token`, `authorization`, `cnic`, `iban`…); no PII in schema; IDs only in events | Log review | Rotate a leaked secret | **Low** (unit tested) |
-| T-09 | Denial of service | Request flood or a slow rail exhausting threads | API, rail calls | Circuit breaker refuses new payments **before** debiting; 8 s rail timeout | `paya_rail_breaker_open`, latency histograms, `outbox_relay_lag` | Restart is safe (drill D1: 1.3 s healthy) | **High for a public deployment.** No general rate limiting; one process caps at ~16 payments/s (load test). Production: gateway rate limits and horizontal scaling |
+| T-09 | Denial of service | Request flood or a slow rail exhausting threads | API, rail calls | Circuit breaker refuses new payments **before** debiting; 8 s rail timeout | `paya_rail_breaker_open`, latency histograms, `outbox_relay_lag` | Restart is safe (drill D1: 1.3 s healthy) | **Medium.** Per-client ceiling on every `/v1` call and durable limits on login, onboarding and chat (ADR-016); one process caps at ~16 payments/s. Production: the ceiling moves to a gateway; horizontal scaling |
 | T-10 | Elevation of privilege | A staff member both requests and approves a reversal | Back office | Role split OPS / FINANCE; app check; DB `CHECK approved_by <> requested_by` | Denial audited in its own transaction | n/a | **Low** (S6, S6b, S6c) |
 | T-11 | Elevation of privilege | Chaos or demo controls abused in production | `/v1/chaos/*` | Disabled unless `PAYA_DEMO_MODE=true`; restricted to SYSADMIN/OPS | Every mode change audited | Set demo mode off | **Low** if the deployment checklist is followed |
 | T-12 | Tampering / phishing | Malicious QR causes open redirect or a fake merchant | Scanner | QR accepted only as `paya://pay?pr=<UUID>`; merchant name comes from **our server**, never from the QR | Payment shows server-side merchant before slide-to-pay | n/a | **Low.** Two moderate react-router 6.x advisories remain (fix needs v7); compensated by UUID-only routing |
@@ -79,7 +79,7 @@ flowchart LR
 | AP-2 | Insider reverses a payment to themselves, or releases a sanctioned customer's hold, alone | Medium | High (fraud, regulatory breach) | **2, mitigated and tested** |
 | AP-3 | Stolen staff token used from another device | Medium | High | Next: revocation and MFA (gap) |
 | AP-4 | Forged rail callback marks an unpaid payment as settled | Low (needs network position) | High | Production control: mTLS and signing (gap in mock) |
-| AP-5 | Flood of payment requests during the rail outage | Medium | Medium | Partly: breaker; rate limiting is a gap |
+| AP-5 | Flood of payment requests during the rail outage | Medium | Medium | Breaker plus the per-client ceiling (ADR-016) |
 
 **AP-1 controls:**
 - Preventive: idempotency key, business uniqueness, row locks, posting uniqueness.
@@ -99,7 +99,5 @@ flowchart LR
 
 The following open risks are also listed in the technical debt register:
 - MFA and token revocation.
-- General rate limiting.
 - Signed rail messages.
 - `react-router` v7 upgrade.
-- A persistent login-lockout store.

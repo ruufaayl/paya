@@ -25,8 +25,9 @@ def client():
     events.reset_for_tests()
     chaos.reset()
     breaker.reset()
-    from paya.observability import login_guard, metrics
-    login_guard.reset()
+    from paya.observability import metrics
+    from paya.ratelimit import ceiling
+    ceiling.reset()
     metrics.reset()
     from paya.api.main import app
 

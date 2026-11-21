@@ -582,3 +582,15 @@ class TokenTransfer(Base):
         CheckConstraint("status IN ('PENDING','CONFIRMED','BLOCKED','FAILED')", name="ck_token_status"),
         CheckConstraint("status <> 'CONFIRMED' OR chain_tx_hash IS NOT NULL", name="ck_token_confirmed_has_tx"),
     )
+
+
+# ---------------------------------------------------------------- Rate limiting (ADR-016)
+class RateLimitCounter(Base):
+    """Sliding-window counters shared by every API process and surviving restarts. Keys are keyed hashes:
+    no raw IP address or username is stored."""
+    __tablename__ = "rate_limit_counters"
+    scope: Mapped[str] = mapped_column(String(32), primary_key=True)
+    key_hash: Mapped[str] = mapped_column(String(32), primary_key=True)
+    window_start: Mapped[int] = mapped_column(BigInteger, primary_key=True)   # epoch seconds
+    count: Mapped[int] = mapped_column(Integer, nullable=False)
+    __table_args__ = (Index("ix_rate_limit_window", "window_start"),)

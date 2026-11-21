@@ -17,3 +17,4 @@
 | [013](ADR-013-super-app-one-money-path.md) | Super app: partner services on the one payment path; consent-scoped data; Compliance kill switch | Products; integration; third-party risk |
 | [014](ADR-014-stablecoin-sandbox-off-by-default.md) | Stablecoin sandbox: off by default, test tokens on a simulated chain, finality-aware, reconciled | Regulation; integration; transaction integrity |
 | [015](ADR-015-migrations-and-database-roles.md) | Alembic migrations; separate owner and app database roles (app is data-only, cannot touch evidence or triggers) | Data integrity; security; operations |
+| [016](ADR-016-rate-limiting.md) | Rate limiting: durable sliding-window limits on login, lockout, onboarding and chat; per-client ceiling; 429 with Retry-After | Security; availability |

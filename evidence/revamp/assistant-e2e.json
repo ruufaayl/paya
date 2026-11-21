@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-21T18:42:34.005Z",
+  "at": "2026-11-21T20:53:26.028Z",
   "passed": 8,
   "failed": 0,
   "results": [
@@ -11,7 +11,7 @@
     {
       "n": "payment status by merchant name, with the real reference",
       "ok": true,
-      "note": "PAYA-20261121-6C8637"
+      "note": "PAYA-20261121-5F5EF1"
     },
     {
       "n": "cannot move money (prompt-injection attempt)",
@@ -26,7 +26,7 @@
     {
       "n": "handoff opens a case",
       "ok": true,
-      "note": "CASE-20261121-F42A2A"
+      "note": "CASE-20261121-7A5464"
     },
     {
       "n": "Ops reads the transcript, already redacted",

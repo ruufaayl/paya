@@ -112,34 +112,3 @@ class RequestMetrics:
 metrics = RequestMetrics()
 
 
-class LoginGuard:
-    """Brute-force protection: 5 failures for one username within 15 minutes locks it for 15 minutes.
-
-    In-process state (resets on restart) - documented as a prototype limit in the threat model.
-    """
-
-    def __init__(self, max_failures: int = 5, window_s: int = 900) -> None:
-        self.max_failures, self.window_s = max_failures, window_s
-        self._fails: dict[str, list[float]] = defaultdict(list)
-        self._lock = threading.Lock()
-
-    def locked(self, username: str) -> bool:
-        with self._lock:
-            now = time.monotonic()
-            self._fails[username] = [t for t in self._fails[username] if now - t < self.window_s]
-            return len(self._fails[username]) >= self.max_failures
-
-    def failure(self, username: str) -> None:
-        with self._lock:
-            self._fails[username].append(time.monotonic())
-
-    def success(self, username: str) -> None:
-        with self._lock:
-            self._fails.pop(username, None)
-
-    def reset(self) -> None:
-        with self._lock:
-            self._fails.clear()
-
-
-login_guard = LoginGuard()

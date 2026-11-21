@@ -50,6 +50,15 @@ class Settings(BaseSettings):
     kyc_session_minutes: int = 30
     kyc_welcome_credit_minor: int = 5_000_00  # demo mode only: synthetic credit so a new wallet can pay
 
+    # Rate limiting (ADR-016). Limits are per sliding window; raise them (not disable) for load tests.
+    rate_limit_enabled: bool = True
+    rate_login_per_ip_per_minute: int = 30
+    login_max_failures: int = 5                    # per username per 15 minutes, then locked
+    rate_onboarding_per_ip_per_hour: int = 10
+    rate_assistant_per_customer_per_minute: int = 20
+    rate_general_per_client_per_minute: int = 600   # every /v1 call, per signed-in user (else per address)
+    trust_forwarded_for: bool = False              # only behind a reverse proxy you control
+
     # Stablecoin sandbox (Theme 5). OFF unless explicitly enabled. Test tokens only; no rupee conversion.
     stablecoin_sandbox: bool = False
     token_confirmations: int = 3             # "confirmed" only at this depth (a reorg can undo less)

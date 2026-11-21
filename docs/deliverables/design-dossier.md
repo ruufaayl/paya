@@ -10,7 +10,7 @@ Pakistan's instant payment system has crossed into everyday commerce. SBP's annu
 
 Paya is designed as a **technology service provider** to a licensed partner EMI, which is synthetic in this prototype. It never holds funds or claims a licence. The implemented journey is the brief's *merchant payment* with its linked *reversal*. It runs from channel to gateway, then identity and AML controls, ledger, rail, posting, settlement, reconciliation, notification and finance reporting.
 
-The prototype runs locally with one command. It is covered by 115 automated backend tests (the ten required scenarios plus concurrency, security, AI, migration and theme tests, all run as a data-only database role), by browser acceptance runs, and by GitHub Actions continuous integration. It has been measured:
+The prototype runs locally with one command. It is covered by 124 automated backend tests (the ten required scenarios plus concurrency, security, AI, migration and theme tests, all run as a data-only database role), by browser acceptance runs, and by GitHub Actions continuous integration. It has been measured:
 
 - **Recovery:** after a forced crash with payments in flight, the API was healthy in 1.3 s, and every payment settled exactly once within 6 s.
 - **Load:** 400 payments, including a storm of duplicate acknowledgements, with zero duplicate settlements.
@@ -363,10 +363,8 @@ All five themes reuse the integrity core: cases, roles, the ledger, the audit ch
 **Limits we accept for a prototype, each with an owner in the technical-debt register:**
 
 - one API process caps near sixteen payments per second;
-- no multi-factor authentication, token revocation or general rate limiting;
-- the application's database role could alter tables, so a superuser could disable triggers;
+- no multi-factor authentication or token revocation (rate limits are in place, ADR-016);
 - the simulated rail has no message signing, and its behaviour rests on assumptions A3 and A4 rather than Raast specifications;
-- the login lockout resets on restart;
 - the AI's LLM path is untested against a real model;
 - onboarding liveness is a basic active check, not certified presentation-attack detection, and the face recogniser has not been evaluated for accuracy or fairness on consented real faces;
 - the assistant understands a fixed set of intents only;
@@ -384,11 +382,11 @@ Several of our best design improvements came from evidence rather than foresight
 **Recommendation: CONDITIONAL GO** for a controlled pilot on synthetic or partner-sandbox data, subject to:
 
 1. a licensed partner sandbox behind `RailPort`;
-2. multi-factor authentication, token revocation and rate limiting;
+2. multi-factor authentication and token revocation;
 3. merchant and cashier interviews validating assumption A1;
 4. any LLM passing the same evaluation before use.
 
-A fifth condition, separate database owner and application roles, is now met (ADR-015): the application has data privileges only and cannot disable triggers or rewrite evidence.
+Met since the review: separate database roles (ADR-015; the application cannot disable triggers or rewrite evidence) and rate limiting (ADR-016).
 
 # Appendices
 

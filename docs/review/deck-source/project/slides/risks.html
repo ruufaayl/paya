@@ -4,7 +4,7 @@
 <table class="data">
 <tr><th style="width:38%;">Limit</th><th style="width:20%;">Risk</th><th style="width:42%;">Next step (owner)</th></tr>
 <tr><td>One API process, about 16 payments/s</td><td>Medium</td><td>More processes plus separate worker; locks already safe (Integrity lead)</td></tr>
-<tr><td>No MFA, token revocation or rate limiting</td><td>High for a pilot</td><td>OIDC with short-lived tokens; gateway limits (Security lead)</td></tr>
+<tr><td>No MFA or token revocation (rate limits done, ADR-016)</td><td>High for a pilot</td><td>OIDC with short-lived tokens and MFA (Security lead)</td></tr>
 <tr><td>App DB role could disable triggers</td><td>Closed</td><td>Done: data-only app role, migrations as owner (ADR-015)</td></tr>
 <tr><td>Simulated rail; assumptions A3 and A4</td><td>Medium</td><td>Licensed sandbox behind RailPort (Integrity lead)</td></tr>
 <tr><td>Riskiest assumption A1 is unvalidated</td><td>High for the business</td><td>10–15 merchant and cashier interviews (Product lead)</td></tr>
