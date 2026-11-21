@@ -46,7 +46,14 @@ PERMISSIONS: dict[str, set[str]] = {
     "kyc:apply": {"APPLICANT"},
     "kyc:read": {"COMPLIANCE", "OPS", "AUDITOR"},
     "kyc:decide": {"COMPLIANCE"},
+    # Paya 2.0 operations console
+    "cases:assign": {"OPS", "COMPLIANCE", "FINANCE"},
+    "access:read": {"AUDITOR", "SYSADMIN", "COMPLIANCE"},
 }
+
+
+def permissions_for(role: str) -> list[str]:
+    return sorted(k for k, roles in PERMISSIONS.items() if role in roles)
 
 
 @dataclass(frozen=True)

@@ -52,6 +52,9 @@ def session_scope() -> Iterator[Session]:
 
 # Guards enforced by PostgreSQL itself, so that no application bug (or manual SQL) can break them.
 INTEGRITY_DDL = [
+    # 0. Additive, idempotent column upgrades for databases created before Paya 2.0 (never destructive).
+    "ALTER TABLE cases ADD COLUMN IF NOT EXISTS assigned_to varchar(64)",
+    "ALTER TABLE cases ADD COLUMN IF NOT EXISTS assigned_at timestamptz",
     # 1. Every journal must balance (sum of debits = sum of credits) when the transaction commits.
     """
     CREATE OR REPLACE FUNCTION paya_check_journal_balanced() RETURNS trigger AS $$

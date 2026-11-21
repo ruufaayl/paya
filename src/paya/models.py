@@ -261,6 +261,8 @@ class Case(Base):
     details: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
     resolution: Mapped[str | None] = mapped_column(String(48))
     resolved_by: Mapped[str | None] = mapped_column(String(64))
+    assigned_to: Mapped[str | None] = mapped_column(String(64))  # the person working it (Paya 2.0)
+    assigned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     sla_due_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     created_at: Mapped[datetime] = TS()
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

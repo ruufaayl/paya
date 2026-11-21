@@ -164,7 +164,8 @@ def login(body: LoginIn, request: Request):
 
 @app.get("/v1/me", tags=["auth"])
 def me(p: Principal = Depends(principal)):
-    return p.__dict__
+    from ..security import permissions_for
+    return {**p.__dict__, "permissions": permissions_for(p.role)}
 
 
 # ------------------------------------------------------------------ merchant
@@ -353,6 +354,17 @@ def transaction_detail(txn_ref: str, p: Principal = Depends(principal)):
                                 "reason": a.reason, "at": a.created_at.isoformat(), "row_hash": a.row_hash[:16]}
                                for a in s.execute(select(AuditLog).where(AuditLog.object_id == t.txn_ref)
                                                   .order_by(AuditLog.id)).scalars()]
+        # Customer-safe money trail: what happened to the customer's money, from the ledger itself.
+        trail_text = {"AUTH_POST": "Taken from your wallet and held in transit", "SETTLE": "Raast confirmed: paid to the shop",
+                      "REVERSAL": "Returned to your wallet"}
+        trail = s.execute(select(Journal).where(Journal.txn_id.in_(ids)).order_by(Journal.created_at)).scalars().all()
+        detail["money_trail"] = [{"posting_type": j.posting_type, "at": j.created_at.isoformat(),
+                                  "description": trail_text[j.posting_type], "journal_ref": str(j.id)[:8]}
+                                 for j in trail if j.posting_type in trail_text]
+        settled_at = next((h.created_at.isoformat() for h in history if h.to_status == "SETTLED"), None)
+        detail["rail_status"] = {"network": "Raast (simulated)", "e2e_id": t.rail_e2e_id,
+                                 "sent": t.rail_attempts > 0, "attempts": t.rail_attempts,
+                                 "confirmed_at": settled_at}
         detail["notifications"] = [{"recipient": n.recipient, "body": n.body, "at": n.created_at.isoformat()}
                                    for n in s.execute(select(Notification).where(Notification.txn_id == t.id)
                                                       .order_by(Notification.created_at)).scalars()
@@ -772,3 +784,9 @@ def prometheus():
               "# TYPE paya_outbox_unpublished gauge", f"paya_outbox_unpublished {unpublished}",
               *http_metrics.prometheus()]
     return "\n".join(lines) + "\n"
+
+
+# Paya 2.0 operations endpoints live in their own module (imported last: it reuses the helpers above).
+from .ops import router as ops_router  # noqa: E402
+
+app.include_router(ops_router)
