@@ -50,91 +50,23 @@ def session_scope() -> Iterator[Session]:
         s.close()
 
 
-# Guards enforced by PostgreSQL itself, so that no application bug (or manual SQL) can break them.
-INTEGRITY_DDL = [
-    # 0. Additive, idempotent column upgrades for databases created before Paya 2.0 (never destructive).
-    "ALTER TABLE cases ADD COLUMN IF NOT EXISTS assigned_to varchar(64)",
-    "ALTER TABLE cases ADD COLUMN IF NOT EXISTS assigned_at timestamptz",
-    # 0b. Theme 2 (green pot) widens three CHECK lists. Re-creating a CHECK is idempotent and keeps every row.
-    "ALTER TABLE transactions DROP CONSTRAINT IF EXISTS ck_txn_type; ALTER TABLE transactions ADD CONSTRAINT "
-    "ck_txn_type CHECK (type IN ('PAYMENT','REVERSAL','REFUND','TOPUP','ADJUSTMENT','GREEN_POT_IN','GREEN_POT_OUT'))",
-    "ALTER TABLE transactions DROP CONSTRAINT IF EXISTS ck_correction_links_original; ALTER TABLE transactions "
-    "ADD CONSTRAINT ck_correction_links_original CHECK (type IN ('PAYMENT','TOPUP','ADJUSTMENT','GREEN_POT_IN',"
-    "'GREEN_POT_OUT') OR original_txn_id IS NOT NULL)",
-    "ALTER TABLE journals DROP CONSTRAINT IF EXISTS ck_posting_type; ALTER TABLE journals ADD CONSTRAINT "
-    "ck_posting_type CHECK (posting_type IN ('AUTH_POST','SETTLE','FEE','REVERSAL','REFUND','ADJUSTMENT','CLAIM',"
-    "'TOPUP','GREEN_POT_IN','GREEN_POT_OUT'))",
-    # 1. Every journal must balance (sum of debits = sum of credits) when the transaction commits.
-    """
-    CREATE OR REPLACE FUNCTION paya_check_journal_balanced() RETURNS trigger AS $$
-    DECLARE d bigint; c bigint;
-    BEGIN
-      SELECT COALESCE(SUM(CASE WHEN direction = 'D' THEN amount_minor END), 0),
-             COALESCE(SUM(CASE WHEN direction = 'C' THEN amount_minor END), 0)
-        INTO d, c FROM ledger_entries WHERE journal_id = NEW.journal_id;
-      IF d <> c OR d = 0 THEN
-        RAISE EXCEPTION 'LEDGER_UNBALANCED: journal % debits=% credits=%', NEW.journal_id, d, c;
-      END IF;
-      RETURN NULL;
-    END $$ LANGUAGE plpgsql;
-    """,
-    "DROP TRIGGER IF EXISTS trg_journal_balanced ON ledger_entries;",
-    """
-    CREATE CONSTRAINT TRIGGER trg_journal_balanced AFTER INSERT ON ledger_entries
-      DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION paya_check_journal_balanced();
-    """,
-    # 2. Financial evidence is append-only. Corrections are new reversing/adjusting journals.
-    """
-    CREATE OR REPLACE FUNCTION paya_append_only() RETURNS trigger AS $$
-    BEGIN
-      RAISE EXCEPTION 'APPEND_ONLY: % on % is not permitted', TG_OP, TG_TABLE_NAME;
-    END $$ LANGUAGE plpgsql;
-    """,
-    *[
-        f"DROP TRIGGER IF EXISTS trg_append_only_{t} ON {t}; "
-        f"CREATE TRIGGER trg_append_only_{t} BEFORE UPDATE OR DELETE ON {t} "
-        f"FOR EACH ROW EXECUTE FUNCTION paya_append_only();"
-        for t in ("ledger_entries", "journals", "audit_log", "transaction_status_history")
-    ],
-    # 3. Business-level idempotency: only one live payment per payment request (QR / order).
-    """
-    CREATE UNIQUE INDEX IF NOT EXISTS uq_one_live_payment_per_request ON transactions (payment_request_id)
-      WHERE type = 'PAYMENT' AND status NOT IN ('REJECTED', 'FAILED', 'EXPIRED', 'REVERSED');
-    """,
-    # 3b. Exactly one house account per chart-of-accounts code (NULL owners would otherwise not conflict).
-    "CREATE UNIQUE INDEX IF NOT EXISTS uq_house_account ON accounts (code) WHERE owner_type IS NULL;",
-    # 4. Only one reversal per original transaction.
-    """
-    CREATE UNIQUE INDEX IF NOT EXISTS uq_one_reversal_per_original ON transactions (original_txn_id)
-      WHERE type = 'REVERSAL';
-    """,
-]
+# The schema, including the database-level integrity guards (balanced journals, append-only evidence,
+# business idempotency indexes), is defined by the Alembic migrations in paya/migrations (ADR-015).
+def create_schema() -> dict:
+    """Upgrade the database to the latest migration as the schema owner and apply the app role's grants."""
+    from .migrate import upgrade
 
-
-def create_schema() -> None:
-    from . import models  # noqa: F401  (register tables)
-    from .rail import RailBase
-    from .registry import RegistryBase
-
-    eng = engine()
-    with eng.begin() as conn:
-        conn.execute(text("CREATE SCHEMA IF NOT EXISTS rail"))
-        conn.execute(text("CREATE SCHEMA IF NOT EXISTS registry"))
-        conn.execute(text("CREATE SCHEMA IF NOT EXISTS chain"))
-    from .chain import ChainBase
-    Base.metadata.create_all(eng)
-    ChainBase.metadata.create_all(eng)
-    RailBase.metadata.create_all(eng)
-    RegistryBase.metadata.create_all(eng)
-    with eng.begin() as conn:
-        for stmt in INTEGRITY_DDL:
-            conn.execute(text(stmt))
+    return upgrade()
 
 
 def drop_schema() -> None:
-    eng = engine()
+    """Tests and demo resets only. Runs as the schema owner: the app role cannot drop anything."""
+    from .migrate import owner_url
+
+    eng = create_engine(owner_url())
     with eng.begin() as conn:
         conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;"))
         conn.execute(text("DROP SCHEMA IF EXISTS rail CASCADE;"))
         conn.execute(text("DROP SCHEMA IF EXISTS registry CASCADE;"))
         conn.execute(text("DROP SCHEMA IF EXISTS chain CASCADE;"))
+    eng.dispose()

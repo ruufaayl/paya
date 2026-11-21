@@ -3,7 +3,11 @@ import uuid
 
 import pytest
 
-os.environ.setdefault("PAYA_DATABASE_URL", "postgresql+psycopg://paya@localhost:5433/paya_test")
+# Two roles, as in production (ADR-015): migrations run as the owner; the app (and so every test) runs as
+# paya_app, which has data privileges only. CI sets these to its own service credentials.
+os.environ.setdefault("PAYA_MIGRATION_DATABASE_URL", "postgresql+psycopg://paya@localhost:5433/paya_test")
+os.environ.setdefault("PAYA_DATABASE_URL", "postgresql+psycopg://paya_app:paya-app-test-only@localhost:5433/paya_test")
+os.environ.setdefault("PAYA_APP_DB_PASSWORD", "paya-app-test-only")
 os.environ.setdefault("PAYA_JWT_SECRET", "test-secret-at-least-32-bytes-long!!")
 
 from fastapi.testclient import TestClient  # noqa: E402

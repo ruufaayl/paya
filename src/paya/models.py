@@ -7,7 +7,7 @@ from datetime import date, datetime, timezone
 
 from sqlalchemy import (
     BigInteger, Boolean, CheckConstraint, Date, DateTime, ForeignKey, Identity, Index, Integer, String,
-    Text, UniqueConstraint,
+    Text, UniqueConstraint, text,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
@@ -99,6 +99,8 @@ class Account(Base):
     __table_args__ = (
         CheckConstraint("type IN ('ASSET','LIABILITY','INCOME','EXPENSE','EQUITY')", name="ck_account_type"),
         UniqueConstraint("code", "owner_type", "owner_id", name="uq_account_owner"),
+        # exactly one house account per chart code (NULL owners would not conflict in the constraint above)
+        Index("uq_house_account", "code", unique=True, postgresql_where=text("owner_type IS NULL")),
     )
 
 
@@ -210,6 +212,11 @@ class Transaction(Base):
         CheckConstraint("type IN ('PAYMENT','TOPUP','ADJUSTMENT','GREEN_POT_IN','GREEN_POT_OUT') OR original_txn_id IS NOT NULL",
                         name="ck_correction_links_original"),
         Index("ix_txn_status", "status"),
+        # business idempotency: one live payment per payment request (QR / order), one reversal per original
+        Index("uq_one_live_payment_per_request", "payment_request_id", unique=True,
+              postgresql_where=text("type = 'PAYMENT' AND status NOT IN ('REJECTED','FAILED','EXPIRED','REVERSED')")),
+        Index("uq_one_reversal_per_original", "original_txn_id", unique=True,
+              postgresql_where=text("type = 'REVERSAL'")),
     )
 
 

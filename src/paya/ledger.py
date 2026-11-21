@@ -1,6 +1,6 @@
 """Double-entry ledger: the only authoritative source of internal financial truth.
 
-Rules (also enforced in PostgreSQL, see db.INTEGRITY_DDL):
+Rules (also enforced in PostgreSQL, see the baseline migration, paya/migrations):
 * every journal balances; entries are positive integers in paisa;
 * ledger rows are append-only - corrections are new journals;
 * a (transaction, posting type) pair can be posted at most once.

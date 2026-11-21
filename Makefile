@@ -1,10 +1,12 @@
-.PHONY: models setup test run up down openapi verify web demo-reset rehearse
+.PHONY: models setup test run up down openapi verify web demo-reset rehearse migrate
 setup:            ## create virtualenv, install, and fetch the face models
 	python3 -m venv .venv && .venv/bin/pip install -e ".[dev]" && $(MAKE) models
 models:           ## download the onboarding face models (checksums pinned)
 	.venv/bin/python -m paya.fetch_models models
 test:             ## run all scenario tests (needs Postgres; see README)
 	.venv/bin/python -m pytest -p no:warnings
+migrate:          ## upgrade the database to the latest migration (as the owner) and apply app-role grants
+	.venv/bin/python -m paya.migrate
 run:              ## run the API locally with auto-reload
 	.venv/bin/uvicorn paya.api.main:app --reload --port 8000
 up:               ## one-command local stack (Postgres + API)

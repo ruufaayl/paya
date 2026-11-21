@@ -38,7 +38,11 @@ _worker: Worker | None = None
 async def lifespan(app: FastAPI):
     global _worker
     configure_logging()
-    create_schema()
+    if get_settings().migrate_on_start:
+        create_schema()   # Alembic upgrade to head as the owner + app-role grants (ADR-015)
+    else:
+        from ..migrate import check_at_head
+        check_at_head()   # compose: the one-shot migrate job ran as owner; this process holds the app role only
     notifications.register()
     ai_service.register()
     if get_settings().demo_mode:

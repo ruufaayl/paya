@@ -18,7 +18,7 @@
 | What is your riskiest assumption? | A1: that cashiers trust screenshots. We found no Pakistan-specific study, so merchant interviews are a condition of our GO |
 | Where does the ~180m figure come from? | SBP Governor's Annual Reports 2024–25 and 2025–26, p. 58. We checked it against the reports themselves; an earlier secondary source said 182.5m, so we quote the rounded primary figure |
 | What would you never do? | Store real CNIC, biometric or card data; probe a real bank or Raast endpoint; present a stablecoin as a live payment method (PVARA/SBP rules) |
-| Why "conditional go"? | The integrity core is proven. The conditions are a partner sandbox, MFA/revocation/rate limits, separate DB roles, merchant validation, and an LLM evaluation |
+| Why "conditional go"? | The integrity core is proven. The conditions are a partner sandbox, MFA/revocation/rate limits, merchant validation, and an LLM evaluation. Separate DB roles was a condition and is now done (ADR-015) |
 | Show me the evidence the demo is not faked | `make demo-reset && make rehearse` replays the demo and asserts every claim. Mission Control renders real backend events only |
 
 ## Paya 2.0, Theme 2 and Theme 3 additions (also yours)

@@ -5,7 +5,7 @@ The brief (§10) asks for: test results, API collection, performance/resilience 
 
 | Evidence | File(s) | How to regenerate |
 |---|---|---|
-| Automated test results (90 tests: the 10 brief scenarios, 3 Week 9 scenarios, concurrency, security, AI, onboarding/KYC K1–K15, operations API O1–O9, assistant C1–C10, green banking G1–G11, super app P1–P13, stablecoin sandbox SC1–SC12) | [tests/](tests/) | `make test` |
+| Automated test results (90 tests: the 10 brief scenarios, 3 Week 9 scenarios, concurrency, security, AI, onboarding/KYC K1–K15, operations API O1–O9, assistant C1–C10, green banking G1–G11, super app P1–P13, stablecoin sandbox SC1–SC12, migrations and roles M1–M6) | [tests/](tests/) | `make test` |
 | Continuous integration | [GitHub Actions](https://github.com/ruufaayl/paya/actions) (green on every push) | push to `main` |
 | API collection and run (16 requests, all assertions pass) | [api/bruno-run.txt](api/bruno-run.txt), [api/bruno-junit.xml](api/bruno-junit.xml); collection in [`/api/bruno`](../api/bruno/) | `cd api/bruno && npx @usebruno/cli run --env local` |
 | API contract | [`/api/openapi.json`](../api/openapi.json), [`/api/events/`](../api/events/) | `make openapi` |
@@ -39,5 +39,7 @@ The brief (§10) asks for: test results, API collection, performance/resilience 
 **Theme 2 (green banking):** `revamp/green-e2e.json` (14/14), screenshots in `screenshots/green/`; the axe scan now covers 20 screens with 0 violations.
 
 **Theme 4 (super app):** `revamp/services-e2e.json` (14/14), screenshots in `screenshots/services/`.
+
+**Database roles (ADR-015):** `security/db-roles-2026-11-21.md`, run against the real Docker Compose stack: the migrate job runs as the owner; the API connects only as `paya_app`, which is refused UPDATE/DELETE on evidence, ALTER, DROP, TRUNCATE and CREATE.
 
 **Theme 5 (stablecoin sandbox, off by default):** `revamp/sandbox-e2e.json` (3/3 with the flag off, 10/10 with it on), screenshots in `screenshots/sandbox/`. The axe scan covers 22 screens with 0 violations.

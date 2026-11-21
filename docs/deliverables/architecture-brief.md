@@ -66,8 +66,8 @@ author: "Rufayl Waseem (24i-5660) · Taha Ali (24i-5525) · Harris Safi (24i-565
 | Duplicate financial effect | 0 | 0 / 400, incl. duplicate-ack storm |
 | Recovery (RTO / RPO) | API 5 min; committed data RPO 0 | 1.3 s after SIGKILL; 0 lost |
 | Reconciliation | every break owned within 24 h | automatic owner and SLA |
-| Reproducibility | one command; CI | `make verify`; CI green; 102 tests; demo rehearsal 8/8 scenes |
+| Reproducibility | one command; CI | `make verify`; CI green; 115 tests; demo rehearsal 8/8 scenes |
 | Accessibility | WCAG 2.2 AA (self-assessed) | 0 axe violations (13 screens); 0 contrast failures |
 | AI safety | 0 unsafe autonomy | 0% (94.1% accuracy on acted cases) |
 
-**Recommendation: CONDITIONAL GO.** Proceed to a synthetic pilot subject to five conditions: a partner sandbox behind `RailPort`; MFA, token revocation and rate limits; separate DB roles; merchant validation of A1; and LLM evaluation before enabling one.
+**Recommendation: CONDITIONAL GO.** Proceed to a synthetic pilot subject to four conditions: a partner sandbox behind `RailPort`; MFA, token revocation and rate limits; merchant validation of A1; and LLM evaluation before enabling one. (Separate DB owner and app roles: done, ADR-015.)

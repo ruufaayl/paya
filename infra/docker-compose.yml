@@ -14,11 +14,25 @@ services:
       test: ["CMD-SHELL", "pg_isready -U paya"]
       interval: 5s
       retries: 10
+  # One-shot: migrate the schema as its OWNER and grant the app role data privileges only (ADR-015).
+  migrate:
+    image: paya-api:local
+    build: { context: .., dockerfile: infra/Dockerfile.api }
+    command: ["python", "-m", "paya.migrate"]
+    environment:
+      PAYA_MIGRATION_DATABASE_URL: postgresql+psycopg://paya:${PAYA_DB_PASSWORD:-paya-local-only}@db:5432/paya
+      PAYA_DATABASE_URL: postgresql+psycopg://paya_app:${PAYA_APP_DB_PASSWORD:-paya-app-local-only}@db:5432/paya
+      PAYA_APP_DB_PASSWORD: ${PAYA_APP_DB_PASSWORD:-paya-app-local-only}
+    depends_on:
+      db: { condition: service_healthy }
+    restart: "no"
   api:
     image: paya-api:local
     build: { context: .., dockerfile: infra/Dockerfile.api }
     environment:
-      PAYA_DATABASE_URL: postgresql+psycopg://paya:${PAYA_DB_PASSWORD:-paya-local-only}@db:5432/paya
+      # The API holds the APP role only: it cannot ALTER, DROP, TRUNCATE, disable triggers or rewrite evidence.
+      PAYA_DATABASE_URL: postgresql+psycopg://paya_app:${PAYA_APP_DB_PASSWORD:-paya-app-local-only}@db:5432/paya
+      PAYA_MIGRATE_ON_START: "false"
       PAYA_JWT_SECRET: ${PAYA_JWT_SECRET:?set PAYA_JWT_SECRET in .env (32+ random characters)}
       PAYA_DEMO_MODE: ${PAYA_DEMO_MODE:-true}
       PAYA_VELOCITY_MAX_PAYMENTS: ${PAYA_VELOCITY_MAX_PAYMENTS:-5}   # raised only for load tests
@@ -29,6 +43,7 @@ services:
     ports: ["8000:8000"]
     depends_on:
       db: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
     restart: unless-stopped
 volumes:
   paya-db:

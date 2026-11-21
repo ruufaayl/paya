@@ -8,6 +8,10 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="PAYA_", env_file=".env", extra="ignore")
 
     database_url: str = "postgresql+psycopg://paya@localhost:5433/paya"
+    # Schema owner, used only to run migrations. Unset = same as database_url (single-role dev mode).
+    migration_database_url: str | None = None
+    app_db_password: str | None = None   # creates the app role if missing (migration step only)
+    migrate_on_start: bool = True        # dev/tests: the API migrates itself. Compose: a separate one-shot job does
     jwt_secret: str = "dev-only-change-me"  # overridden via env in every non-dev environment
     jwt_ttl_minutes: int = 60
     demo_mode: bool = True  # enables chaos controls and synthetic seed users

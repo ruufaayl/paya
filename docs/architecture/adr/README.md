@@ -16,3 +16,4 @@
 | [012](ADR-012-green-banking-ledger-native-and-honest.md) | Green banking: labelled estimates, green pot on ledger 2110, offsets as ordinary payments | Products; ledger; responsible claims |
 | [013](ADR-013-super-app-one-money-path.md) | Super app: partner services on the one payment path; consent-scoped data; Compliance kill switch | Products; integration; third-party risk |
 | [014](ADR-014-stablecoin-sandbox-off-by-default.md) | Stablecoin sandbox: off by default, test tokens on a simulated chain, finality-aware, reconciled | Regulation; integration; transaction integrity |
+| [015](ADR-015-migrations-and-database-roles.md) | Alembic migrations; separate owner and app database roles (app is data-only, cannot touch evidence or triggers) | Data integrity; security; operations |

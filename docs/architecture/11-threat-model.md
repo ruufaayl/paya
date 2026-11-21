@@ -42,7 +42,7 @@ flowchart LR
 |---|---|---|---|---|---|---|---|
 | T-01 | Spoofing | Credential stuffing or brute force on staff accounts | `/v1/auth/login` | Argon2id hashes; lock after 5 failures in 15 min (429) | Every failure and lockout in the audit chain; `security.login_locked` telemetry | Lock expires after 15 min; admin can deactivate the user (`users.active`) | **Medium.** Lock state is in-process (resets on restart); no MFA; shared demo password in demo mode |
 | T-02 | Spoofing | Stolen JWT replayed (e.g. via XSS) | PWA local storage | 60-min expiry; HS256 secret of 32+ chars from env; strict JSON APIs | Audit trail of actions per user and correlation ID | Rotate `PAYA_JWT_SECRET` to invalidate every token | **Medium.** No revocation list; tokens live in `localStorage`. Production: httpOnly cookies or OIDC with short-lived tokens |
-| T-03 | Tampering | Changing an amount or ledger history after the fact | DB | Append-only triggers on ledger, journals, audit and status history; balanced-journal trigger; app has no UPDATE path | `GET /v1/audit/verify` hash chain; integrity check `trial_balance_balanced` | Restore from backup (drill D3); correcting journals | **Low for the app; medium for a DB superuser**, who could disable triggers. Production: separate DB roles; the app role cannot ALTER |
+| T-03 | Tampering | Changing an amount or ledger history after the fact | DB | Append-only triggers on ledger, journals, audit and status history; balanced-journal trigger; app has no UPDATE path | `GET /v1/audit/verify` hash chain; integrity check `trial_balance_balanced` | Restore from backup (drill D3); correcting journals | **Low.** The app connects as `paya_app` (ADR-015): no UPDATE/DELETE on evidence, cannot ALTER or disable triggers. Residual: a stolen *owner* credential, which the API never holds in Compose |
 | T-04 | Tampering | Double spending through concurrent or retried requests | `/v1/payments` | Idempotency key; one live payment per QR; wallet row lock; `UNIQUE(txn_id, posting_type)` | `no_negative_wallets`, `in_transit_equals_open_payments` checks | Compensating reversal | **Low.** Proven by S2, S11 and the concurrency regression test |
 | T-05 | Tampering | Forged or replayed rail acknowledgement | Rail callback path | Inbox de-duplication; acks matched by E2E id to our own outstanding payments only | Reconciliation against the settlement file (STATUS_MISMATCH, MISSING_INTERNAL) | Claim journal + Finance case | **Medium.** The mock has no message signing. Production: mTLS plus signed messages from the rail operator |
 | T-06 | Repudiation | Staff deny approving a reversal or releasing a hold | Back office | Named accounts; one role per user | Audit chain (who, what, when, why, how); journals store `actor` and `approved_by` | n/a | **Low** |
@@ -100,7 +100,6 @@ flowchart LR
 The following open risks are also listed in the technical debt register:
 - MFA and token revocation.
 - General rate limiting.
-- Separate DB roles: the application role should be unable to alter or disable triggers.
 - Signed rail messages.
 - `react-router` v7 upgrade.
 - A persistent login-lockout store.

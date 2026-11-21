@@ -10,7 +10,7 @@ Pakistan's instant payment system has crossed into everyday commerce. SBP's annu
 
 Paya is designed as a **technology service provider** to a licensed partner EMI, which is synthetic in this prototype. It never holds funds or claims a licence. The implemented journey is the brief's *merchant payment* with its linked *reversal*. It runs from channel to gateway, then identity and AML controls, ledger, rail, posting, settlement, reconciliation, notification and finance reporting.
 
-The prototype runs locally with one command. It is covered by 102 automated backend tests (all ten scenarios the brief requires, plus concurrency, security, AI, onboarding, green banking, super-app, stablecoin-sandbox and assistant tests), by browser acceptance runs, and by GitHub Actions continuous integration. It has been measured:
+The prototype runs locally with one command. It is covered by 115 automated backend tests (the ten required scenarios plus concurrency, security, AI, migration and theme tests, all run as a data-only database role), by browser acceptance runs, and by GitHub Actions continuous integration. It has been measured:
 
 - **Recovery:** after a forced crash with payments in flight, the API was healthy in 1.3 s, and every payment settled exactly once within 6 s.
 - **Load:** 400 payments, including a storm of duplicate acknowledgements, with zero duplicate settlements.
@@ -352,7 +352,7 @@ Machines approve only when every check passes; **only people reject**. An unansw
 
 **Theme 2: sustainable and green banking (ADR-012).** The wallet shows a spend-based *estimate* of the carbon linked to the customer's settled payments, with its range, method and factor version (`green.v1`, illustrative). A green pot ring-fences the customer's own money on chart account 2110: each move is one balanced journal against their wallet (2100), under the payment's own row lock, balance checks and idempotency key, and round-ups are capped at what settled payments earned. An offset is an ordinary Raast payment to a synthetic project, so screening, recovery and reconciliation apply unchanged; its certificate exists only after settlement and says no real credit is retired. Staff see aggregates only, and two integrity checks were added.
 
-**Theme 4: the super app (ADR-013).** A Services tab adds electricity and gas bills, mobile top-up, a marketplace with a merchant-funded offer, and monthly micro-takaful, all from synthetic partners. A partner is simply a merchant: checkout creates a server-priced payment request, which the customer authorises on the normal review screen, so no new money path exists (a test reads the module's source). An order's status ("bill paid", "cover active") is read from that payment, so it can never run ahead of the ledger. One bill can be paid only once, even across customers. Each partner receives only the fields the customer consented to, the shared fields are recorded on the order, and an integrity check verifies them. Compliance can suspend a partner, with the reason in the audit chain. Investments are not offered, because an EMI is not licensed for them.
+**Theme 4: the super app (ADR-013).** A Services tab adds bills, mobile top-up, a marketplace with a merchant-funded offer, and monthly micro-takaful from synthetic partners. A partner is just a merchant: checkout creates a server-priced payment request that the customer authorises on the normal review screen, so there is no new money path (a test reads the module's source). Order status ("bill paid", "cover active") is read from that payment, so it cannot run ahead of the ledger. A bill can be paid only once; partners receive only consented fields, recorded on the order and integrity-checked; Compliance can suspend a partner (audited). Investments are not offered.
 
 **Theme 5: stablecoin sandbox (ADR-014).** PVARA/SBP rules do not permit stablecoin payments for Paya, so this prototype is **off unless a server flag is set**. Verified customers who acknowledge the tokens are worthless get faucet test tokens on a simulated chain (mempool, blocks, reorgs, outages). Transfers are screened, limited, travel-rule-checked and idempotent; they count only at three confirmations and are reconciled against the chain. No token movement can reach the rupee ledger (an integrity check). Savings are not built: yield is not an EMI product.
 
@@ -385,9 +385,10 @@ Several of our best design improvements came from evidence rather than foresight
 
 1. a licensed partner sandbox behind `RailPort`;
 2. multi-factor authentication, token revocation and rate limiting;
-3. separate database owner and application roles;
-4. merchant and cashier interviews validating assumption A1;
-5. any LLM passing the same evaluation before use.
+3. merchant and cashier interviews validating assumption A1;
+4. any LLM passing the same evaluation before use.
+
+A fifth condition, separate database owner and application roles, is now met (ADR-015): the application has data privileges only and cannot disable triggers or rewrite evidence.
 
 # Appendices
 

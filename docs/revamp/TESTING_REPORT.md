@@ -6,7 +6,7 @@ Run on 2026-11-21 against PostgreSQL 16 and the real face models (YuNet/SFace), 
 
 | Suite | Tool | Result | Evidence |
 |---|---|---|---|
-| Backend unit and integration (financial integrity S1–S13, security, AI, KYC K1–K15, **ops API O1–O9**, **assistant C1–C10**, **green banking G1–G11**, **super app P1–P13**, **stablecoin sandbox SC1–SC12**) | pytest | **102 passed**, 0 failed (47 before the revamp + 9 ops + 10 assistant + 11 green + 13 super app + 12 sandbox) | `pytest -q` |
+| Backend unit and integration (financial integrity S1–S13, security, AI, KYC K1–K15, **ops API O1–O9**, **assistant C1–C10**, **green banking G1–G11**, **super app P1–P13**, **stablecoin sandbox SC1–SC12**, **migrations and DB roles M1–M6**) | pytest | **115 passed**, 0 failed, **all running as the data-only `paya_app` role** (47 before the revamp + 9 ops + 10 assistant + 11 green + 13 super app + 12 sandbox + 13 migrations/roles, M3 parametrised over 8 statements) | `pytest -q` |
 | Conversational banking in a real browser (wallet chat → handoff → Ops transcript → close) | Playwright | **8 / 8** | `evidence/revamp/assistant-e2e.json`, `docs/revamp/tools/assistant_e2e.cjs` |
 | Green banking in a real browser (footprint → pot with double tap → round-ups → offset through the normal review → certificate → Mission Control aggregates → integrity) | Playwright | **14 / 14** | `evidence/revamp/green-e2e.json`, `docs/revamp/tools/green_e2e.cjs`, `evidence/screenshots/green/` |
 | End-to-end acceptance (wallet + Mission Control, real backend) | Playwright | **33 / 33 checks passed** | `evidence/revamp/e2e-results.json`, `docs/revamp/tools/revamp_e2e.cjs` |

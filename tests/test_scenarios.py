@@ -297,9 +297,14 @@ def test_s13_same_settlement_file_twice_is_refused(client, as_):
 # ---------------------------------------------------------------- ledger guards enforced by PostgreSQL
 def test_ledger_is_append_only_and_unbalanced_journals_are_refused(client, as_):
     pay(client, as_, new_request(client, as_, 5_000))
-    with pytest.raises(Exception, match="APPEND_ONLY"):
+    with pytest.raises(Exception, match="permission denied"):          # the app role: refused by privilege
         with session_scope() as s:
             s.execute(text("UPDATE ledger_entries SET amount_minor = 1"))
+    from sqlalchemy import create_engine
+    from paya.migrate import owner_url
+    with pytest.raises(Exception, match="APPEND_ONLY"):                # even the owner: refused by the trigger
+        with create_engine(owner_url()).begin() as c:
+            c.execute(text("UPDATE ledger_entries SET amount_minor = 1"))
     with pytest.raises(Exception, match="LEDGER_UNBALANCED"):
         with session_scope() as s:
             t = s.execute(select(Transaction).limit(1)).scalar_one()

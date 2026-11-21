@@ -103,6 +103,10 @@ Stablecoin payments aren't permitted for Paya under PVARA/SBP rules, so this is 
 
 **Ask Paya** in the wallet answers questions about your own money in English or Roman Urdu ("mera balance kitna hai", "did my payment to Chai Junction go through?"), using read-only data from the ledger. It cannot move money; for actions it links into the normal review-and-authorise flow. Card numbers, CNICs, OTPs and passwords are removed before anything is stored. "Talk to a person" opens a case for Operations, who can read the redacted transcript (each read is audited). Design: `docs/architecture/17-conversational-banking.md`, ADR-011.
 
+## Database migrations and roles
+
+The schema is managed by Alembic (`src/paya/migrations`): `make migrate` upgrades to the latest revision as the schema owner and grants the app role data privileges only. In Docker Compose a one-shot `migrate` service does this, and the API connects as `paya_app`, which cannot alter tables, disable the ledger's triggers, or update or delete ledger, journal, audit or status-history rows. A database created before migrations existed is stamped and upgraded, never rebuilt. Design: ADR-015. Evidence: `evidence/security/db-roles-2026-11-21.md`.
+
 ## Test
 
 ```bash

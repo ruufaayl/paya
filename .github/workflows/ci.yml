@@ -18,7 +18,10 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U paya" --health-interval 5s --health-timeout 5s --health-retries 10
     env:
-      PAYA_DATABASE_URL: postgresql+psycopg://paya:paya-ci-only@localhost:5432/paya_test
+      # Two roles, as in production (ADR-015): tests run as the restricted app role.
+      PAYA_MIGRATION_DATABASE_URL: postgresql+psycopg://paya:paya-ci-only@localhost:5432/paya_test
+      PAYA_DATABASE_URL: postgresql+psycopg://paya_app:paya-app-ci-only@localhost:5432/paya_test
+      PAYA_APP_DB_PASSWORD: paya-app-ci-only
       PAYA_JWT_SECRET: ci-only-secret-at-least-32-characters-long
     steps:
       - uses: actions/checkout@v4
