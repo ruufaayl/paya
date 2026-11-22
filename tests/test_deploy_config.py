@@ -46,3 +46,21 @@ def test_on_vercel_the_public_default_jwt_secret_is_refused(monkeypatch):
     finally:
         monkeypatch.delenv("VERCEL")
         config.get_settings.cache_clear()
+
+
+def test_on_vercel_without_a_jwt_secret_one_is_derived_from_the_private_database_url(monkeypatch):
+    from paya import config
+    monkeypatch.setenv("VERCEL", "1")
+    monkeypatch.delenv("PAYA_JWT_SECRET", raising=False)
+    monkeypatch.setenv("DATABASE_URL", "postgres://u:secret-pw@host/db")
+    config.get_settings.cache_clear()
+    try:
+        a = config.get_settings().jwt_secret
+        config.get_settings.cache_clear()
+        assert a == config.get_settings().jwt_secret and len(a) == 64 and "secret-pw" not in a   # stable, not the password
+        monkeypatch.setenv("DATABASE_URL", "postgres://u:other-pw@host/db")
+        config.get_settings.cache_clear()
+        assert config.get_settings().jwt_secret != a
+    finally:
+        monkeypatch.delenv("VERCEL")
+        config.get_settings.cache_clear()

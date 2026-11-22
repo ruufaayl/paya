@@ -106,6 +106,13 @@ def get_settings() -> Settings:
         url = _platform_database_url()
         if url:
             s.database_url = url
+    if on_vercel() and not os.getenv("PAYA_JWT_SECRET") and os.getenv("DATABASE_URL"):
+        # No explicit secret: derive a stable one from a secret the platform already holds privately (the database
+        # connection string includes its password). Same on every instance, never public; an explicit
+        # PAYA_JWT_SECRET always wins, and rotating the database password rotates this key.
+        import hashlib
+        import hmac
+        s.jwt_secret = hmac.new(os.environ["DATABASE_URL"].encode(), b"paya-jwt-signing-key-v1", hashlib.sha256).hexdigest()
     if on_vercel() and (s.jwt_secret == "dev-only-change-me" or len(s.jwt_secret) < 32):
         # The development default is public in the repository: anyone could forge sign-in tokens with it.
         raise RuntimeError("PAYA_JWT_SECRET must be set to 32+ random characters in the Vercel project settings")
