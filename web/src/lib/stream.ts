@@ -20,8 +20,8 @@ export function msgId(m: StreamMsg): string {
 
 /** Poll /v1/live (database-backed) every `everyMs`. On a deployment with several server instances (Vercel) the
  *  WebSocket only carries what its own instance saw; this carries everything. Returns a stop function. */
-export function startLivePoll(as: string, onMsg: (m: StreamMsg) => void, everyMs = 1200): () => void {
-  let stop = false, timer: number | undefined;
+export function startLivePoll(as: string, onMsg: (m: StreamMsg) => void, onStatus?: (ok: boolean) => void, everyMs = 1000): () => void {
+  let stop = false, timer: number | undefined, fails = 0;
   let cur: { event: number; tel: number } | null = null;
   const tick = async () => {
     try {
@@ -29,11 +29,41 @@ export function startLivePoll(as: string, onMsg: (m: StreamMsg) => void, everyMs
       const r = (await call<{ messages: StreamMsg[]; cursor: { event: number; tel: number } }>(as, `/v1/live${q}`)).data;
       if (cur) r.messages.forEach((m) => onMsg(m));
       cur = r.cursor;
-    } catch { /* offline or signed out: try again */ }
+      fails = 0; onStatus?.(true);
+    } catch { if (++fails >= 3) onStatus?.(false); /* one slow request (cold start) is not "offline" */ }
     if (!stop) timer = window.setTimeout(tick, document.hidden ? everyMs * 4 : everyMs);
   };
   tick();
   return () => { stop = true; window.clearTimeout(timer); };
+}
+
+/** One live link: the database poller (sees every server instance) plus a WebSocket where the host supports it.
+ *  Connected = either is healthy. On serverless hosts the socket cannot stay open; after a few failed opens we stop
+ *  retrying it (and try again every minute) instead of flapping the status. */
+export function liveLink(as: string, deliver: (m: StreamMsg) => void, onState: (s: { connected: boolean; reconnecting: boolean }) => void): () => void {
+  let pollOk = false, wsOk = false, stop = false, retry = 0, closedWithoutOpen = 0;
+  let ws: WebSocket | null = null, timer: number | undefined;
+  const emit = () => onState({ connected: pollOk || wsOk, reconnecting: !(pollOk || wsOk) });
+  const stopPoll = startLivePoll(as, deliver, (ok) => { if (ok !== pollOk) { pollOk = ok; emit(); } });
+  const open = async () => {
+    let opened = false;
+    try {
+      const s = await ensure(as);
+      ws = new WebSocket(wsUrl(s.token));
+      ws.onopen = () => { opened = true; retry = 0; closedWithoutOpen = 0; wsOk = true; emit(); };
+      ws.onmessage = (e) => { try { deliver(JSON.parse(e.data)); } catch { /* ignore */ } };
+      ws.onclose = () => {
+        wsOk = false; emit();
+        if (stop) return;
+        if (!opened) closedWithoutOpen++;
+        const giveUp = closedWithoutOpen >= 3;            // host can't hold sockets: rely on the poller
+        timer = window.setTimeout(open, giveUp ? 60_000 : Math.min(8000, 500 * 2 ** retry++));
+      };
+      ws.onerror = () => ws?.close();
+    } catch { if (!stop) timer = window.setTimeout(open, 5000); }
+  };
+  open();
+  return () => { stop = true; stopPoll(); window.clearTimeout(timer); if (ws) { ws.onclose = null; ws.close(); } };
 }
 
 export function msgRef(m: StreamMsg): string | undefined {
@@ -55,25 +85,8 @@ export function useStream(as: string | null, onMsg: (m: StreamMsg) => void) {
       if (seen.current.size > 3000) seen.current = new Set(Array.from(seen.current).slice(-1500));
       cb.current(m);
     };
-    const stopPoll = startLivePoll(as, deliver);
-    let ws: WebSocket | null = null;
-    let stop = false;
-    let retry = 0;
-    let timer: number | undefined;
-    const open = async () => {
-      try {
-        const s = await ensure(as);
-        ws = new WebSocket(wsUrl(s.token));
-        ws.onopen = () => { retry = 0; setConnected(true); };
-        ws.onmessage = (e) => { try { deliver(JSON.parse(e.data)); } catch { /* ignore */ } };
-        ws.onclose = () => { setConnected(false); if (!stop) timer = window.setTimeout(open, Math.min(8000, 500 * 2 ** retry++)); };
-        ws.onerror = () => ws?.close();
-      } catch {
-        if (!stop) timer = window.setTimeout(open, 3000);
-      }
-    };
-    open();
-    return () => { stop = true; stopPoll(); window.clearTimeout(timer); ws?.close(); };
+    const link = liveLink(as, deliver, (s) => setConnected(s.connected));
+    return link;
   }, [as]);
   return connected;
 }

@@ -5,8 +5,8 @@ import { Lock } from "lucide-react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import { EmptyState } from "../ds/ui";
-import { call, ensure, login, logout, sessions, wsUrl } from "../lib/api";
-import { msgId, startLivePoll, type StreamMsg } from "../lib/stream";
+import { call, login, logout, sessions } from "../lib/api";
+import { liveLink, msgId, type StreamMsg } from "../lib/stream";
 
 // ------------------------------------------------------------------ operator
 export const STAFF = [
@@ -73,7 +73,6 @@ export function StreamProvider({ as, children }: { as: string; children: ReactNo
   const inval = useRef<number | undefined>();
 
   useEffect(() => {
-    let ws: WebSocket | null = null, stop = false, retry = 0, timer: number | undefined;
     const deliver = (m: StreamMsg) => {
           const id = msgId(m);
           if (seen.current.has(id)) return;
@@ -89,20 +88,8 @@ export function StreamProvider({ as, children }: { as: string; children: ReactNo
             inval.current = window.setTimeout(() => qc.invalidateQueries(), 600); // refresh read models after facts change
           }
     };
-    // Database-backed poller alongside the WebSocket: on several server instances it is the one that sees everything.
-    const stopPoll = startLivePoll(as, (m) => { setConnected(true); setReconnecting(false); deliver(m); });
-    const open = async () => {
-      try {
-        const s = await ensure(as);
-        ws = new WebSocket(wsUrl(s.token));
-        ws.onopen = () => { retry = 0; setConnected(true); setReconnecting(false); };
-        ws.onmessage = (e) => { try { deliver(JSON.parse(e.data)); } catch { /* ignore */ } };
-        ws.onclose = () => { setConnected(false); if (!stop) { setReconnecting(true); timer = window.setTimeout(open, Math.min(8000, 500 * 2 ** retry++)); } };
-        ws.onerror = () => ws?.close();
-      } catch { if (!stop) { setReconnecting(true); timer = window.setTimeout(open, 3000); } }
-    };
-    open();
-    return () => { stop = true; stopPoll(); window.clearTimeout(timer); ws?.close(); };
+    // Database-backed poller plus WebSocket: on several server instances the poller is the one that sees everything.
+    return liveLink(as, deliver, (s) => { setConnected(s.connected); setReconnecting(s.reconnecting); });
   }, [as, qc]);
 
   useEffect(() => {
