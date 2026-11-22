@@ -146,6 +146,8 @@ def upgrade(revision: str = "head") -> dict:
     eng = create_engine(url)
     stamped, created = False, []
     with eng.begin() as conn:          # ONE transaction: a failure leaves the database exactly as it was
+        # Several serverless instances can cold-start together: only one migrates at a time.
+        conn.execute(text("SELECT pg_advisory_xact_lock(hashtext('paya:migrate'))"))
         names = inspect(conn).get_table_names()
         current = (conn.execute(text("SELECT version_num FROM alembic_version")).scalar()
                    if "alembic_version" in names else None)

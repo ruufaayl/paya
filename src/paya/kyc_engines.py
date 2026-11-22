@@ -164,8 +164,19 @@ def models_present(model_dir: str) -> bool:
 @lru_cache(maxsize=1)
 def _default_engine() -> FaceEngine | None:
     cfg = get_settings()
-    if cfg.kyc_face_engine != "opencv" or not models_present(cfg.kyc_model_dir):
+    if cfg.kyc_face_engine != "opencv":
         return None
+    if not models_present(cfg.kyc_model_dir):
+        from .config import on_vercel
+        if not on_vercel():
+            return None          # no models: every application is referred to a person (never auto-decided)
+        try:                     # serverless: fetch into /tmp on first use, checksums verified as in `make models`
+            from .fetch_models import fetch
+            fetch(cfg.kyc_model_dir)
+        except Exception:        # noqa: BLE001  a failed fetch must not break onboarding: it refers instead
+            return None
+        if not models_present(cfg.kyc_model_dir):
+            return None
     return OpenCVFaceEngine(cfg.kyc_model_dir)
 
 

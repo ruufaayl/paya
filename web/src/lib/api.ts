@@ -11,7 +11,10 @@ function safeSet(k: string, v: string) {
 }
 
 export function apiBase(): string {
-  return (safeGet(KEY_BASE) || import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "");
+  // Precedence: this device's setting, then the build's VITE_API_URL, then: in development the local API, and in a
+  // production build the page's own origin (on Vercel the API is a service behind /v1 on the same domain).
+  const fallback = import.meta.env.DEV ? "http://localhost:8000" : window.location.origin;
+  return (safeGet(KEY_BASE) || import.meta.env.VITE_API_URL || fallback).replace(/\/$/, "");
 }
 export function setApiBase(url: string) { safeSet(KEY_BASE, url.trim().replace(/\/$/, "")); }
 

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "api": {
+      "root": "src",
+      "framework": "fastapi",
+      "entrypoint": "paya.api.main:app"
+    },
+    "web": {
+      "root": "web",
+      "framework": "vite"
+    }
+  },
+  "rewrites": [
+    { "source": "/v1/(.*)", "destination": { "service": "api" } },
+    { "source": "/healthz", "destination": { "service": "api" } },
+    { "source": "/metrics", "destination": { "service": "api" } },
+    { "source": "/docs", "destination": { "service": "api" } },
+    { "source": "/openapi.json", "destination": { "service": "api" } },
+    { "source": "/app", "destination": { "service": "web", "path": "/index.html" } },
+    { "source": "/app/(.*)", "destination": { "service": "web", "path": "/index.html" } },
+    { "source": "/control", "destination": { "service": "web", "path": "/index.html" } },
+    { "source": "/control/(.*)", "destination": { "service": "web", "path": "/index.html" } },
+    { "source": "/(.*)", "destination": { "service": "web" } }
+  ]
+}

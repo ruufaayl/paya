@@ -1,4 +1,5 @@
 """Runtime configuration. All values come from environment variables (see .env.example)."""
+import os
 from functools import lru_cache
 
 from pydantic import field_validator
@@ -81,6 +82,30 @@ class Settings(BaseSettings):
     token_travel_rule_units: int = 1_000_00  # external transfers at or above this need beneficiary details
 
 
+def on_vercel() -> bool:
+    return bool(os.getenv("VERCEL"))   # set by Vercel at build and run time
+
+
+def _platform_database_url() -> str | None:
+    """Vercel Marketplace Postgres (e.g. Neon) injects DATABASE_URL / POSTGRES_URL. Use it when PAYA_DATABASE_URL
+    is not set, with the psycopg driver."""
+    for key in ("DATABASE_URL", "POSTGRES_URL"):
+        url = os.getenv(key)
+        if url:
+            for prefix in ("postgres://", "postgresql://"):
+                if url.startswith(prefix):
+                    return "postgresql+psycopg://" + url[len(prefix):]
+            return url
+    return None
+
+
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()
+    s = Settings()
+    if not os.getenv("PAYA_DATABASE_URL"):
+        url = _platform_database_url()
+        if url:
+            s.database_url = url
+    if on_vercel() and not os.getenv("PAYA_KYC_MODEL_DIR"):
+        s.kyc_model_dir = "/tmp/paya-models"   # the only writable place; models are fetched there on first use
+    return s

@@ -1,0 +1,13 @@
+# Runtime dependencies for the Vercel 'api' service (root: src/). Mirrors [project].dependencies in
+# ../pyproject.toml; tests/test_deploy_config.py fails if they drift apart.
+fastapi==0.165.0
+uvicorn[standard]==0.32.*
+sqlalchemy==2.0.*
+psycopg[binary]==3.2.*
+pydantic==2.*
+pydantic-settings==2.*
+pyjwt==2.*
+argon2-cffi==23.*
+alembic==1.14.*
+cryptography==50.0.*
+opencv-python-headless==4.10.0.84

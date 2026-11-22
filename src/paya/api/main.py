@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 
 from .. import ai_service, audit, events, kyc, ledger, notifications, payments, recon
-from ..config import get_settings
+from ..config import get_settings, on_vercel
 from ..db import create_schema, session_scope
 from ..errors import Forbidden, LoginLocked, NotFound, PayaError, Unauthenticated, ValidationFailed
 from ..idempotency import execute as idempotent
@@ -280,7 +280,13 @@ def pay(body: PayIn, request: Request, background: BackgroundTasks,
     code, resp, replayed = idempotent(principal=p.user_id, operation="POST /v1/payments", key=idempotency_key,
                                       body=body.model_dump(mode="json"), fn=run)
     if not replayed and resp.get("status") == "PENDING":
-        background.add_task(_dispatch_and_relay, uuid.UUID(resp["txn_id"]))
+        if on_vercel():
+            # Serverless: work after the response may be paused, so send to the rail before answering. The
+            # answer is still PENDING-safe: the screen reads the outcome from the server, and the worker or the
+            # next enquiry finishes anything this misses.
+            _dispatch_and_relay(uuid.UUID(resp["txn_id"]))
+        else:
+            background.add_task(_dispatch_and_relay, uuid.UUID(resp["txn_id"]))
     else:
         background.add_task(_safe_relay)
     return JSONResponse(status_code=code, content=resp, headers={"Idempotent-Replayed": str(replayed).lower()})
