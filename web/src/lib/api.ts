@@ -130,7 +130,7 @@ export async function call<T = any>(as: string, path: string, init: RequestInit 
   const headers: Record<string, string> = { authorization: `Bearer ${s.token}`, ...(init.headers as any) };
   if (init.body) headers["content-type"] = "application/json";
   if (init.idempotencyKey) headers["Idempotency-Key"] = init.idempotencyKey;
-  const r = await fetch(`${apiBase()}${path}`, { ...init, headers });
+  const r = await fetch(`${apiBase()}${path}`, { cache: "no-store", ...init, headers });
   const body = await r.json().catch(() => ({}));
   if (r.status === 401) {
     forget(as);
