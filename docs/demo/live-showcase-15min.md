@@ -62,6 +62,7 @@ A bill can be paid once per month. If a number says **already paid**, tap anothe
 | 3 | Mission Control → **Rail lab** → **Restore healthy** | Rail mode NORMAL. The live database is shared, so someone may have left a failure mode on |
 | 4 | Second screen or second tab: `/control/qr-wall` | Six QRs, each "Waiting for a scan" |
 | 5 | iPhone: Home Screen icon (or `/app`) → **Sara Ahmed** | Balance shows |
+| 5b | First time after a new deploy: close the Home Screen app and reopen it (and reload Mission Control once) | The app picks up the latest version; top bar shows **Live** |
 | 6 | Optional second phone: `/app` → a till (e.g. **Danish**, Lahore Tikka House) | "New sale" keypad |
 
 The live database is shared and is not reset between demos. That is fine: the ledger, audit chain and integrity checks are built for continuous history. The velocity rule holds a customer's 6th payment in 10 minutes, so switch payers (Sara → Omar) if you pay many times.
