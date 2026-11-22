@@ -29,3 +29,20 @@ def test_database_url_from_the_platform_is_used_with_the_psycopg_driver(monkeypa
     monkeypatch.delenv("PAYA_DATABASE_URL", raising=False)
     monkeypatch.setenv("DATABASE_URL", "postgres://u:p@host.neon.tech/db?sslmode=require")
     assert config._platform_database_url() == "postgresql+psycopg://u:p@host.neon.tech/db?sslmode=require"
+
+
+def test_on_vercel_the_public_default_jwt_secret_is_refused(monkeypatch):
+    import pytest
+    from paya import config
+    monkeypatch.setenv("VERCEL", "1")
+    monkeypatch.setenv("PAYA_JWT_SECRET", "dev-only-change-me")   # the public default (beats any local .env)
+    config.get_settings.cache_clear()
+    try:
+        with pytest.raises(RuntimeError, match="PAYA_JWT_SECRET"):
+            config.get_settings()
+        monkeypatch.setenv("PAYA_JWT_SECRET", "x" * 40)
+        config.get_settings.cache_clear()
+        assert config.get_settings().jwt_secret == "x" * 40
+    finally:
+        monkeypatch.delenv("VERCEL")
+        config.get_settings.cache_clear()
