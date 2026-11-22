@@ -1,5 +1,16 @@
-PASS  clean applicant auto-approved
-PASS  new wallet shows synthetic Rs 5,000
-PASS  near watch-list name referred
-PASS  no tipping off on the phone
-PASS  phone updates after the second officer approves
+# Theme 1 browser run (Paya 2.0) - 2026-11-22T15:27:28.583Z
+Engine: {"face_engine":"opencv-yunet2023mar+sface2021dec","registry_mode":"NORMAL","rules_version":"kyc.v1","note":null}
+PASS  clean applicant approved automatically with the real models  (liveness retries: 0)
+PASS  face match scored by SFace above its published threshold  (cosine 0.877)
+PASS  liveness passed on the head-turn challenge  (PASS)
+PASS  every automated check recorded with its engine and evidence  (7 checks)
+PASS  near watch-list name referred to a person
+PASS  no tipping off: the applicant sees nothing about screening
+PASS  referral carries the two-person rule
+PASS  applicant token is refused outside onboarding
+PASS  same officer cannot confirm their own recommendation (server refusal)
+PASS  second officer confirms: approved by two different people
+PASS  the waiting phone updates by itself when the officers decide
+PASS  both officers' decisions, and the refused self-confirmation, are in the hash-chained audit log  (chain intact: true)
+
+12/12 checks passed

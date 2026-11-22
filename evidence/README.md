@@ -5,7 +5,7 @@ The brief (§10) asks for: test results, API collection, performance/resilience 
 
 | Evidence | File(s) | How to regenerate |
 |---|---|---|
-| Automated test results (90 tests: the 10 brief scenarios, 3 Week 9 scenarios, concurrency, security, AI, onboarding/KYC K1–K15, operations API O1–O9, assistant C1–C10, green banking G1–G11, super app P1–P13, stablecoin sandbox SC1–SC12, migrations and roles M1–M6, rate limits L1–L9, sessions and MFA A1–A13) | [tests/](tests/) | `make test` |
+| Automated test results (90 tests: the 10 brief scenarios, 3 Week 9 scenarios, concurrency, security, AI, onboarding/KYC K1–K15, operations API O1–O9, assistant C1–C10, green banking G1–G11, super app P1–P13, stablecoin sandbox SC1–SC12, migrations and roles M1–M8, rate limits L1–L9, sessions and MFA A1–A13) | [tests/](tests/) | `make test` |
 | Continuous integration | [GitHub Actions](https://github.com/ruufaayl/paya/actions) (green on every push) | push to `main` |
 | API collection and run (16 requests, all assertions pass) | [api/bruno-run.txt](api/bruno-run.txt), [api/bruno-junit.xml](api/bruno-junit.xml); collection in [`/api/bruno`](../api/bruno/) | `cd api/bruno && npx @usebruno/cli run --env local` |
 | API contract | [`/api/openapi.json`](../api/openapi.json), [`/api/events/`](../api/events/) | `make openapi` |

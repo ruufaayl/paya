@@ -92,19 +92,72 @@ def check_at_head() -> str:
     return current
 
 
+def _baseline():
+    import importlib
+
+    return importlib.import_module("paya.migrations.versions.0001_baseline")
+
+
+def baseline_tables() -> set[tuple[str | None, str]]:
+    """(schema, table) pairs the baseline revision creates, read from the revision itself."""
+    src = pathlib.Path(_baseline().__file__).read_text()
+    out = set()
+    for m in re.finditer(r"op\.create_table\('(\w+)',(.*?)\n    \)", src, re.S):
+        sch = re.search(r"schema='(\w+)'", m.group(2))
+        out.add((sch.group(1) if sch else None, m.group(1)))
+    return out
+
+
+def _complete_legacy(conn) -> list[str]:
+    """A database made before migrations may predate parts of the baseline (e.g. a schema added by a later
+    feature). Create only what is MISSING from the baseline (schemas, tables, idempotent guards); never alter
+    or drop what exists. Columns added after the baseline are left to the later revisions."""
+    from .migrations.meta import TARGET
+
+    created = []
+    for sch in SCHEMAS[1:]:
+        conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {sch}"))
+    insp = inspect(conn)
+    wanted = baseline_tables()
+    for md in TARGET:
+        for t in md.sorted_tables:
+            key = (t.schema, t.name)
+            if key in wanted and not insp.has_table(t.name, schema=t.schema):
+                t.create(conn)
+                created.append(f"{t.schema + '.' if t.schema else ''}{t.name}")
+    for stmt in _baseline().GUARDS:     # CREATE OR REPLACE / IF NOT EXISTS: safe to repeat
+        conn.execute(text(stmt))
+    return created
+
+
+def drift(conn) -> list:
+    from alembic.autogenerate import compare_metadata
+    from alembic.migration import MigrationContext
+
+    from .migrations.meta import TARGET, include_name
+
+    ctx = MigrationContext.configure(conn, opts={"include_schemas": True, "include_name": include_name,
+                                                 "compare_type": True})
+    return compare_metadata(ctx, TARGET)
+
+
 def upgrade(revision: str = "head") -> dict:
     url = owner_url()
     eng = create_engine(url)
-    stamped = False
-    with eng.begin() as conn:
+    stamped, created = False, []
+    with eng.begin() as conn:          # ONE transaction: a failure leaves the database exactly as it was
         names = inspect(conn).get_table_names()
-        if "transactions" in names and "alembic_version" not in names:
-            # created before migrations: record it as the baseline instead of re-creating anything
+        current = (conn.execute(text("SELECT version_num FROM alembic_version")).scalar()
+                   if "alembic_version" in names else None)
+        if "transactions" in names and current is None:
+            # created before migrations: complete what the baseline expects, then record it as the baseline
+            created = _complete_legacy(conn)
             cfg = _config(url)
             cfg.attributes["connection"] = conn
             command.stamp(cfg, BASELINE)
             stamped = True
-    with eng.begin() as conn:
+        elif current == BASELINE:
+            created = _complete_legacy(conn)   # repairs a stamp left by an interrupted earlier upgrade
         cfg = _config(url)
         cfg.attributes["connection"] = conn
         command.upgrade(cfg, revision)
@@ -114,8 +167,12 @@ def upgrade(revision: str = "head") -> dict:
             for stmt in grant_statements(role):
                 conn.execute(text(stmt))
         head = conn.execute(text("SELECT version_num FROM alembic_version")).scalar()
+        if revision == "head":
+            diffs = drift(conn)
+            if diffs:   # refuse to serve on a schema the code does not describe; the transaction rolls back
+                raise SystemExit(f"schema differs from the models after migrating: {diffs[:5]}")
     eng.dispose()
-    return {"revision": head, "stamped_legacy_database": stamped, "app_role": role}
+    return {"revision": head, "stamped_legacy_database": stamped, "created_for_legacy": created, "app_role": role}
 
 
 if __name__ == "__main__":

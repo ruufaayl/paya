@@ -14,7 +14,7 @@
 | ~~App DB role could ALTER tables (disable triggers)~~ | Integrity lead | **Done (ADR-015)** | `paya_app` is data-only, no UPDATE/DELETE on evidence; the API never holds owner credentials (`evidence/security/db-roles-2026-11-21.md`) |
 | Mock rail has no message signing | Integrity lead | Strategic (mock) | mTLS + signed messages with the real operator |
 | react-router 6.x: 2 moderate advisories (fix only in v7) | Channels lead | Compensated (UUID-only QR routing) | Upgrade to v7 after the semester |
-| One API process caps at ~16 payments/s (CPU-bound) | Integrity lead | Accepted for prototype | Multiple API processes + separate worker + broker (ADR-004) |
+| One API process caps at ~14 payments/s (CPU-bound; 16 before the per-request session check) | Integrity lead | Accepted for prototype | Multiple API processes + separate worker + broker (ADR-004) |
 | Active (head-turn) liveness only; not certified presentation-attack detection | Security lead | Strategic | Certified passive-liveness vendor behind `FaceEngine` before any pilot |
 | Face recogniser not evaluated on real, consented faces (FMR/FNMR, group fairness) | AI lead | Strategic | Evaluation on a consented, balanced dataset before auto-approval is used for real |
 | Simulated identity registry instead of a licensed verification service | Integrity lead | Strategic (no public access) | Replace through `RegistryPort` under the partner's licence |

@@ -83,3 +83,40 @@ def test_m6_grants_follow_the_append_only_list(client):
         assert granted[t] == {"SELECT", "INSERT"}, t
     assert granted["transactions"] == {"SELECT", "INSERT", "UPDATE", "DELETE"}
     assert all("TRUNCATE" not in p and "TRIGGER" not in p for p in granted.values())
+
+
+def test_m7_older_database_missing_part_of_the_baseline_is_completed_not_rebuilt(client, as_):
+    """Found on a real pre-migration database: it predated the registry schema (Theme 1)."""
+    pay(client, as_, new_request(client, as_, 9_000))
+    with session_scope() as s:
+        before = s.execute(select(func.count()).select_from(Transaction)).scalar()
+    from alembic import command
+    with owner().begin() as c:
+        cfg = migrate._config(migrate.owner_url())
+        cfg.attributes["connection"] = c
+        command.downgrade(cfg, migrate.BASELINE)
+        c.execute(text("DROP TABLE alembic_version"))
+        c.execute(text("DROP SCHEMA registry CASCADE"))          # an older feature set: no registry yet
+        c.execute(text("DROP TABLE kyc_checks"))
+    out = migrate.upgrade()
+    assert out["stamped_legacy_database"] and {"registry.identities", "kyc_checks"} <= set(out["created_for_legacy"])
+    with owner().connect() as c:
+        assert migrate.drift(c) == []
+    with session_scope() as s:
+        assert s.execute(select(func.count()).select_from(Transaction)).scalar() == before
+
+
+def test_m8_a_failed_upgrade_leaves_no_stamp_behind(client, monkeypatch):
+    from alembic import command
+    with owner().begin() as c:
+        cfg = migrate._config(migrate.owner_url())
+        cfg.attributes["connection"] = c
+        command.downgrade(cfg, migrate.BASELINE)
+        c.execute(text("DROP TABLE alembic_version"))
+    monkeypatch.setattr(migrate, "grant_statements", lambda role: ["SELECT no_such_function()"])   # fail late
+    with pytest.raises(Exception):
+        migrate.upgrade()
+    with owner().connect() as c:
+        assert c.execute(text("SELECT to_regclass('alembic_version')")).scalar() is None   # rolled back entirely
+    monkeypatch.undo()
+    assert migrate.upgrade()["stamped_legacy_database"] is True

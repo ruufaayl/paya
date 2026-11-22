@@ -23,8 +23,8 @@ The measured values come from the load test (`evidence/performance/`) and the re
 
 | # | SLI (how measured) | SLO (target) | Why this target (business justification) | Measured | Met |
 |---|---|---|---|---|---|
-| SLO-1 | Payment initiation latency: client-side p95 of `POST /v1/payments` | p95 ≤ 1,000 ms at the design load of 10 concurrent customers | The customer is standing at a counter; over ~1 s feels broken | 84 ms (c=1); 792 ms (c=10) | yes |
-| SLO-2 | **Time to authoritative status**: SETTLE journal time − creation time | p95 ≤ 3 s with a healthy rail | The cashier must not wait to hand over goods; this is the product promise | 102 ms (c=1); 1.8 s (c=10) | yes |
+| SLO-1 | Payment initiation latency: client-side p95 of `POST /v1/payments` | p95 ≤ 1,000 ms at the design load of 10 concurrent customers | The customer is standing at a counter; over ~1 s feels broken | 96 ms (c=1); 899 ms (c=10). Before ADR-015 to 017: 84 / 792 ms | yes |
+| SLO-2 | **Time to authoritative status**: SETTLE journal time − creation time | p95 ≤ 3 s with a healthy rail | The cashier must not wait to hand over goods; this is the product promise | 112 ms (c=1); 2.1 s (c=10). Before: 102 ms / 1.8 s | yes |
 | SLO-3 | **Duplicate financial effect**: transactions with more than one SETTLE or AUTH_POST journal | **0, always** (error budget = zero) | Money integrity is not traded for speed | 0 of 400 (incl. duplicate-ack storm) | yes |
 | SLO-4 | Payment success rate: settled ÷ attempted, excluding business declines | ≥ 99.5% over 30 days | Failures must be rare *and* explained | 100% in tests (400/400) | yes |
 | SLO-5 | Uncertainty resolved: PENDING older than 15 min without escalation | 0 (every uncertain payment is resolved or owned by a human within 15 min) | Week 9: every partial failure needs an owner and a timeout | Integrity check `pending_beyond_review_window` = 0 | yes |
@@ -33,8 +33,8 @@ The measured values come from the load test (`evidence/performance/`) and the re
 | SLO-8 | API availability (`/healthz` success) | 99.5% monthly (prototype) | A single node can't promise more honestly | — (not measured over 30 days) | n/a |
 
 **Capacity finding (measured, stated honestly):**
-- One payment costs about 60 ms of service time.
-- One Python process therefore saturates at about **16 payments/s** however many clients wait, because the work is CPU-bound in one interpreter.
+- One payment costs about 70 ms of service time (re-measured 2026-11-22; it was 60 ms before every request began checking its server-side session, ADR-017).
+- One Python process therefore saturates at about **14 payments/s** (16 before) however many clients wait, because the work is CPU-bound in one interpreter. The cost of instant revocation is about 12% of throughput.
 - At 10 concurrent clients, the extra latency is queueing.
 - **Scaling path:**
   - several API processes, plus a separate worker process (the row locks added after the load test already make concurrent workers safe);

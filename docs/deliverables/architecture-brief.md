@@ -61,12 +61,12 @@ author: "Rufayl Waseem (24i-5660) · Taha Ali (24i-5525) · Harris Safi (24i-565
 
 | NFR | Target | Measured (one machine, prototype) |
 |---|---|---|
-| Pay latency | p95 ≤ 1 s at 10 concurrent | 792 ms (84 ms at c=1) |
+| Pay latency | p95 ≤ 1 s at 10 concurrent | 899 ms (96 ms at c=1), re-measured after the security hardening |
 | Time to authoritative PAID | p95 ≤ 3 s | 1.8 s (0.1 s at c=1) |
 | Duplicate financial effect | 0 | 0 / 400, incl. duplicate-ack storm |
 | Recovery (RTO / RPO) | API 5 min; committed data RPO 0 | 1.3 s after SIGKILL; 0 lost |
 | Reconciliation | every break owned within 24 h | automatic owner and SLA |
-| Reproducibility | one command; CI | `make verify`; CI green; 138 tests; demo rehearsal 8/8 scenes |
+| Reproducibility | one command; CI | `make verify`; CI green; 140 tests; demo rehearsal 8/8 scenes |
 | Accessibility | WCAG 2.2 AA (self-assessed) | 0 axe violations (13 screens); 0 contrast failures |
 | AI safety | 0 unsafe autonomy | 0% (94.1% accuracy on acted cases) |
 

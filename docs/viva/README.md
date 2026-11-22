@@ -34,11 +34,11 @@ The brief (§10): *"Each member must explain design decisions, code ownership, t
 
 | Fact | Value | Source |
 |---|---|---|
-| Automated tests | 138, all passing as the data-only app role (CI green) | `evidence/tests/`, GitHub Actions |
+| Automated tests | 140, all passing as the data-only app role (CI green) | `evidence/tests/`, GitHub Actions |
 | Crash recovery | healthy 1.3 s; in-flight payments settled exactly once in 6.0 s | `evidence/resilience/` |
 | DB restart | API back in 0.7 s | same |
 | Load test | 400 payments, 0 duplicate settlements; p95 792 ms at 10 concurrent; ~16 payments/s per process | `evidence/performance/` |
-| Service time | ~60 ms per payment (p95 84 ms at c=1) | same |
+| Service time | ~70 ms per payment (p95 96 ms at c=1); 60 ms before the session check (ADR-017) | same |
 | AI | 94.1% accuracy on acted cases; 0% unsafe autonomy; 20/20 injection safe | `evidence/ai/evaluation.md` |
 | Fee | 0.50% synthetic merchant discount rate (PKR 2,450 → 12.25) | `config.py` |
 | Abstain threshold | confidence < 0.75; amount > PKR 100,000; missing evidence; compliance link | `ai_triage.py` |

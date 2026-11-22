@@ -3,7 +3,7 @@
 <h2>What we accept, and who owns it</h2>
 <table class="data">
 <tr><th style="width:38%;">Limit</th><th style="width:20%;">Risk</th><th style="width:42%;">Next step (owner)</th></tr>
-<tr><td>One API process, about 16 payments/s</td><td>Medium</td><td>More processes plus separate worker; locks already safe (Integrity lead)</td></tr>
+<tr><td>One API process, about 14 payments/s</td><td>Medium</td><td>More processes plus separate worker; locks already safe (Integrity lead)</td></tr>
 <tr><td>Tokens in browser storage (revocation and staff MFA done, ADR-017)</td><td>Low-medium</td><td>httpOnly cookies or OIDC; MFA recovery codes (Security lead)</td></tr>
 <tr><td>App DB role could disable triggers</td><td>Closed</td><td>Done: data-only app role, migrations as owner (ADR-015)</td></tr>
 <tr><td>Simulated rail; assumptions A3 and A4</td><td>Medium</td><td>Licensed sandbox behind RailPort (Integrity lead)</td></tr>

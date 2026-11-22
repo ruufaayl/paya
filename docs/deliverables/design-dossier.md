@@ -10,7 +10,7 @@ Pakistan's instant payment system has crossed into everyday commerce. SBP's annu
 
 Paya is designed as a **technology service provider** to a licensed partner EMI, which is synthetic in this prototype. It never holds funds or claims a licence. The implemented journey is the brief's *merchant payment* with its linked *reversal*. It runs from channel to gateway, then identity and AML controls, ledger, rail, posting, settlement, reconciliation, notification and finance reporting.
 
-The prototype runs locally with one command. It is covered by 138 automated backend tests (the ten required scenarios plus concurrency, security, AI, migration and theme tests, all run as a data-only database role), by browser acceptance runs, and by GitHub Actions continuous integration. It has been measured:
+The prototype runs locally with one command. It is covered by 140 automated backend tests (the ten required scenarios plus concurrency, security, AI, migration and theme tests, all run as a data-only database role), by browser acceptance runs, and by GitHub Actions continuous integration. It has been measured:
 
 - **Recovery:** after a forced crash with payments in flight, the API was healthy in 1.3 s, and every payment settled exactly once within 6 s.
 - **Load:** 400 payments, including a storm of duplicate acknowledgements, with zero duplicate settlements.
@@ -293,12 +293,12 @@ Reproducibility is part of resilience. A fresh clone from GitHub passes every te
 
 **SLOs.** Eight service-level objectives pair business meaning with measured values. They are stated as one-machine prototype numbers, not production capacity:
 
-- payment initiation p95 under 1 s at ten concurrent customers (measured 792 ms);
-- authoritative status p95 under 3 s (1.8 s);
+- payment initiation p95 under 1 s at ten concurrent customers (measured 899 ms after the security hardening; 792 ms before);
+- authoritative status p95 under 3 s (2.1 s);
 - zero duplicate financial effects (0 of 400);
 - no uncertain payment older than fifteen minutes without an owner.
 
-The load test also established an honest capacity limit. A payment costs about 60 ms of CPU, so one Python process saturates near sixteen payments per second, and higher concurrency adds queueing. The scaling path is several API processes, a separate worker and a broker; the row locks already make concurrent workers safe.
+The load test also established an honest capacity limit. A payment costs about 70 ms of service time (60 ms before every request began checking its server-side session), so one Python process saturates near fourteen payments per second, and higher concurrency adds queueing. The scaling path is several API processes, a separate worker and a broker; the row locks already make concurrent workers safe.
 
 ## 10. Responsible AI governance
 

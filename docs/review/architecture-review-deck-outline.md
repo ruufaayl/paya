@@ -15,9 +15,9 @@
 | 4 | **Transaction integrity: designed for the unhappy path** | State machine (timeout = PENDING, ADR-006); idempotency at four layers (ADR-003); append-only, balanced ledger (ADR-002); row locks plus constraints (ADR-007) | `rendered/state-model.png` + `rendered/seq-timeout.png` | B (Taha) |
 | 5 | **Ledger and reconciliation** | Posting rules (worked example E1); 4-layer recon stack; exception taxonomy with owners; 20 integrity checks | Table from `evidence/ledger/worked-examples.md`; break card screenshot | C (Harris) |
 | 6 | **Security, KYC/AML and access governance** | Maker ≠ checker; holds move no money; onboarding two-person rule; hash-chained audit incl. transcript reads; 21 STRIDE threats | Cards | D (Kanz) |
-| 7 | **Resilience, observability and evidence** | Recovery 1.3 s; 0/400 duplicates; 138 tests; 33/33 browser acceptance; rehearsal 8/8; truthful topology | `evidence/screenshots/revamp/console-topology-inspector-1440.png` | E (Mudaser) |
+| 7 | **Resilience, observability and evidence** | Recovery 1.3 s; 0/400 duplicates; 140 tests; 33/33 browser acceptance; rehearsal 8/8; truthful topology | `evidence/screenshots/revamp/console-topology-inspector-1440.png` | E (Mudaser) |
 | 8 | **Bounded AI: it suggests, people decide** | Triage agent metrics (94.1%, 0% unsafe, 20/20 injection); Paya Assistant (read-only, Roman Urdu, redaction); neither can move money | Case drawer + assistant phone screenshots | C (Harris) |
-| 9 | **Risks and limits we accept, and those we don't** | Single process ~16/s; DB roles, rate limits, MFA and revocation (closed, ADR-015 to 017); simulated rail; A1 unvalidated; AI and biometrics not evaluated on real data | Risk table | D (Kanz) |
+| 9 | **Risks and limits we accept, and those we don't** | Single process ~14/s; DB roles, rate limits, MFA and revocation (closed, ADR-015 to 017); simulated rail; A1 unvalidated; AI and biometrics not evaluated on real data | Risk table | D (Kanz) |
 | 10 | **Recommendation: CONDITIONAL GO** | Six conditions (adds certified liveness and a consented fairness study before onboarding real customers) | Checklist | A (Rufayl) |
 
 **Backup slides** (not counted): CI run and reproducibility; BPMN model; ERD; per-scenario test map.

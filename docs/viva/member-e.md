@@ -21,7 +21,7 @@
 | What does the circuit breaker protect? | After 3 failures it OPENs. New payments get 503 **before** any debit; it half-opens after 30 s |
 | RTO and RPO? | API 5 min (measured 1.3 s); DB RPO 0 for committed data while the volume survives, ≤ 24 h if the volume is lost (daily dump); in-flight payments correct within 15 min (measured 6 s) |
 | Why are your SLOs credible? | Measured by `load_test.py` and `recovery_drill.py`; stated as prototype numbers on one machine, not production claims |
-| Why only ~16 payments/s? | ~60 ms CPU per payment in one Python process; extra latency at c=10 is queueing. Scaling path: more processes plus a separate worker (now safe thanks to the row locks) |
+| Why only ~14 payments/s? | ~70 ms per payment in one Python process (60 ms before every request checked its session for instant revocation: a deliberate ~12% trade); extra latency at c=10 is queueing. Scaling path: more processes plus a separate worker (now safe thanks to the row locks) |
 | Is Mission Control scripted? | No. `effectOf()` maps live WebSocket events and telemetry to animations; refresh it and it shows the replay buffer |
 | How do you trace one payment in the logs? | `correlation_id` on every request log line and in-request telemetry; worker lines join on `txn_ref` |
 

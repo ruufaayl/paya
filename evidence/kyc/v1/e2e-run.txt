@@ -1,0 +1,5 @@
+PASS  clean applicant auto-approved
+PASS  new wallet shows synthetic Rs 5,000
+PASS  near watch-list name referred
+PASS  no tipping off on the phone
+PASS  phone updates after the second officer approves
