@@ -36,7 +36,7 @@ The 1.x console read as `auditor` and pressed buttons as hard-coded personas. 2.
 
 ## Two-person and maker-checker, made visible
 
-- **KYC:** the inspector explains the rule. The first officer's button says "Recommend approval"; after that it shows "Recommended by Hamza. Waiting for a second officer", and the button becomes "Confirm approval (2nd officer)". If Hamza tries to confirm, the server refuses (403, SoD) and the refusal is written to the audit chain.
+- **KYC:** the inspector explains the rule. The first officer's button says "Recommend approval"; after that it shows "Recommended by Kanz. Waiting for a second officer", and the button becomes "Confirm approval (2nd officer)". If Kanz tries to confirm, the server refuses (403, SoD) and the refusal is written to the audit chain.
 - **Reversals:** the Approvals tab names the maker. The approve button reads "Approve (you are the maker)" when that's true, and the server refuses it.
 
 ## Density and readability

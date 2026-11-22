@@ -32,27 +32,27 @@ def onboarding(client, n):
 def test_l1_login_attempts_per_address_are_limited(client, tight):
     codes = [client.post("/v1/auth/login", json=LOGIN).status_code for _ in range(4)]
     assert codes == [401, 401, 401, 429]
-    r = client.post("/v1/auth/login", json={"username": "sana.ops", "password": "paya-demo-2026"})
+    r = client.post("/v1/auth/login", json={"username": "mudaser.ops", "password": "paya-demo-2026"})
     assert r.status_code == 429 and r.json()["error"]["code"] == "RATE_LIMITED"     # the address, not the user
     assert 1 <= int(r.headers["Retry-After"]) <= 60
 
 
 def test_l2_lockout_survives_a_restart_because_it_is_in_the_database(client):
     for _ in range(5):
-        client.post("/v1/auth/login", json={"username": "rabia.finance", "password": "wrong"})
+        client.post("/v1/auth/login", json={"username": "rufayl.finance", "password": "wrong"})
     ratelimit.ceiling.reset()                       # an API restart loses process memory...
-    r = client.post("/v1/auth/login", json={"username": "rabia.finance", "password": "paya-demo-2026"})
+    r = client.post("/v1/auth/login", json={"username": "rufayl.finance", "password": "paya-demo-2026"})
     assert r.status_code == 429 and r.json()["error"]["code"] == "LOGIN_LOCKED"   # ...but not the lockout
     assert r.headers["Retry-After"] == "900"
 
 
 def test_l3_successful_login_clears_failures(client):
     for _ in range(4):
-        client.post("/v1/auth/login", json={"username": "sana.ops", "password": "wrong"})
-    assert client.post("/v1/auth/login", json={"username": "sana.ops", "password": "paya-demo-2026"}).status_code == 200
+        client.post("/v1/auth/login", json={"username": "mudaser.ops", "password": "wrong"})
+    assert client.post("/v1/auth/login", json={"username": "mudaser.ops", "password": "paya-demo-2026"}).status_code == 200
     for _ in range(4):
-        client.post("/v1/auth/login", json={"username": "sana.ops", "password": "wrong"})
-    assert client.post("/v1/auth/login", json={"username": "sana.ops", "password": "paya-demo-2026"}).status_code == 200
+        client.post("/v1/auth/login", json={"username": "mudaser.ops", "password": "wrong"})
+    assert client.post("/v1/auth/login", json={"username": "mudaser.ops", "password": "paya-demo-2026"}).status_code == 200
 
 
 def test_l4_onboarding_applications_per_address_are_limited(client, tight):
@@ -77,7 +77,7 @@ def test_l6_general_ceiling_per_signed_in_user(client, as_, tight):
 
 def test_l7_no_raw_address_or_username_is_stored(client):
     for _ in range(2):
-        client.post("/v1/auth/login", json={"username": "rabia.finance", "password": "wrong"})
+        client.post("/v1/auth/login", json={"username": "rufayl.finance", "password": "wrong"})
     with session_scope() as s:
         rows = s.execute(select(RateLimitCounter)).scalars().all()
     assert rows and all(len(r.key_hash) == 32 for r in rows)

@@ -49,7 +49,7 @@ def test_s1_normal_success_end_to_end(client, as_):
     assert wallet_minor(client, as_) == before - 245_000
     assert journals(ref) == ["AUTH_POST", "FEE", "SETTLE"]
 
-    run = client.post("/v1/finance/recon/run", headers=as_("rabia.finance"), json={}).json()
+    run = client.post("/v1/finance/recon/run", headers=as_("rufayl.finance"), json={}).json()
     assert run["MATCHED"] >= 1
     d = detail(client, as_, ref)
     assert d["status"] == "RECONCILED" and d["display_status"] == "Paid"
@@ -138,18 +138,18 @@ def test_s6_ops_requests_finance_approves_reversal_with_linked_reference(client,
     before = wallet_minor(client, as_)
     ref = pay(client, as_, new_request(client, as_, 40_000)).json()["txn_ref"]
     chaos.set_mode("DOWN")                                 # rail stays unreachable: a human must decide
-    r = client.post(f"/v1/ops/transactions/{ref}/reversal-requests", headers=as_("sana.ops"),
+    r = client.post(f"/v1/ops/transactions/{ref}/reversal-requests", headers=as_("mudaser.ops"),
                     json={"reason": "Rail down 20 min, customer waiting at counter"})
     assert r.status_code == 201
     approval = r.json()["approval_id"]
     # OPS cannot approve (RBAC), and FINANCE is a different person (SoD)
     assert client.post(f"/v1/finance/approvals/{approval}/approve", headers=as_("faisal.ops")).status_code == 403
-    r = client.post(f"/v1/finance/approvals/{approval}/approve", headers=as_("rabia.finance"))
+    r = client.post(f"/v1/finance/approvals/{approval}/approve", headers=as_("rufayl.finance"))
     assert r.status_code == 200 and r.json()["status"] == "REVERSED"
     d = detail(client, as_, ref)
     rev = [j for j in d["ledger"] if j["posting_type"] == "REVERSAL"][0]
-    assert rev["approved_by"] == "rabia.finance" and rev["initiated_via"] == "MANUAL_APPROVED"
-    assert d["approvals"][0]["maker"] == "sana.ops" and d["approvals"][0]["checker"] == "rabia.finance"
+    assert rev["approved_by"] == "rufayl.finance" and rev["initiated_via"] == "MANUAL_APPROVED"
+    assert d["approvals"][0]["maker"] == "mudaser.ops" and d["approvals"][0]["checker"] == "rufayl.finance"
     assert wallet_minor(client, as_) == before
     chaos.reset()
 
@@ -158,13 +158,13 @@ def test_s6c_self_approval_is_refused_and_the_denial_is_kept_in_the_audit_chain(
     from paya.errors import SegregationOfDuties
     chaos.set_mode("TIMEOUT_NO_RECORD")
     ref = pay(client, as_, new_request(client, as_, 20_000)).json()["txn_ref"]
-    a = payments.request_reversal(txn_ref=ref, actor="sana.ops", actor_role="OPS", reason="test")
+    a = payments.request_reversal(txn_ref=ref, actor="mudaser.ops", actor_role="OPS", reason="test")
     with pytest.raises(SegregationOfDuties):
-        payments.approve_reversal(approval_id=a.id, actor="sana.ops", actor_role="FINANCE")  # same person
+        payments.approve_reversal(approval_id=a.id, actor="mudaser.ops", actor_role="FINANCE")  # same person
     with session_scope() as s:
         denied = s.execute(select(AuditLog).where(AuditLog.action == "REVERSAL_APPROVE",
                                                   AuditLog.outcome == "DENIED")).scalars().all()
-    assert len(denied) == 1 and denied[0].actor == "sana.ops"
+    assert len(denied) == 1 and denied[0].actor == "mudaser.ops"
     assert status(ref) == "PENDING"
     chaos.reset()
 
@@ -189,9 +189,9 @@ def test_s7_watchlist_hold_blocks_without_moving_money_then_compliance_releases(
     assert journals(ref) == [] and wallet_minor(client, as_, "zarak") == before  # no money moved, evidence kept
 
     # Ops cannot release a compliance hold
-    assert client.post(f"/v1/compliance/holds/{ref}/decision", headers=as_("sana.ops"),
+    assert client.post(f"/v1/compliance/holds/{ref}/decision", headers=as_("mudaser.ops"),
                        json={"decision": "RELEASE", "reason": "looks fine"}).status_code == 403
-    r = client.post(f"/v1/compliance/holds/{ref}/decision", headers=as_("hamza.compliance"),
+    r = client.post(f"/v1/compliance/holds/{ref}/decision", headers=as_("kanz.compliance"),
                     json={"decision": "RELEASE", "reason": "False positive: different DOB and city on file"})
     assert r.status_code == 200
     assert status(ref) == "SETTLED"
@@ -212,7 +212,7 @@ def test_s8_unauthorised_attempts_are_denied_and_logged(client, as_):
     with session_scope() as s:
         denied = s.execute(select(AuditLog).where(AuditLog.outcome == "DENIED", AuditLog.actor == "ayesha.cashier")).scalars().all()
     assert denied and denied[0].action == "recon:run"
-    v = client.get("/v1/audit/verify", headers=as_("auditor")).json()
+    v = client.get("/v1/audit/verify", headers=as_("taha.audit")).json()
     assert v["chain_intact"] is True
 
 
@@ -238,9 +238,9 @@ def test_s10_recon_break_lands_in_exception_queue_with_owner(client, as_, settin
     chaos.queue("PARTIAL")                                 # accepted at the rail, missing from its file
     ref = pay(client, as_, new_request(client, as_, 33_000)).json()["txn_ref"]
     ok = pay(client, as_, new_request(client, as_, 12_000)).json()["txn_ref"]
-    run = client.post("/v1/finance/recon/run", headers=as_("rabia.finance"), json={}).json()
+    run = client.post("/v1/finance/recon/run", headers=as_("rufayl.finance"), json={}).json()
     assert run["MATCHED"] == 1 and run["MISSING_EXTERNAL"] == 1
-    cases = client.get("/v1/cases", headers=as_("sana.ops")).json()
+    cases = client.get("/v1/cases", headers=as_("mudaser.ops")).json()
     brk = [c for c in cases if c["kind"] == "RECON_BREAK" and c["txn_ref"] == ref]
     assert brk and brk[0]["state"] == "OPEN" and brk[0]["owner_role"] in ("OPS", "FINANCE")
     assert status(ok) == "RECONCILED" and status(ref) == "SETTLED"
@@ -250,9 +250,9 @@ def test_s10b_settled_after_cutoff_is_a_timing_difference_not_a_break(client, as
     monkeypatch.setattr(settings, "settlement_cutoff_utc_hour", 0)
     chaos.queue("LATE_SETTLE")
     ref = pay(client, as_, new_request(client, as_, 21_000)).json()["txn_ref"]
-    run = client.post("/v1/finance/recon/run", headers=as_("rabia.finance"), json={}).json()
+    run = client.post("/v1/finance/recon/run", headers=as_("rufayl.finance"), json={}).json()
     assert run["TIMING_DIFFERENCE"] == 1
-    assert not [c for c in client.get("/v1/cases", headers=as_("sana.ops")).json() if c["txn_ref"] == ref]
+    assert not [c for c in client.get("/v1/cases", headers=as_("mudaser.ops")).json() if c["txn_ref"] == ref]
 
 
 # ---------------------------------------------------------------- S11 Week 9 workshop (PKR 6,800, retry with NEW key)
@@ -289,8 +289,8 @@ def test_s12_circuit_breaker_refuses_new_payments_before_taking_money(client, as
 # ---------------------------------------------------------------- S13 duplicate settlement file
 def test_s13_same_settlement_file_twice_is_refused(client, as_):
     pay(client, as_, new_request(client, as_, 5_000))
-    assert client.post("/v1/finance/recon/run", headers=as_("rabia.finance"), json={}).status_code == 200
-    r = client.post("/v1/finance/recon/run", headers=as_("rabia.finance"), json={})
+    assert client.post("/v1/finance/recon/run", headers=as_("rufayl.finance"), json={}).status_code == 200
+    r = client.post("/v1/finance/recon/run", headers=as_("rufayl.finance"), json={})
     assert r.status_code == 409 and r.json()["error"]["code"] == "DUPLICATE_SETTLEMENT_FILE"
 
 
@@ -324,7 +324,7 @@ def test_conformance_no_settlement_without_authorisation_and_posting(client, as_
     pay(client, as_, new_request(client, as_, 11_000))
     payments.run_status_enquiries(force=True)
     pay(client, as_, new_request(client, as_, 12_000), customer="zarak")
-    client.post("/v1/compliance/holds/" + detail_ref_of_open_hold() + "/decision", headers=as_("hamza.compliance"),
+    client.post("/v1/compliance/holds/" + detail_ref_of_open_hold() + "/decision", headers=as_("kanz.compliance"),
                 json={"decision": "RELEASE", "reason": "False positive after review"})
     with session_scope() as s:
         rows = s.execute(text("SELECT txn_id, to_status FROM transaction_status_history ORDER BY id")).all()
@@ -348,7 +348,7 @@ def detail_ref_of_open_hold() -> str:
 def test_integrity_checks_pass_on_healthy_system_and_catch_a_silent_customer(client, as_):
     ref = pay(client, as_, new_request(client, as_, 15_000)).json()["txn_ref"]
     events.relay_once()
-    r = client.get("/v1/finance/integrity", headers=as_("rabia.finance")).json()
+    r = client.get("/v1/finance/integrity", headers=as_("rufayl.finance")).json()
     assert r["overall"] == "PASS", [c for c in r["checks"] if c["status"] != "PASS"]
     assert {c["layer"] for c in r["checks"]} == {"technical", "operational", "financial", "exceptions"}
 
@@ -356,7 +356,7 @@ def test_integrity_checks_pass_on_healthy_system_and_catch_a_silent_customer(cli
     with session_scope() as s:
         s.execute(text("DELETE FROM notifications"))
         s.execute(text("UPDATE transactions SET updated_at = now() - interval '60 seconds' WHERE txn_ref = :r"), {"r": ref})
-    r = client.get("/v1/finance/integrity", headers=as_("rabia.finance")).json()
+    r = client.get("/v1/finance/integrity", headers=as_("rufayl.finance")).json()
     failed = {c["check"]: c for c in r["checks"] if c["status"] == "FAIL"}
     assert r["overall"] == "FAIL" and failed["settled_without_customer_notice"]["value"] == 1
     assert client.get("/v1/finance/integrity", headers=as_("ayesha.cashier")).status_code == 403
@@ -394,6 +394,6 @@ def test_integrity_flags_settled_payments_no_file_ever_covered(client, as_):
     ref = pay(client, as_, new_request(client, as_, 7_000)).json()["txn_ref"]
     with session_scope() as s:
         s.execute(text("UPDATE transactions SET updated_at = now() - interval '2 days' WHERE txn_ref = :r"), {"r": ref})
-    r = client.get("/v1/finance/integrity", headers=as_("auditor")).json()
+    r = client.get("/v1/finance/integrity", headers=as_("taha.audit")).json()
     chk = [c for c in r["checks"] if c["check"] == "settled_but_unreconciled_after_d1"][0]
     assert chk["status"] == "WARN" and chk["value"] == 1

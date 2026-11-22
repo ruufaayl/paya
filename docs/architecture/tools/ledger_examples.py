@@ -74,15 +74,15 @@ for title, fn in cases:
         chaos.set_mode("TIMEOUT_NO_RECORD")
         ref = run_payment(40_000, sara, None, "E5")
         chaos.set_mode("DOWN")
-        a = payments.request_reversal(txn_ref=ref, actor="sana.ops", actor_role="OPS", reason="Rail silent beyond SLA")
-        payments.approve_reversal(approval_id=a.id, actor="rabia.finance", actor_role="FINANCE")
+        a = payments.request_reversal(txn_ref=ref, actor="mudaser.ops", actor_role="OPS", reason="Rail silent beyond SLA")
+        payments.approve_reversal(approval_id=a.id, actor="rufayl.finance", actor_role="FINANCE")
         chaos.reset()
     else:
         ref = fn()
     refs[title] = ref
     md += [f"## {title}", "", f"Reference `{ref}`.", "", *postings(ref), ""]
 
-summary = recon.run(rail.settlement_file(__import__("datetime").datetime.now(__import__("datetime").timezone.utc).date()), actor="rabia.finance")
+summary = recon.run(rail.settlement_file(__import__("datetime").datetime.now(__import__("datetime").timezone.utc).date()), actor="rufayl.finance")
 md += ["## Reconciliation run on the same day", "", "```json", __import__("json").dumps(summary, indent=2), "```", ""]
 with session_scope() as s:
     tb = ledger.trial_balance(s)

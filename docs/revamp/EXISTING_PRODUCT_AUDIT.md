@@ -73,7 +73,7 @@ QR payment (happy path, retry, double tap) · compliance hold → release/reject
 4. **Decorative surfaces:** gradient balance card with a blurred blob, "aurora" backgrounds, glassmorphism tab bar.
 5. **Mission Control has no information architecture.** Everything is on one screen. Reconciliation, audit, integrity, KYC history and AI metrics have no home. The right panel mixes approvals, cases and the feed.
 6. **Map semantics are misleading.** A node turns green after any info event; there is no distinction between static architecture and observed runtime state. No legend for node status. No search, filter or node inspector.
-7. **Operator identity is hidden.** Buttons labelled "Approve as Hamza" hard-code personas; the two-person rule is demonstrated by having two buttons rather than two signed-in people.
+7. **Operator identity is hidden.** Buttons labelled "Approve as Kanz" hard-code personas; the two-person rule is demonstrated by having two buttons rather than two signed-in people.
 8. **No receipts, no amount review step,** and the payment result relies on one large animation.
 9. **Colour-only status** on graph nodes and some chips.
 10. **No reduced-motion handling;** perpetual animations (pulse rings, scanning line, spinning rings).

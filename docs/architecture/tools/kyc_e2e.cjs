@@ -83,14 +83,14 @@ async function onboard(p, who, shots) {
 }
 
 async function findApp(name) {
-  const all = (await api("auditor", "/v1/kyc/applications")).body;
+  const all = (await api("taha.audit", "/v1/kyc/applications")).body;
   const hit = (all.items || all).find((a) => a.full_name === name);
-  return hit ? (await api("auditor", `/v1/kyc/applications/${hit.ref}`)).body : null;
+  return hit ? (await api("taha.audit", `/v1/kyc/applications/${hit.ref}`)).body : null;
 }
 
 (async () => {
   say(`# Theme 1 browser run (Paya 2.0) - ${new Date().toISOString()}`);
-  say(`Engine: ${JSON.stringify((await api("sana.ops", "/v1/kyc/engine")).body)}`);
+  say(`Engine: ${JSON.stringify((await api("mudaser.ops", "/v1/kyc/engine")).body)}`);
   const b = await chromium.launch();
 
   // 1. A clean applicant: every check passes, the machine approves, the wallet opens with its welcome credit.
@@ -123,32 +123,32 @@ async function findApp(name) {
   const probe = await fetch(`${API}/v1/wallet`, { headers: { authorization: `Bearer ${start.onboarding_token}` } });
   check("applicant token is refused outside onboarding", probe.status === 403);
 
-  // 4. Mission Control: Hamza recommends, cannot confirm his own, Nadia confirms; the phone updates by itself.
+  // 4. Mission Control: Kanz recommends, cannot confirm his own, Harris confirms; the phone updates by itself.
   const c = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
-  await c.goto(`${WEB}/control`); await c.evaluate(() => { localStorage.clear(); localStorage.setItem("paya.operator", "hamza.compliance"); });
+  await c.goto(`${WEB}/control`); await c.evaluate(() => { localStorage.clear(); localStorage.setItem("paya.operator", "kanz.compliance"); });
   await c.goto(`${WEB}/control/kyc?app=${app2.ref}`); await c.waitForTimeout(1800);
   await c.screenshot({ path: `${OUT}/b-6-console-review.png` });
   const decide = async (btn) => { await c.getByRole("button", { name: btn }).click(); await c.getByLabel(/Reason/).fill("Reviewed evidence: different date of birth from the list entry"); await c.getByRole("dialog").last().getByRole("button", { name: "Approve" }).click(); await c.waitForTimeout(1500); };
   await decide("Recommend approval");
   await decide(/Confirm approval/);
-  let st = (await api("auditor", `/v1/kyc/applications/${app2.ref}`)).body;
-  check("same officer cannot confirm their own recommendation (server refusal)", st.state === "REFERRED" && st.recommended_by === "hamza.compliance");
+  let st = (await api("taha.audit", `/v1/kyc/applications/${app2.ref}`)).body;
+  check("same officer cannot confirm their own recommendation (server refusal)", st.state === "REFERRED" && st.recommended_by === "kanz.compliance");
   await c.screenshot({ path: `${OUT}/b-7-two-person-refused.png` });
   for (let i = 0; i < 5 && await c.getByRole("dialog").count(); i++) { await c.keyboard.press("Escape"); await c.waitForTimeout(250); }
-  await c.locator('button[aria-haspopup="menu"]').click(); await c.getByRole("menuitemradio", { name: /Nadia/ }).click(); await c.waitForTimeout(1200);
+  await c.locator('button[aria-haspopup="menu"]').click(); await c.getByRole("menuitemradio", { name: /Harris/ }).click(); await c.waitForTimeout(1200);
   await c.goto(`${WEB}/control/kyc?app=${app2.ref}`); await c.waitForTimeout(1500);
   await decide(/Confirm approval/);
-  st = (await api("auditor", `/v1/kyc/applications/${app2.ref}`)).body;
-  check("second officer confirms: approved by two different people", st.state === "APPROVED" && st.decided_by === "nadia.compliance");
+  st = (await api("taha.audit", `/v1/kyc/applications/${app2.ref}`)).body;
+  check("second officer confirms: approved by two different people", st.state === "APPROVED" && st.decided_by === "harris.compliance");
   const flipped = await z.waitForFunction(() => /wallet is open/i.test(document.body.innerText), null, { timeout: 15000 }).then(() => true).catch(() => false);
   check("the waiting phone updates by itself when the officers decide", flipped);
   await z.screenshot({ path: `${OUT}/b-8-phone-approved.png` });
-  const rec = (await api("auditor", "/v1/audit/log?action=KYC_RECOMMEND_APPROVE")).body;
-  const appr = (await api("auditor", "/v1/audit/log?action=KYC_APPROVE")).body;
-  const refused = (await api("auditor", "/v1/audit/log?outcome=DENIED")).body;
+  const rec = (await api("taha.audit", "/v1/audit/log?action=KYC_RECOMMEND_APPROVE")).body;
+  const appr = (await api("taha.audit", "/v1/audit/log?action=KYC_APPROVE")).body;
+  const refused = (await api("taha.audit", "/v1/audit/log?outcome=DENIED")).body;
   check("both officers' decisions, and the refused self-confirmation, are in the hash-chained audit log",
-    rec.items.some((x) => x.actor === "hamza.compliance") && appr.items.some((x) => x.actor === "nadia.compliance")
-    && refused.items.some((x) => x.actor === "hamza.compliance") && appr.chain_intact === true,
+    rec.items.some((x) => x.actor === "kanz.compliance") && appr.items.some((x) => x.actor === "harris.compliance")
+    && refused.items.some((x) => x.actor === "kanz.compliance") && appr.chain_intact === true,
     `chain intact: ${appr.chain_intact}`);
 
   await b.close();

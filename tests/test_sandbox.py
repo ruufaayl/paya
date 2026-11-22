@@ -59,7 +59,7 @@ def test_sc1_switched_off_by_default(client, as_):
         assert r.status_code == 404 and r.json()["error"]["code"] == "FEATURE_DISABLED"
     assert client.post("/v1/sandbox/enrol", headers=as_("sara"), json={"acknowledge_no_value": True}).status_code == 404
     assert tokens.tick() == {}                                       # the worker does nothing either
-    assert client.get("/v1/ops/sandbox", headers=as_("sana.ops")).json()["enabled"] is False
+    assert client.get("/v1/ops/sandbox", headers=as_("mudaser.ops")).json()["enabled"] is False
 
 
 def test_sc2_enrolment_needs_tier2_and_acknowledgement(client, as_, on):
@@ -128,9 +128,9 @@ def test_sc7_screened_address_is_blocked_with_a_compliance_case(client, as_, on)
     funded(client, as_)
     r = send(client, as_, to_address=BLOCKED, amount_units=50_00)
     assert r.json()["status"] == "BLOCKED" and r.json()["chain_tx"] is None
-    cases = client.get("/v1/cases", headers=as_("hamza.compliance")).json()
+    cases = client.get("/v1/cases", headers=as_("kanz.compliance")).json()
     assert any(c["kind"] == "TOKEN_SCREENING" for c in cases)
-    log = client.get("/v1/audit/log?action=TOKEN_TRANSFER_BLOCKED", headers=as_("auditor")).json()
+    log = client.get("/v1/audit/log?action=TOKEN_TRANSFER_BLOCKED", headers=as_("taha.audit")).json()
     assert log["items"] and log["chain_intact"]
 
 

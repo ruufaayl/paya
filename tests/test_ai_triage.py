@@ -21,9 +21,9 @@ def _break_case(client, as_, settings, monkeypatch, amount=33_000):
     monkeypatch.setattr(settings, "settlement_cutoff_utc_hour", 24)   # settled "before cut-off": a real break
     chaos.queue("PARTIAL")
     ref = pay(client, as_, new_request(client, as_, amount)).json()["txn_ref"]
-    client.post("/v1/finance/recon/run", headers=as_("rabia.finance"), json={})
+    client.post("/v1/finance/recon/run", headers=as_("rufayl.finance"), json={})
     events.relay_once()
-    case = [c for c in client.get("/v1/cases", headers=as_("sana.ops")).json() if c["txn_ref"] == ref][0]
+    case = [c for c in client.get("/v1/cases", headers=as_("mudaser.ops")).json() if c["txn_ref"] == ref][0]
     return ref, case
 
 
@@ -41,7 +41,7 @@ def test_recon_break_is_auto_triaged_suggestion_audited_and_no_money_moves(clien
         after = ledger.trial_balance(s)
     # only the payment's own postings (AUTH_POST + SETTLE + FEE) exist; triage posted nothing
     assert after["total_debit_minor"] - before["total_debit_minor"] == 2 * 33_000 + 165
-    m = client.get("/v1/ai/metrics", headers=as_("auditor")).json()
+    m = client.get("/v1/ai/metrics", headers=as_("taha.audit")).json()
     assert m["suggestions"] == 1 and m["audit_completeness"] == 1.0
 
 
@@ -49,23 +49,23 @@ def test_only_the_case_owner_reviews_and_resolves_and_overrides_need_a_reason(cl
     ref, case = _break_case(client, as_, settings, monkeypatch)
     sid = case["ai"]["id"]
     assert case["owner_role"] == "OPS"
-    r = client.post(f"/v1/ai/suggestions/{sid}/review", headers=as_("rabia.finance"), json={"decision": "ACCEPTED"})
+    r = client.post(f"/v1/ai/suggestions/{sid}/review", headers=as_("rufayl.finance"), json={"decision": "ACCEPTED"})
     assert r.status_code == 403                                                  # not the owner
-    r = client.post(f"/v1/ai/suggestions/{sid}/review", headers=as_("sana.ops"), json={"decision": "OVERRIDDEN"})
+    r = client.post(f"/v1/ai/suggestions/{sid}/review", headers=as_("mudaser.ops"), json={"decision": "OVERRIDDEN"})
     assert r.status_code == 409                                                  # override without reason code
-    r = client.post(f"/v1/ai/suggestions/{sid}/review", headers=as_("sana.ops"),
+    r = client.post(f"/v1/ai/suggestions/{sid}/review", headers=as_("mudaser.ops"),
                     json={"decision": "OVERRIDDEN", "reason_code": "WRONG_ACTION", "note": "Rail already confirmed by phone"})
     assert r.status_code == 200
-    assert client.post(f"/v1/cases/{case['case_ref']}/resolve", headers=as_("rabia.finance"),
+    assert client.post(f"/v1/cases/{case['case_ref']}/resolve", headers=as_("rufayl.finance"),
                        json={"resolution": "RAIL_CONFIRMED_AND_REISSUED", "note": "x" * 5}).status_code == 403
-    r = client.post(f"/v1/cases/{case['case_ref']}/resolve", headers=as_("sana.ops"),
+    r = client.post(f"/v1/cases/{case['case_ref']}/resolve", headers=as_("mudaser.ops"),
                     json={"resolution": "RAIL_CONFIRMED_AND_REISSUED", "note": "Rail re-issued file line"})
     assert r.status_code == 200 and r.json()["state"] == "RESOLVED"
-    assert client.get("/v1/ai/metrics", headers=as_("auditor")).json()["override_rate"] == 1.0
+    assert client.get("/v1/ai/metrics", headers=as_("taha.audit")).json()["override_rate"] == 1.0
     # an AI suggestion can never resolve a case by itself
-    assert client.post(f"/v1/ai/cases/{case['case_ref']}/triage", headers=as_("sana.ops")).json()["case_ref"] == case["case_ref"]
+    assert client.post(f"/v1/ai/cases/{case['case_ref']}/triage", headers=as_("mudaser.ops")).json()["case_ref"] == case["case_ref"]
     with session_scope() as s:
-        assert s.execute(select(Case.resolved_by).where(Case.case_ref == case["case_ref"])).scalar_one() == "sana.ops"
+        assert s.execute(select(Case.resolved_by).where(Case.case_ref == case["case_ref"])).scalar_one() == "mudaser.ops"
 
 
 def test_agent_abstains_when_rail_status_is_unknown_and_for_high_value(client, as_, settings, monkeypatch):
@@ -146,12 +146,12 @@ def test_pending_review_case_gets_reversal_recommendation_but_reversal_still_nee
         payments.open_case(s, kind="PENDING_REVIEW", txn=t, owner_role="OPS", summary="test", details={"e2e_id": t.rail_e2e_id},
                            sla_minutes=60)
         case_ref = s.execute(select(C.case_ref).where(C.txn_id == t.id)).scalar_one()
-    out = client.post(f"/v1/ai/cases/{case_ref}/triage", headers=as_("sana.ops")).json()
+    out = client.post(f"/v1/ai/cases/{case_ref}/triage", headers=as_("mudaser.ops")).json()
     assert out["next_action"] == "RECOMMEND_REVERSAL" and not out["abstained"]
     with session_scope() as s:
         assert s.execute(select(Transaction.status).where(Transaction.txn_ref == ref)).scalar_one() == "PENDING"  # unchanged
     chaos.set_mode("DOWN")
-    out = client.post(f"/v1/ai/cases/{case_ref}/triage", headers=as_("sana.ops")).json()
+    out = client.post(f"/v1/ai/cases/{case_ref}/triage", headers=as_("mudaser.ops")).json()
     assert out["abstained"] and out["next_action"] == "HUMAN_REVIEW"
     chaos.reset()
     with session_scope() as s:

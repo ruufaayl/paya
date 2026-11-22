@@ -50,7 +50,7 @@ function Inner() {
       <div className="grid gap-4 xl:grid-cols-[1fr_380px]">
         <Card className="p-4">
           <SectionHeader level={3} title="Import a settlement file" description="Fetches the simulated rail's file for a business date, verifies control totals and the file hash, then matches every line." />
-          {!can("recon:run") && <div className="mt-3"><Alert tone="warning" title="Finance only">Running reconciliation needs recon:run (Finance). Switch operator to Rabia to run it.</Alert></div>}
+          {!can("recon:run") && <div className="mt-3"><Alert tone="warning" title="Finance only">Running reconciliation needs recon:run (Finance). Switch operator to Rufayl to run it.</Alert></div>}
           <div className="mt-3 flex flex-wrap items-end gap-2">
             <Input size2="md" label="Business date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-44" />
             <Button disabled={!can("recon:run")} loading={run.isPending} icon={<FileUp className="h-4 w-4" />} onClick={() => run.mutate(false)}>Import and reconcile</Button>

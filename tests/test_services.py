@@ -31,7 +31,7 @@ def test_p1_hub_lists_services_and_says_what_is_not_offered(client, as_):
     kinds = {s["kind"] for s in h["services"]}
     assert kinds == {"BILLER", "TOPUP", "SHOP", "INSURER"}
     assert h["not_offered"][0]["name"] == "Investments"
-    assert client.get("/v1/services", headers=as_("sana.ops")).status_code == 403
+    assert client.get("/v1/services", headers=as_("mudaser.ops")).status_code == 403
 
 
 def test_p2_bill_paid_through_the_normal_path_and_only_once(client, as_):
@@ -112,9 +112,9 @@ def test_p7_partner_data_needs_consent_and_shares_only_consented_fields(client, 
 def test_p8_compliance_suspends_a_partner_and_it_is_audited(client, as_):
     consent(client, as_, "BAZAAR")
     o = order(client, as_, "BAZAAR", items=[{"sku": "SOAP-4", "qty": 1}]).json()
-    assert client.post("/v1/ops/partners/BAZAAR/status", headers=as_("sana.ops"),
+    assert client.post("/v1/ops/partners/BAZAAR/status", headers=as_("mudaser.ops"),
                        json={"status": "SUSPENDED", "reason": "complaints spike"}).status_code == 403
-    r = client.post("/v1/ops/partners/BAZAAR/status", headers=as_("hamza.compliance"),
+    r = client.post("/v1/ops/partners/BAZAAR/status", headers=as_("kanz.compliance"),
                     json={"status": "SUSPENDED", "reason": "complaints spike under review"})
     assert r.status_code == 200
     hub = {s["code"]: s for s in client.get("/v1/services", headers=as_("sara")).json()["services"]}
@@ -122,8 +122,8 @@ def test_p8_compliance_suspends_a_partner_and_it_is_audited(client, as_):
     assert order(client, as_, "BAZAAR", items=[{"sku": "SOAP-4", "qty": 1}]).status_code == 409
     pay(client, as_, o["payment_request_id"])           # an order made before the suspension can still be paid
     assert orders(client, as_)[o["ref"]]["status"] == "COMPLETED"
-    log = client.get("/v1/audit/log?action=PARTNER_SUSPENDED", headers=as_("auditor")).json()
-    assert log["items"][0]["actor"] == "hamza.compliance" and log["chain_intact"]
+    log = client.get("/v1/audit/log?action=PARTNER_SUSPENDED", headers=as_("taha.audit")).json()
+    assert log["items"][0]["actor"] == "kanz.compliance" and log["chain_intact"]
 
 
 def test_p9_orders_and_requests_are_private_to_the_customer(client, as_):
@@ -137,7 +137,7 @@ def test_p9_orders_and_requests_are_private_to_the_customer(client, as_):
 def test_p10_mission_control_sees_partners_and_volumes(client, as_):
     o = order(client, as_, "RAVIGAS", consumer_no="0312340000").json()
     pay(client, as_, o["payment_request_id"])
-    rows = {p["code"]: p for p in client.get("/v1/ops/partners", headers=as_("sana.ops")).json()}
+    rows = {p["code"]: p for p in client.get("/v1/ops/partners", headers=as_("mudaser.ops")).json()}
     assert rows["RAVIGAS"]["completed"] == 1 and rows["RAVIGAS"]["completed_minor"] == o["amount_minor"]
     assert client.get("/v1/ops/partners", headers=as_("sara")).status_code == 403
 

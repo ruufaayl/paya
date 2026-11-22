@@ -28,7 +28,7 @@ async function scan(page, name) {
   await ph.goto(`${WEB}/app/assistant`); await ph.waitForTimeout(1000); await scan(ph, "wallet: assistant");
   await ph.goto(`${WEB}/app/open`); await ph.waitForTimeout(800); await scan(ph, "wallet: onboarding intro");
   const c = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
-  await c.goto(`${WEB}/control`); await c.evaluate(() => { localStorage.clear(); localStorage.setItem("paya.operator", "auditor"); }); 
+  await c.goto(`${WEB}/control`); await c.evaluate(() => { localStorage.clear(); localStorage.setItem("paya.operator", "taha.audit"); }); 
   for (const [r, n] of [["", "overview"], ["/transactions", "transactions"], ["/cases", "cases"], ["/kyc", "kyc"], ["/recon", "recon"], ["/events", "events"], ["/audit", "audit"], ["/rail-lab", "rail lab"], ["/ai", "ai operations"], ["/green", "green banking"], ["/partners", "partners"], ["/sandbox", "stablecoin sandbox"], ["/security", "security"]]) {
     await c.goto(`${WEB}/control${r}`); await c.waitForTimeout(1500); await scan(c, `console: ${n}`);
   }

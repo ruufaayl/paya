@@ -110,9 +110,9 @@ def test_g7_offset_is_a_normal_payment_and_certified_only_after_settlement(clien
 
 def test_g8_staff_see_aggregates_and_customers_see_only_their_own(client, as_):
     move(client, as_, "IN", 1_000_00)
-    assert client.get("/v1/green/pot", headers=as_("sana.ops")).status_code == 403
+    assert client.get("/v1/green/pot", headers=as_("mudaser.ops")).status_code == 403
     assert client.get("/v1/ops/green/portfolio", headers=as_("sara")).status_code == 403
-    port = client.get("/v1/ops/green/portfolio", headers=as_("sana.ops")).json()
+    port = client.get("/v1/ops/green/portfolio", headers=as_("mudaser.ops")).json()
     assert port["pots"] == {**port["pots"], "count": 1, "total_minor": 1_000_00, "ledger_account": "2110"}
     assert "Sara" not in str(port) and "customer" not in str(port).lower()
     assert pot(client, as_, "omar")["balance"] == 0 and pot(client, as_, "omar")["moves"] == []

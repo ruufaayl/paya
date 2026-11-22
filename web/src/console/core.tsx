@@ -10,13 +10,13 @@ import { liveLink, msgId, type StreamMsg } from "../lib/stream";
 
 // ------------------------------------------------------------------ operator
 export const STAFF = [
-  { username: "sana.ops", name: "Sana", role: "OPS", title: "Operations" },
+  { username: "mudaser.ops", name: "Mudaser Waleed", role: "OPS", title: "Operations" },
   { username: "faisal.ops", name: "Faisal", role: "OPS", title: "Operations" },
-  { username: "hamza.compliance", name: "Hamza", role: "COMPLIANCE", title: "Compliance" },
-  { username: "nadia.compliance", name: "Nadia", role: "COMPLIANCE", title: "Compliance (2nd officer)" },
-  { username: "rabia.finance", name: "Rabia", role: "FINANCE", title: "Finance & reconciliation" },
+  { username: "kanz.compliance", name: "Kanz ur Rehman", role: "COMPLIANCE", title: "Compliance" },
+  { username: "harris.compliance", name: "Harris Safi", role: "COMPLIANCE", title: "Compliance (2nd officer)" },
+  { username: "rufayl.finance", name: "Rufayl Waseem", role: "FINANCE", title: "Finance & reconciliation" },
   { username: "admin", name: "Admin", role: "SYSADMIN", title: "System administrator" },
-  { username: "auditor", name: "Auditor", role: "AUDITOR", title: "Internal audit (read-only)" },
+  { username: "taha.audit", name: "Taha Ali", role: "AUDITOR", title: "Internal audit (read-only)" },
 ];
 
 export interface Operator { username: string; role: string; display_name: string; permissions: string[] }

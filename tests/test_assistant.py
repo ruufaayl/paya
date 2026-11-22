@@ -72,20 +72,20 @@ def test_c7_handoff_opens_one_audited_ops_case_and_staff_can_read_the_redacted_t
     case_ref = r2["handoff"]["case_ref"]
     r3 = say(client, as_, "talk to a human please", ref=r1["conversation_ref"])
     assert r3["handoff"]["case_ref"] == case_ref and r3["handoff"]["existing"]  # one case per conversation
-    cases = client.get("/v1/cases", headers=as_("sana.ops")).json()
+    cases = client.get("/v1/cases", headers=as_("mudaser.ops")).json()
     assert any(c["case_ref"] == case_ref and c["kind"] == "SUPPORT_HANDOFF" and c["owner_role"] == "OPS" for c in cases)
-    t = client.get(f"/v1/ops/assistant/conversations/{r1['conversation_ref']}", headers=as_("sana.ops")).json()
+    t = client.get(f"/v1/ops/assistant/conversations/{r1['conversation_ref']}", headers=as_("mudaser.ops")).json()
     assert t["handoff_case_ref"] == case_ref and "4111" not in str(t)
-    log = client.get("/v1/audit/log?action=CHAT", headers=as_("auditor")).json()["items"]
+    log = client.get("/v1/audit/log?action=CHAT", headers=as_("taha.audit")).json()["items"]
     assert {a["action"] for a in log} >= {"CHAT_HANDOFF", "CHAT_TRANSCRIPT_READ"}
 
 
 def test_c8_permissions_and_conversation_isolation(client, as_):
     r = say(client, as_, "hi")
     assert client.get(f"/v1/assistant/conversations/{r['conversation_ref']}", headers=as_("omar")).status_code == 404
-    assert client.post("/v1/assistant/messages", headers=as_("sana.ops"), json={"text": "hi"}).status_code == 403
+    assert client.post("/v1/assistant/messages", headers=as_("mudaser.ops"), json={"text": "hi"}).status_code == 403
     assert client.get(f"/v1/ops/assistant/conversations/{r['conversation_ref']}", headers=as_("sara")).status_code == 403
-    m = client.get("/v1/ops/assistant/metrics", headers=as_("auditor")).json()
+    m = client.get("/v1/ops/assistant/metrics", headers=as_("taha.audit")).json()
     assert m["conversations"] >= 1 and m["rules_version"] == "assistant.v1"
 
 
@@ -101,7 +101,7 @@ def test_c9_assistant_has_no_money_moving_code_path():
 def test_c10_ops_closes_the_handoff_without_touching_money(client, as_):
     r = say(client, as_, "please let me talk to a human")
     case_ref = r["handoff"]["case_ref"]
-    bad = client.post(f"/v1/cases/{case_ref}/resolve", headers=as_("sana.ops"), json={"resolution": "WRITTEN_OFF_APPROVED", "note": "wrong kind"})
+    bad = client.post(f"/v1/cases/{case_ref}/resolve", headers=as_("mudaser.ops"), json={"resolution": "WRITTEN_OFF_APPROVED", "note": "wrong kind"})
     assert bad.status_code == 409  # a recon resolution is not valid for a chat handoff
-    ok = client.post(f"/v1/cases/{case_ref}/resolve", headers=as_("sana.ops"), json={"resolution": "CUSTOMER_CONTACTED", "note": "called back"})
+    ok = client.post(f"/v1/cases/{case_ref}/resolve", headers=as_("mudaser.ops"), json={"resolution": "CUSTOMER_CONTACTED", "note": "called back"})
     assert ok.status_code == 200 and ok.json()["state"] == "RESOLVED"

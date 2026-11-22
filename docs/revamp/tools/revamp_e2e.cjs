@@ -120,7 +120,7 @@ async function onboard(p, who) {
   await s.screenshot({ path: `${OUT}/wallet-review-390.png` });
   await s.getByRole("slider").focus(); await s.keyboard.press("Enter");
   await s.waitForURL(/\/app\/txn\//); const ref1 = s.url().split("/").pop();
-  const settled = await waitFor(async () => ["SETTLED", "RECONCILED"].includes((await api("auditor", `/v1/transactions/${ref1}`)).body.status));
+  const settled = await waitFor(async () => ["SETTLED", "RECONCILED"].includes((await api("taha.audit", `/v1/transactions/${ref1}`)).body.status));
   await s.getByRole("heading", { name: "Paid" }).waitFor({ timeout: 8000 }).catch(() => {});
   check("payment: success shown only after backend SETTLED", settled && /Paid/.test(await s.locator("h1").innerText()));
   await s.screenshot({ path: `${OUT}/wallet-result-paid-390.png`, fullPage: true });
@@ -151,7 +151,7 @@ async function onboard(p, who) {
   const samples = []; let shot = false;
   for (let i = 0; i < 80; i++) {
     const h = (await o.locator("h1", { hasText: /Processing|Paid/ }).first().innerText().catch(() => "")).trim();
-    const st = (await api("auditor", `/v1/transactions/${ref3}`)).body.status;
+    const st = (await api("taha.audit", `/v1/transactions/${ref3}`)).body.status;
     samples.push([h, st]);
     if (!shot && st === "PENDING" && h === "Processing") {
       await o.screenshot({ path: `${OUT}/wallet-result-pending-390.png` }); shot = true;
@@ -166,7 +166,7 @@ async function onboard(p, who) {
   const violations = samples.filter(([h, st]) => h === "Paid" && !["SETTLED", "RECONCILED"].includes(st));
   check("pending: never shows Paid before the backend settles", violations.length === 0, `${samples.length} samples`);
   check("pending: shows Processing while the backend is PENDING", samples.some(([h, st]) => st === "PENDING" && h === "Processing"));
-  const settled3 = await waitFor(async () => (await api("auditor", `/v1/transactions/${ref3}`)).body.status === "SETTLED", 25000);
+  const settled3 = await waitFor(async () => (await api("taha.audit", `/v1/transactions/${ref3}`)).body.status === "SETTLED", 25000);
   await o.waitForTimeout(2500);
   check("pending: recovery agent settles it exactly once, then the screen says Paid", settled3 && /Paid/.test(await o.locator("h1").innerText()));
 
@@ -200,7 +200,7 @@ async function onboard(p, who) {
   await gate.getByText("Try a non-staff account").click(); await gate.waitForTimeout(1000);
   check("unauthorised: cashier is refused by the console", /no back-office access/i.test(await gate.locator("body").innerText()));
 
-  const c = await console_(browser, "sana.ops");
+  const c = await console_(browser, "mudaser.ops");
   check("overview: loads real metrics", /Success rate/i.test(await c.locator("body").innerText()));
   await c.screenshot({ path: `${OUT}/console-overview-1440.png` });
   await c.getByLabel(/Search transactions by reference/).fill(ref1); await c.keyboard.press("Enter"); await c.waitForTimeout(1500);
@@ -218,45 +218,45 @@ async function onboard(p, who) {
     await c.getByRole("button", { name: "Apply scenario" }).click(); await c.waitForTimeout(700);
     await c.getByRole("button", { name: /Trigger test payment/ }).click(); await c.waitForTimeout(3500);
     const runRef = (await c.locator("li button.ref").first().innerText()).trim();
-    const st = await waitFor(async () => { const s2 = (await api("auditor", `/v1/transactions/${runRef}`)).body.status; return s2 === expect ? s2 : null; }, 15000);
+    const st = await waitFor(async () => { const s2 = (await api("taha.audit", `/v1/transactions/${runRef}`)).body.status; return s2 === expect ? s2 : null; }, 15000);
     check(`rail lab: ${mode} → ${expect}`, !!st, runRef);
   }
   await c.screenshot({ path: `${OUT}/console-rail-lab-1440.png` });
   await c.getByRole("button", { name: "Restore healthy" }).click(); await c.waitForTimeout(500);
 
   // Reconciliation: import, import again (refused), inspect the break
-  await switchOp(c, "Rabia");
+  await switchOp(c, "Rufayl");
   await c.goto(`${WEB}/control/recon`); await c.waitForTimeout(1000);
   await c.getByRole("button", { name: "Import and reconcile" }).click(); await c.waitForTimeout(2000);
-  const runs = (await api("rabia.finance", "/v1/finance/recon/runs")).body;
+  const runs = (await api("rufayl.finance", "/v1/finance/recon/runs")).body;
   check("reconciliation: run recorded", runs.length >= 1);
   await c.getByRole("button", { name: "Import the same file again" }).click(); await c.waitForTimeout(1500);
-  check("reconciliation: identical file refused", (await api("rabia.finance", "/v1/finance/recon/runs")).body.length === runs.length && /already imported|Not possible|refused|duplicate/i.test(await c.locator("body").innerText()));
-  const items = (await api("rabia.finance", `/v1/finance/recon/runs/${runs[0].id}/items`)).body.items;
+  check("reconciliation: identical file refused", (await api("rufayl.finance", "/v1/finance/recon/runs")).body.length === runs.length && /already imported|Not possible|refused|duplicate/i.test(await c.locator("body").innerText()));
+  const items = (await api("rufayl.finance", `/v1/finance/recon/runs/${runs[0].id}/items`)).body.items;
   const brk = items.find((i) => i.category !== "MATCHED" && i.case);
   check("reconciliation: unmatched record has an owned case", !!brk, brk && `${brk.category} → ${brk.case.case_ref}`);
   await c.screenshot({ path: `${OUT}/console-recon-1440.png` });
 
   // Assign and resolve the break as its owner; AI triage suggestion
   if (brk) {
-    const owner = brk.case.owner_role === "FINANCE" ? "Rabia" : "Sana";
+    const owner = brk.case.owner_role === "FINANCE" ? "Rufayl" : "Mudaser";
     await switchOp(c, owner);
     await c.goto(`${WEB}/control/cases?case=${brk.case.case_ref}`); await c.waitForTimeout(1500);
     await c.getByRole("button", { name: "Take it" }).click(); await c.waitForTimeout(1200);
-    const cd = (await api("auditor", `/v1/cases/${brk.case.case_ref}`)).body;
+    const cd = (await api("taha.audit", `/v1/cases/${brk.case.case_ref}`)).body;
     check("exception assignment: case assigned to the operator, audited", cd.assigned_to && cd.audit.some((x) => x.action === "CASE_ASSIGN"), cd.assigned_to);
     await c.getByRole("button", { name: /Ask AI|Re-run/ }).click(); await c.waitForTimeout(3000);
-    const cd2 = (await api("auditor", `/v1/cases/${brk.case.case_ref}`)).body;
+    const cd2 = (await api("taha.audit", `/v1/cases/${brk.case.case_ref}`)).body;
     check("AI triage: suggestion recorded, advisory only", cd2.ai.length >= 1);
     await c.screenshot({ path: `${OUT}/console-case-drawer-1440.png` });
     await c.getByRole("button", { name: "Resolve with evidence" }).click(); await c.waitForTimeout(1200);
-    check("exception resolution: case resolved by its owner", (await api("auditor", `/v1/cases/${brk.case.case_ref}`)).body.state === "RESOLVED");
+    check("exception resolution: case resolved by its owner", (await api("taha.audit", `/v1/cases/${brk.case.case_ref}`)).body.state === "RESOLVED");
     await c.keyboard.press("Escape");
   }
 
   // KYC two-person approval through the UI
-  await switchOp(c, "Hamza");
-  const apps = (await api("hamza.compliance", "/v1/kyc/applications?state=REFERRED")).body;
+  await switchOp(c, "Kanz");
+  const apps = (await api("kanz.compliance", "/v1/kyc/applications?state=REFERRED")).body;
   const app = apps.find((x) => x.two_person_rule);
   if (app) {
     await c.goto(`${WEB}/control/kyc?app=${app.ref}`); await c.waitForTimeout(1500);
@@ -266,19 +266,19 @@ async function onboard(p, who) {
     await approve(/Confirm approval/);
     await c.screenshot({ path: `${OUT}/console-kyc-sod-refused-1440.png` });
     await c.keyboard.press("Escape"); await c.waitForTimeout(400); await c.keyboard.press("Escape"); await c.waitForTimeout(400);
-    const st = (await api("auditor", `/v1/kyc/applications/${app.ref}`)).body;
-    check("two-person rule: same officer cannot confirm own recommendation", st.state === "REFERRED" && st.recommended_by === "hamza.compliance");
-    await switchOp(c, "Nadia");
+    const st = (await api("taha.audit", `/v1/kyc/applications/${app.ref}`)).body;
+    check("two-person rule: same officer cannot confirm own recommendation", st.state === "REFERRED" && st.recommended_by === "kanz.compliance");
+    await switchOp(c, "Harris");
     await c.goto(`${WEB}/control/kyc?app=${app.ref}`); await c.waitForTimeout(1500);
     await approve(/Confirm approval/);
-    const st2 = (await api("auditor", `/v1/kyc/applications/${app.ref}`)).body;
-    check("two-person rule: second officer approves", st2.state === "APPROVED" && st2.decided_by === "nadia.compliance");
+    const st2 = (await api("taha.audit", `/v1/kyc/applications/${app.ref}`)).body;
+    check("two-person rule: second officer approves", st2.state === "APPROVED" && st2.decided_by === "harris.compliance");
   } else check("two-person rule: referred application available", false);
 
   // Unauthorised finance action and the audit log
   const denied = await api("ayesha.cashier", "/v1/finance/recon/run", { method: "POST", body: "{}" });
   check("unauthorised finance action: 403 from the server", denied.status === 403);
-  await switchOp(c, "Sana");
+  await switchOp(c, "Mudaser");
   await c.goto(`${WEB}/control/audit`); await c.waitForTimeout(900);
   check("audit page restricted for Ops", /Not available for your role/.test(await c.locator("body").innerText()));
   await switchOp(c, "Auditor");
@@ -289,7 +289,7 @@ async function onboard(p, who) {
 
   // Responsive console + topology + events
   for (const w of [1280, 1920]) {
-    const pc = await console_(browser, "auditor", w);
+    const pc = await console_(browser, "taha.audit", w);
     for (const [route, name] of [["", "overview"], ["/topology", "topology"], ["/transactions", "transactions"]]) {
       await pc.goto(`${WEB}/control${route}`); await pc.waitForTimeout(1800);
       const overflow = await pc.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);

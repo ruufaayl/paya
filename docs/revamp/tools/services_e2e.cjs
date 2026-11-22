@@ -78,11 +78,11 @@ async function slideToPay(p) {
 
   // 3. Third-party risk: Compliance suspends a partner
   const c = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
-  await c.goto(`${WEB}/control`); await c.evaluate(() => { localStorage.clear(); localStorage.setItem("paya.operator", "sana.ops"); });
+  await c.goto(`${WEB}/control`); await c.evaluate(() => { localStorage.clear(); localStorage.setItem("paya.operator", "mudaser.ops"); });
   await c.goto(`${WEB}/control/partners`); await c.waitForTimeout(1800);
   text = await c.locator("main").innerText();
   check("Ops sees partners and volumes but can't suspend", /Indus Power/.test(text) && /Compliance only/.test(text) && !/Suspend\b/.test(text.replace(/suspended/gi, "")));
-  await c.evaluate(() => localStorage.setItem("paya.operator", "hamza.compliance")); await c.reload(); await c.waitForTimeout(1800);
+  await c.evaluate(() => localStorage.setItem("paya.operator", "kanz.compliance")); await c.reload(); await c.waitForTimeout(1800);
   const row = c.getByRole("row", { name: /Hifazat Takaful/ });
   await row.getByRole("button", { name: "Suspend" }).click();
   await c.getByLabel("Reason (goes into the audit log)").fill("Claims complaints under review");
@@ -90,12 +90,12 @@ async function slideToPay(p) {
   await c.screenshot({ path: `${OUT}/6-console-partners.png` });
   await p.goto(`${WEB}/app/services/HIFAZAT`); await p.waitForTimeout(1200);
   check("suspended partner is unavailable in the wallet", /Temporarily unavailable/.test(await p.locator("main").innerText()));
-  const audit = (await api("auditor", "/v1/audit/log?action=PARTNER_SUSPENDED")).body;
-  check("suspension recorded in the audit chain with its reason", audit.items[0] && audit.items[0].actor === "hamza.compliance" && audit.chain_intact);
-  const integ = (await api("rabia.finance", "/v1/finance/integrity")).body.checks;
+  const audit = (await api("taha.audit", "/v1/audit/log?action=PARTNER_SUSPENDED")).body;
+  check("suspension recorded in the audit chain with its reason", audit.items[0] && audit.items[0].actor === "kanz.compliance" && audit.chain_intact);
+  const integ = (await api("rufayl.finance", "/v1/finance/integrity")).body.checks;
   const want = ["service_order_matches_payment_request", "partner_data_shared_only_with_consent", "till_paid_without_settlement", "trial_balance_balanced"];
   check("integrity: order amounts, consented sharing, trial balance", want.every((w) => integ.find((x) => x.check === w)?.status === "PASS"));
-  await api("hamza.compliance", "/v1/ops/partners/HIFAZAT/status", { method: "POST", body: JSON.stringify({ status: "ACTIVE", reason: "Review closed, resume" }) });
+  await api("kanz.compliance", "/v1/ops/partners/HIFAZAT/status", { method: "POST", body: JSON.stringify({ status: "ACTIVE", reason: "Review closed, resume" }) });
   await b.close();
   const failed = results.filter((x) => !x.ok).length;
   fs.writeFileSync(path.join(__dirname, "../../../evidence/revamp/services-e2e.json"), JSON.stringify({ at: new Date().toISOString(), passed: results.length - failed, failed, results }, null, 2));

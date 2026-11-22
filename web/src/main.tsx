@@ -39,3 +39,9 @@ adoptApiFromUrl();   // ?api=https://backend on any link points this device at t
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => undefined));
 }
+
+// iOS Safari ignores user-scalable=no for pinch, so block the pinch gesture itself outside Mission Control
+// (the console keeps pinch for the topology map). Double-tap zoom is off via touch-action: manipulation.
+const blockPinch = (e: Event) => { if (!location.pathname.startsWith("/control")) e.preventDefault(); };
+["gesturestart", "gesturechange"].forEach((t) => document.addEventListener(t, blockPinch, { passive: false }));
+document.addEventListener("touchmove", (e) => { if ((e as TouchEvent).touches.length > 1) blockPinch(e); }, { passive: false });

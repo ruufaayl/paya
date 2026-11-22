@@ -16,7 +16,7 @@ sequenceDiagram
     participant K as KYC service
     participant F as Face engine (YuNet + SFace)
     participant R as Identity registry (simulated)
-    actor C as Compliance (Hamza / Nadia)
+    actor C as Compliance (Kanz / Harris)
     A->>API: start (consent, details, username, password)
     API-->>A: applicant token (30 min, can only finish this application)
     A->>API: specimen

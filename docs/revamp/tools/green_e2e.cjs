@@ -68,13 +68,13 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   check("offset requests are not offered to other customers", omarSees.body.every((r) => r.kind !== "GREEN_OFFSET"));
 
   const c = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
-  await c.goto(`${WEB}/control`); await c.evaluate(() => { localStorage.clear(); localStorage.setItem("paya.operator", "sana.ops"); });
+  await c.goto(`${WEB}/control`); await c.evaluate(() => { localStorage.clear(); localStorage.setItem("paya.operator", "mudaser.ops"); });
   await c.goto(`${WEB}/control/green`); await c.waitForTimeout(2000);
   text = await c.locator("main").innerText();
   check("Mission Control shows pot total from ledger 2110 and settled offsets", /Rs 5,120/.test(text) && /Rs 1,500/.test(text) && /ledger 2110/.test(text));
   check("Mission Control shows aggregates only (no customer names)", !/Sara|Ahmed/.test(text));
   await c.screenshot({ path: `${OUT}/5-console-green.png` });
-  const integ = (await api("rabia.finance", "/v1/finance/integrity")).body;
+  const integ = (await api("rufayl.finance", "/v1/finance/integrity")).body;
   const g = integ.checks.filter((x) => x.check.includes("green") || x.check === "trial_balance_balanced");
   check("integrity: pots non-negative, one journal per move, trial balance", g.length === 3 && g.every((x) => x.status === "PASS"));
   await b.close();

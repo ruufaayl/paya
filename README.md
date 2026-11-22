@@ -49,10 +49,10 @@ Demo logins all use the password `paya-demo-2026` (synthetic, demo mode only):
 | `zarak` | Customer who triggers the synthetic watch-list hold |
 | `hina` | Customer who is not KYC-verified |
 | `ayesha.cashier`, `bilal.admin` | Chai Junction cashier / merchant admin |
-| `sana.ops`, `faisal.ops` | Operations (request reversals, status enquiries) |
-| `hamza.compliance` | Compliance (release or reject holds) |
-| `nadia.compliance` | Compliance (second officer for the onboarding two-person rule) |
-| `rabia.finance` | Finance (approve reversals, run reconciliation) |
+| `mudaser.ops`, `faisal.ops` | Operations (request reversals, status enquiries) |
+| `kanz.compliance` | Compliance (release or reject holds) |
+| `harris.compliance` | Compliance (second officer for the onboarding two-person rule) |
+| `rufayl.finance` | Finance (approve reversals, run reconciliation) |
 | `admin` | System administrator (chaos controls only, no financial actions) |
 | `auditor` | Read-only, verifies the audit hash chain |
 
@@ -83,7 +83,7 @@ cd web && npm install && npm run dev      # http://localhost:5173  (API defaults
 
 ## Digital onboarding and KYC (Theme 1)
 
-Open a wallet from the phone: tap **Open a new Paya wallet**, consent, enter synthetic details, make a SPECIMEN ID card on the device, take a selfie, turn your head left and right, and get a decision in seconds. Clear cases are approved automatically. Anything else goes to Compliance in Mission Control; a possible watch-list match needs two officers (Hamza, then Nadia). Photos and face templates are never stored.
+Open a wallet from the phone: tap **Open a new Paya wallet**, consent, enter synthetic details, make a SPECIMEN ID card on the device, take a selfie, turn your head left and right, and get a decision in seconds. Clear cases are approved automatically. Anything else goes to Compliance in Mission Control; a possible watch-list match needs two officers (Kanz, then Harris). Photos and face templates are never stored.
 
 Run `make models` once to fetch the face models (YuNet, MIT licence; SFace, Apache 2.0; checksums pinned). Without them, every application is referred to a person. Design: `docs/architecture/16-digital-onboarding-kyc.md`, ADR-010. Evidence: `evidence/kyc/`.
 

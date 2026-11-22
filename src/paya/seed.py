@@ -2,7 +2,7 @@
 
 No real CNIC, account, card, biometric or credential data is ever stored in Paya.
 """
-from sqlalchemy import select, text
+from sqlalchemy import select, text, update
 
 from . import ledger
 from .db import session_scope
@@ -29,13 +29,13 @@ STAFF = [
     ("ayesha.cashier", "Ayesha (Cashier, Chai Junction)", "CASHIER", None, "MRC-0001"),
     ("bilal.admin", "Bilal (Merchant admin, Chai Junction)", "MERCHANT_ADMIN", None, "MRC-0001"),
     ("kamran.cashier", "Kamran (Cashier, Shifa Pharmacy)", "CASHIER", None, "MRC-0002"),
-    ("sana.ops", "Sana (Operations)", "OPS", None, None),
+    ("mudaser.ops", "Mudaser Waleed (Operations)", "OPS", None, None),
     ("faisal.ops", "Faisal (Operations)", "OPS", None, None),
-    ("hamza.compliance", "Hamza (Compliance)", "COMPLIANCE", None, None),
-    ("nadia.compliance", "Nadia (Compliance, second officer)", "COMPLIANCE", None, None),
-    ("rabia.finance", "Rabia (Finance & reconciliation)", "FINANCE", None, None),
+    ("kanz.compliance", "Kanz ur Rehman (Compliance)", "COMPLIANCE", None, None),
+    ("harris.compliance", "Harris Safi (Compliance, second officer)", "COMPLIANCE", None, None),
+    ("rufayl.finance", "Rufayl Waseem (Finance & reconciliation)", "FINANCE", None, None),
     ("admin", "System administrator", "SYSADMIN", None, None),
-    ("auditor", "Internal audit (read-only)", "AUDITOR", None, None),
+    ("taha.audit", "Taha Ali (Internal audit, read-only)", "AUDITOR", None, None),
 ]
 CUSTOMER_LOGINS = {"Sara Ahmed": "sara", "Omar Farooq": "omar", "Zarak Khanzada": "zarak", "Hina Baig": "hina"}
 
@@ -103,6 +103,11 @@ EXTRA_CASHIERS = [
 ]
 
 
+# Staff accounts renamed after the team (Fall 2026). Databases seeded earlier are renamed in place, idempotently.
+STAFF_RENAMES = {"sana.ops": "mudaser.ops", "hamza.compliance": "kanz.compliance", "nadia.compliance": "harris.compliance",
+                 "rabia.finance": "rufayl.finance", "auditor": "taha.audit"}
+
+
 def ensure_demo_extras() -> dict:
     added = 0
     with session_scope() as s:
@@ -119,6 +124,12 @@ def ensure_demo_extras() -> dict:
                 merchants[reg] = m
                 added += 1
         have = set(s.execute(select(User.username)).scalars())
+        display = {u: d for u, d, *_ in STAFF}
+        for old, new in STAFF_RENAMES.items():
+            if old in have and new not in have:
+                s.execute(update(User).where(User.username == old).values(username=new, display_name=display[new]))
+                have.discard(old); have.add(new)
+                added += 1
         pw = None
         for username, display, reg in EXTRA_CASHIERS:
             if username not in have:

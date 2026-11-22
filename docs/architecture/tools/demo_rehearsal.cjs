@@ -21,7 +21,7 @@ const pageErrors = [];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const tokens = {};
-async function api(p, { as = "auditor", method = "GET", body, headers = {} } = {}) {
+async function api(p, { as = "taha.audit", method = "GET", body, headers = {} } = {}) {
   if (!tokens[as]) tokens[as] = (await (await fetch(`${API}/v1/auth/login`, { method: "POST", headers: { "content-type": "application/json" },
     body: JSON.stringify({ username: as, password: "paya-demo-2026" }) })).json()).access_token;
   const r = await fetch(`${API}${p}`, { method, headers: { authorization: `Bearer ${tokens[as]}`, "content-type": "application/json", ...headers }, body: body ? JSON.stringify(body) : undefined });
@@ -93,10 +93,10 @@ const FAKE_CAMERA = () => {
   const trigger = async () => { await mc.getByRole("button", { name: /Trigger test payment/ }).click(); await sleep(2500); return (await mc.locator("ul li").filter({ hasText: /PAYA-|refused/ }).first().innerText()).trim(); };
   const heading = async () => (await phone.locator("h1", { hasText: /Processing|Paid|Under review|Declined/ }).first().innerText().catch(() => "")).trim();
 
-  await scene("0. Set-up: Mission Control as Sana, till and wallet signed in", () => mc.screenshot({ path: `${OUT}/scene-0-overview.png` }), async (check) => {
-    await mc.goto(`${WEB}/control`); await mc.evaluate(() => { localStorage.clear(); localStorage.setItem("paya.operator", "sana.ops"); });
+  await scene("0. Set-up: Mission Control as Mudaser, till and wallet signed in", () => mc.screenshot({ path: `${OUT}/scene-0-overview.png` }), async (check) => {
+    await mc.goto(`${WEB}/control`); await mc.evaluate(() => { localStorage.clear(); localStorage.setItem("paya.operator", "mudaser.ops"); });
     await mc.goto(`${WEB}/control`);
-    check("Mission Control is live as Sana", await mc.getByText("Live", { exact: true }).waitFor({ timeout: 15000 }).then(() => true).catch(() => false));
+    check("Mission Control is live as Mudaser", await mc.getByText("Live", { exact: true }).waitFor({ timeout: 15000 }).then(() => true).catch(() => false));
     check("Raast rail badged as simulated", /Simulated/.test(await mc.locator("header").innerText()));
     await till.goto(`${WEB}/app`); await till.evaluate(() => localStorage.clear()); await till.goto(`${WEB}/app`);
     await till.getByText("Ayesha", { exact: true }).click(); check("till open", await till.getByText("New sale").waitFor().then(() => true));
@@ -141,7 +141,7 @@ const FAKE_CAMERA = () => {
     check("wallet turns Paid by itself", (await heading()) === "Paid");
   });
 
-  await scene("3. Compliance hold: no money moves; Ops can't decide; Hamza releases with a reason", () => mc.screenshot({ path: `${OUT}/scene-3-hold.png` }), async (check) => {
+  await scene("3. Compliance hold: no money moves; Ops can't decide; Kanz releases with a reason", () => mc.screenshot({ path: `${OUT}/scene-3-hold.png` }), async (check) => {
     await railLab(null, "zarak");
     const run = await trigger(); const ref = (run.match(/PAYA-\d{8}-[0-9A-F]{6}/) || [])[0];
     check("payment is under review", await waitFor(async () => (await status(ref)) === "UNDER_REVIEW"), ref);
@@ -150,18 +150,18 @@ const FAKE_CAMERA = () => {
     const caseRef = tx.cases.find((c) => c.kind === "COMPLIANCE_HOLD").case_ref;
     await mc.goto(`${WEB}/control/cases?case=${caseRef}`); await sleep(1300);
     check("Ops sees the case but cannot decide", /Only Compliance can release or reject/.test(await mc.getByRole("dialog").innerText()));
-    await actAs("Hamza");
+    await actAs("Kanz");
     await mc.goto(`${WEB}/control/cases?case=${caseRef}`); await sleep(1300);
     await mc.getByRole("button", { name: "Release hold" }).click();
     await mc.getByLabel(/Reason/).fill("False positive: different date of birth and city on file");
     await mc.getByRole("dialog").last().getByRole("button", { name: "Release" }).click(); await sleep(1200);
     check("released payment settles", await waitFor(async () => (await status(ref)) === "SETTLED", 20000));
     const audit = (await api(`/v1/cases/${caseRef}`)).data.audit;
-    check("Hamza's decision is in the audit trail", audit.some((a) => a.actor === "hamza.compliance"));
+    check("Kanz's decision is in the audit trail", audit.some((a) => a.actor === "kanz.compliance"));
   });
 
   await scene("4. Raast outage: breaker opens, 4th payment refused before any debit, recovery settles the rest", () => mc.screenshot({ path: `${OUT}/scene-4-outage.png` }), async (check) => {
-    await actAs("Sana");
+    await actAs("Mudaser");
     await railLab("Outage", "omar");
     const runs = [];
     for (let i = 0; i < 4; i++) runs.push(await trigger());
@@ -180,15 +180,15 @@ const FAKE_CAMERA = () => {
     const run = await trigger(); const ref = (run.match(/PAYA-\d{8}-[0-9A-F]{6}/) || [])[0];
     await waitFor(async () => (await status(ref)) === "SETTLED");
     await mc.getByRole("button", { name: "Restore healthy" }).click(); await sleep(300);
-    await actAs("Rabia");
+    await actAs("Rufayl");
     await mc.goto(`${WEB}/control/recon`); await sleep(900);
     await mc.getByRole("button", { name: "Import and reconcile" }).click(); await sleep(2200);
-    const runs = (await api("/v1/finance/recon/runs", { as: "rabia.finance" })).data;
+    const runs = (await api("/v1/finance/recon/runs", { as: "rufayl.finance" })).data;
     const items = (await api(`/v1/finance/recon/runs/${runs[0].id}/items`)).data.items;
     const brk = items.find((i) => i.txn_ref === ref && i.case);
     check("missing line becomes an owned case", !!brk, brk && `${brk.category} → ${brk.case.case_ref}`);
     await mc.screenshot({ path: `${OUT}/scene-5-recon.png` });
-    await actAs(brk.case.owner_role === "FINANCE" ? "Rabia" : "Sana");
+    await actAs(brk.case.owner_role === "FINANCE" ? "Rufayl" : "Mudaser");
     await mc.goto(`${WEB}/control/cases?case=${brk.case.case_ref}`); await sleep(1200);
     await mc.getByRole("button", { name: "Take it" }).click(); await sleep(900);
     // The triage agent reacts to new breaks by itself; ask only if it hasn't suggested anything yet.
@@ -200,7 +200,7 @@ const FAKE_CAMERA = () => {
     await mc.getByRole("button", { name: "Resolve with evidence" }).click(); await sleep(1200);
     const cd = (await api(`/v1/cases/${brk.case.case_ref}`)).data;
     check("owner resolved it; suggestion accepted by a person", cd.state === "RESOLVED" && cd.ai.at(-1).reviewer_decision === "ACCEPTED");
-    await actAs("Rabia");
+    await actAs("Rufayl");
     await mc.goto(`${WEB}/control/recon`); await sleep(900);
     await mc.getByRole("button", { name: "Import the same file again" }).click(); await sleep(1400);
     check("same settlement file refused", /File already imported|already/i.test(await mc.locator("body").innerText()));
@@ -231,15 +231,15 @@ const FAKE_CAMERA = () => {
     }
     const t = await phone.locator("body").innerText();
     check("near-watch-list name referred, no tipping off", /person is checking/i.test(t) && !/screen|watch|sanction/i.test(t));
-    const app = (await api("/v1/kyc/applications?state=REFERRED", { as: "hamza.compliance" })).data.find((a) => a.full_name === "Zarak Khanzad");
-    await actAs("Hamza");
+    const app = (await api("/v1/kyc/applications?state=REFERRED", { as: "kanz.compliance" })).data.find((a) => a.full_name === "Zarak Khanzad");
+    await actAs("Kanz");
     await mc.goto(`${WEB}/control/kyc?app=${app.ref}`); await sleep(1300);
     const approve = async (btn) => { await mc.getByRole("button", { name: btn }).click(); await mc.getByLabel(/Reason/).fill("Reviewed: different date of birth from the list entry"); await mc.getByRole("dialog").last().getByRole("button", { name: "Approve" }).click(); await sleep(1400); };
     await approve("Recommend approval");
     await approve(/Confirm approval/);
     check("same officer's confirmation refused by the server", /Needs a different person/.test(await mc.locator("body").innerText()));
     await mc.screenshot({ path: `${OUT}/scene-6-two-person.png` });
-    await actAs("Nadia");
+    await actAs("Harris");
     await mc.goto(`${WEB}/control/kyc?app=${app.ref}`); await sleep(1300);
     await approve(/Confirm approval/);
     check("second officer approves", (await api(`/v1/kyc/applications/${app.ref}`)).data.state === "APPROVED");
@@ -256,8 +256,8 @@ const FAKE_CAMERA = () => {
     await mc.goto(`${WEB}/control/audit`); await sleep(1400);
     const a = await mc.locator("body").innerText();
     check("hash chain intact", /Hash chain intact/.test(a));
-    check("denials are recorded (e.g. Hamza's self-confirmation)", /DENIED/.test(a));
-    const integ = (await api("/v1/finance/integrity", { as: "auditor" })).data;
+    check("denials are recorded (e.g. Kanz's self-confirmation)", /DENIED/.test(a));
+    const integ = (await api("/v1/finance/integrity", { as: "taha.audit" })).data;
     check("integrity checks have no FAIL", integ.checks.every((c) => c.status !== "FAIL"), integ.overall);
   });
 

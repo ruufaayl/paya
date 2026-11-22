@@ -82,7 +82,7 @@ run_id = dt.datetime.now(dt.timezone.utc).strftime("%H%M%S")
 d1, d2, d3, d4 = ensure([f"drill{run_id}{i}" for i in range(4)])  # fresh customers: no velocity history
 
 wait_healthy()
-admin, cashier, auditor = token("admin"), token("ayesha.cashier"), token("auditor")
+admin, cashier, auditor = token("admin"), token("ayesha.cashier"), token("taha.audit")
 note(f"# Recovery drill - {dt.datetime.now(dt.timezone.utc):%Y-%m-%d %H:%M} UTC")
 note("")
 note("Stack: Docker Compose (`paya-api` + `postgres:16-alpine`) on the development container. Mock Raast rail. Synthetic data.")
@@ -123,7 +123,7 @@ note(f"- Each payment has exactly one AUTH_POST, one SETTLE and one FEE journal:
 rail_rows = psql("paya", "SELECT count(*) FROM rail.payments WHERE e2e_id IN (SELECT rail_e2e_id FROM transactions WHERE txn_ref IN ("
                  + ",".join(f"'{r}'" for r in refs) + "))")
 note(f"- Rail-side records for these 3 payments: **{rail_rows}** (no duplicate credits from the resend)")
-fin = token("rabia.finance")
+fin = token("rufayl.finance")
 integ = c.get(f"{B}/v1/finance/integrity", headers=fin).json()
 note(f"- Integrity checks after recovery: **{integ['overall']}**")
 note("")

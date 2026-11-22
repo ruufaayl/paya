@@ -33,9 +33,9 @@ Demo password for every account: `paya-demo-2026`.
 | Zarak Khanzada (customer) | `zarak` | Synthetic watch-list match → compliance hold |
 | Hina Baig (KYC pending) | `hina` | Unverified: can't pay |
 | Ayesha, Kamran, Noor, Danish, Sadia, Imran | `<name>.cashier` | Tills: Chai Junction, Shifa Pharmacy, Green Leaf Grocers, Lahore Tikka House, Clifton Fuel Stop, Saddar Book Corner |
-| Sana, Faisal | `sana.ops`, `faisal.ops` | Operations |
-| Hamza, Nadia | `hamza.compliance`, `nadia.compliance` | Compliance (two officers) |
-| Rabia | `rabia.finance` | Finance and reconciliation |
+| Mudaser, Faisal | `mudaser.ops`, `faisal.ops` | Operations |
+| Kanz, Harris | `kanz.compliance`, `harris.compliance` | Compliance (two officers) |
+| Rufayl | `rufayl.finance` | Finance and reconciliation |
 | Admin, Auditor | `admin`, `auditor` | Security; read-only audit |
 
 **Synthetic bill consumer numbers** (also shown as tap-to-use chips on the bill screen; any 10 digits work):
@@ -58,7 +58,7 @@ A bill can be paid once per month. If a number says **already paid**, tap anothe
 | Step | Where | Check |
 |---|---|---|
 | 1 | Open https://paya-six.vercel.app/healthz | `status: ok`, breaker `CLOSED` |
-| 2 | Laptop on the projector: `/control` → **Sana (Operations)** | Top bar: **Live**, Raast rail **Simulated · NORMAL**, **Integrity pass** |
+| 2 | Laptop on the projector: `/control` → **Mudaser (Operations)** | Top bar: **Live**, Raast rail **Simulated · NORMAL**, **Integrity pass** |
 | 3 | Mission Control → **Rail lab** → **Restore healthy** | Rail mode NORMAL. The live database is shared, so someone may have left a failure mode on |
 | 4 | Second screen or second tab: `/control/qr-wall` | Six QRs, each "Waiting for a scan" |
 | 5 | iPhone: Home Screen icon (or `/app`) → **Sara Ahmed** | Balance shows |
@@ -113,15 +113,15 @@ The live database is shared and is not reset between demos. That is fine: the le
 | Do | Say | See |
 |---|---|---|
 | Rail lab → pay as **Zarak** → Trigger | "A synthetic watch-list match." | **Under review**: money reserved, not sent |
-| **Cases & approvals** → open it as Sana | "Operations can see it but cannot decide." | No decision buttons |
-| **Act as → Hamza** → **Release hold** with a reason | "Only Compliance decides, and the reason is in the hash-chained audit log." | Payment settles; decision trail |
+| **Cases & approvals** → open it as Mudaser | "Operations can see it but cannot decide." | No decision buttons |
+| **Act as → Kanz** → **Release hold** with a reason | "Only Compliance decides, and the reason is in the hash-chained audit log." | Payment settles; decision trail |
 
 ### 8:30–10:00 · Reconciliation and AI (Speaker A)
 
 | Do | Say | See |
 |---|---|---|
 | Rail lab → **Missing line** → pay as Sara → **Restore healthy** | "Raast pays but leaves the line out of its settlement file." | Settled |
-| **Act as → Rabia** → **Reconciliation** → **Import and reconcile** | "Control totals and file hash are checked, then every line is matched." | Match rate below 100%; **Missing in Raast file** with a case |
+| **Act as → Rufayl** → **Reconciliation** → **Import and reconcile** | "Control totals and file hash are checked, then every line is matched." | Match rate below 100%; **Missing in Raast file** with a case |
 | **AI operations** (or open the case) | "The AI agent proposes a cause and an action with evidence. It's advisory: a test reads its source to prove it can't move money." | Suggestion with confidence |
 | **Import the same file again** | "The same file twice is refused by its SHA-256." | Toast: *File already imported* |
 
@@ -141,14 +141,14 @@ The live database is shared and is not reset between demos. That is fine: the le
 | Do | Say | See |
 |---|---|---|
 | iPhone: `/app/open` → name **Zarak Khanzad** → SPECIMEN card → head turn | "A synthetic card, no real CNIC. Photos are checked in memory and never stored." | "A person is checking a few details" |
-| **Act as → Hamza** → **Identity & KYC** → **Recommend approval**; try **Confirm** | "A possible watch-list match needs two officers. The server refuses the same person." | "Needs a different person" |
-| **Act as → Nadia** → **Confirm approval** | — | Phone: **Your wallet is open** |
+| **Act as → Kanz** → **Identity & KYC** → **Recommend approval**; try **Confirm** | "A possible watch-list match needs two officers. The server refuses the same person." | "Needs a different person" |
+| **Act as → Harris** → **Confirm approval** | — | Phone: **Your wallet is open** |
 
 ### 13:45–15:00 · Security, audit and the backend (Speaker B)
 
 | Do | Say | See |
 |---|---|---|
-| **Security** (as Hamza): turn on two-step verification | "TOTP for staff, enforced outside demo mode. Signing out ends the session on the server at once." | QR and key; session list |
+| **Security** (as Kanz): turn on two-step verification | "TOTP for staff, enforced outside demo mode. Signing out ends the session on the server at once." | QR and key; session list |
 | **Act as → Auditor** → **Audit & access** | "Read-only. The audit chain is hash-linked and verified; every denial is recorded." | **Chain intact**; denials |
 | `/docs` | "Every endpoint, with role-based access checked on the server." | OpenAPI |
 | `/healthz` | — | ok |
@@ -188,7 +188,7 @@ The live database is shared and is not reset between demos. That is fine: the le
 | Symptom | Say | Do |
 |---|---|---|
 | A payment stays **Processing** | "This is the system being honest about uncertainty." | Rail lab → **Restore healthy** → **Ask the rail about all pending payments** |
-| A payment is held unexpectedly | "The velocity rule did its job." | Release it as Hamza, or pay as Omar |
+| A payment is held unexpectedly | "The velocity rule did its job." | Release it as Kanz, or pay as Omar |
 | The first request is slow | "A cold start of the serverless API." | Wait 2–3 seconds; open `/healthz` before the demo |
 | A wall card doesn't flip | — | Click **New QR** on that card, or reload the page; the payment is still in the ledger |
 | Bill says already paid | "One bill, one payment, enforced with a database lock." | Tap another consumer number |

@@ -43,16 +43,16 @@ async function api(u, p, init = {}) { const t = await token(u); const r = await 
   await p.screenshot({ path: `${OUT}/3-handoff.png`, fullPage: false });
 
   const c = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
-  await c.goto(`${WEB}/control`); await c.evaluate(() => { localStorage.clear(); localStorage.setItem("paya.operator", "sana.ops"); });
+  await c.goto(`${WEB}/control`); await c.evaluate(() => { localStorage.clear(); localStorage.setItem("paya.operator", "mudaser.ops"); });
   await c.goto(`${WEB}/control/cases?case=${caseRef}`); await c.waitForTimeout(1500);
   await c.getByRole("button", { name: "Read transcript" }).click(); await c.waitForTimeout(1200);
   const drawer = await c.getByRole("dialog").innerText();
   check("Ops reads the transcript, already redacted", /Customer/.test(drawer) && !/482913|4111/.test(drawer) && /\[redacted/.test(drawer));
   await c.screenshot({ path: `${OUT}/4-console-transcript.png` });
   await c.getByRole("button", { name: "Mark as handled" }).click(); await c.waitForTimeout(1200);
-  const cd = await api("auditor", `/v1/cases/${caseRef}`);
+  const cd = await api("taha.audit", `/v1/cases/${caseRef}`);
   check("handoff closed by Ops; transcript read is audited", cd.state === "RESOLVED" && cd.audit.some((a) => a.action === "CASE_RESOLVED"));
-  const audit = await api("auditor", "/v1/audit/log?action=CHAT_TRANSCRIPT_READ");
+  const audit = await api("taha.audit", "/v1/audit/log?action=CHAT_TRANSCRIPT_READ");
   check("transcript read recorded in the audit chain", audit.items.length >= 1 && audit.chain_intact);
   await c.goto(`${WEB}/control/ai`); await c.waitForTimeout(1500);
   await c.screenshot({ path: `${OUT}/5-console-ai-ops.png` });

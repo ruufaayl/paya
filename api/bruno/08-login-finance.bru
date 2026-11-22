@@ -1,5 +1,5 @@
 meta {
-  name: 08 Login finance (Rabia)
+  name: 08 Login finance (Rufayl)
   type: http
   seq: 8
 }
@@ -9,7 +9,7 @@ post {
   auth: none
 }
 body:json {
-  { "username": "rabia.finance", "password": "{{password}}" }
+  { "username": "rufayl.finance", "password": "{{password}}" }
 }
 script:post-response {
   bru.setVar("financeToken", res.body.access_token);

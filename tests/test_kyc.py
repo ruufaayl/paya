@@ -157,7 +157,7 @@ def test_k1_happy_path_opens_a_tier1_wallet_that_can_pay(client, as_):
                      json={"amount_minor": 450_00, "order_ref": "ORD-KYC-1"}).json()["id"]
     pay = client.post("/v1/payments", headers={**h, "Idempotency-Key": uuid.uuid4().hex}, json={"payment_request_id": pr})
     assert pay.status_code == 202, pay.text
-    assert client.get("/v1/audit/verify", headers=as_("auditor")).json()["chain_intact"] is True
+    assert client.get("/v1/audit/verify", headers=as_("taha.audit")).json()["chain_intact"] is True
 
 
 # ------------------------------------------------------------------ K2
@@ -238,7 +238,7 @@ def test_k6_unknown_answers_refer_never_decide(client, as_):
     assert out["outcome"] == "REFERRED" and "REGISTRY_TIMEOUT" in app_row(app["ref"])["reasons"]
     registry.reset()
     kyc_engines.set_face_engine(None)  # models missing
-    app, _, out = full(client, name="Sana Mir")
+    app, _, out = full(client, name="Mudaser Mir")
     assert out["outcome"] == "REFERRED" and "FACE_ENGINE_UNAVAILABLE" in app_row(app["ref"])["reasons"]
     kyc_engines.set_face_engine(MockFaceEngine())
     app, _, out = full(client, name="Adeel Khan", geo=None)
@@ -254,27 +254,27 @@ def test_k7_watchlist_potential_match_needs_two_officers_and_no_tipping_off(clie
     assert "screen" not in out["message"].lower() and "watch" not in out["message"].lower()
     status = client.get("/v1/onboarding/status", headers=app["h"]).json()
     assert "checks" not in status and "reasons" not in status
-    detail = client.get(f"/v1/kyc/applications/{app['ref']}", headers=as_("hamza.compliance")).json()
+    detail = client.get(f"/v1/kyc/applications/{app['ref']}", headers=as_("kanz.compliance")).json()
     assert detail["two_person_rule"] and "SCREENING_POTENTIAL_MATCH" in detail["reasons"]
     url = f"/v1/compliance/kyc/{app['ref']}/decision"
-    r = client.post(url, headers=as_("hamza.compliance"), json={"decision": "APPROVE", "reason": "different DOB on list"})
+    r = client.post(url, headers=as_("kanz.compliance"), json={"decision": "APPROVE", "reason": "different DOB on list"})
     assert r.json()["status"] == "AWAITING_SECOND_OFFICER"
-    r = client.post(url, headers=as_("hamza.compliance"), json={"decision": "APPROVE", "reason": "approving again"})
+    r = client.post(url, headers=as_("kanz.compliance"), json={"decision": "APPROVE", "reason": "approving again"})
     assert r.status_code == 403 and r.json()["error"]["code"] == "SEGREGATION_OF_DUTIES"
     with session_scope() as s:
         denied = s.execute(select(AuditLog).where(AuditLog.action == "KYC_APPROVE", AuditLog.outcome == "DENIED")).scalars().all()
         assert len(denied) == 1  # the refusal is recorded even though the action rolled back
-    r = client.post(url, headers=as_("nadia.compliance"), json={"decision": "APPROVE", "reason": "confirmed false positive"})
+    r = client.post(url, headers=as_("harris.compliance"), json={"decision": "APPROVE", "reason": "confirmed false positive"})
     assert r.json()["state"] == "APPROVED"
     with session_scope() as s:
         c = s.get(Customer, app_row(app["ref"])["customer_id"])
         assert c.risk_rating == "MEDIUM"
         # the database itself refuses one person in both roles
         a = s.execute(select(KYCApplication).where(KYCApplication.ref == app["ref"])).scalar_one()
-        assert (a.recommended_by, a.decided_by) == ("hamza.compliance", "nadia.compliance")
+        assert (a.recommended_by, a.decided_by) == ("kanz.compliance", "harris.compliance")
     with pytest.raises(Exception):
         with session_scope() as s:
-            s.execute(update(KYCApplication).where(KYCApplication.ref == app["ref"]).values(decided_by="hamza.compliance"))
+            s.execute(update(KYCApplication).where(KYCApplication.ref == app["ref"]).values(decided_by="kanz.compliance"))
 
 
 # ------------------------------------------------------------------ K8
@@ -328,11 +328,11 @@ def test_k11_applicant_token_is_narrow_and_staff_roles_are_separated(client, as_
     assert client.get("/v1/kyc/applications", headers=app["h"]).status_code == 403
     assert client.get("/v1/kyc/applications", headers=as_("sara")).status_code == 403
     _, _, out = full(client, name="Zarak Khanzad")
-    ref = client.get("/v1/kyc/applications?state=REFERRED", headers=as_("auditor")).json()[0]["ref"]
+    ref = client.get("/v1/kyc/applications?state=REFERRED", headers=as_("taha.audit")).json()[0]["ref"]
     body = {"decision": "REJECT", "reason": "confirmed true match"}
-    assert client.post(f"/v1/compliance/kyc/{ref}/decision", headers=as_("sana.ops"), json=body).status_code == 403
-    assert client.post(f"/v1/compliance/kyc/{ref}/decision", headers=as_("hamza.compliance"), json=body).json()["state"] == "REJECTED"
-    cases = client.get("/v1/cases?state=ALL", headers=as_("hamza.compliance")).json()
+    assert client.post(f"/v1/compliance/kyc/{ref}/decision", headers=as_("mudaser.ops"), json=body).status_code == 403
+    assert client.post(f"/v1/compliance/kyc/{ref}/decision", headers=as_("kanz.compliance"), json=body).json()["state"] == "REJECTED"
+    cases = client.get("/v1/cases?state=ALL", headers=as_("kanz.compliance")).json()
     assert any(c["kind"] == "KYC_REVIEW" and c["state"] == "RESOLVED" for c in cases)
 
 
@@ -343,7 +343,7 @@ def test_k12_more_info_lets_the_applicant_retake_the_document(client, as_):
     for _ in range(5):
         client.post("/v1/onboarding/document", headers=app["h"], json={"image": png(np.full((300, 480, 3), 128, np.uint8))})
     assert app_row(app["ref"])["state"] == "REFERRED"
-    r = client.post(f"/v1/compliance/kyc/{app['ref']}/decision", headers=as_("hamza.compliance"),
+    r = client.post(f"/v1/compliance/kyc/{app['ref']}/decision", headers=as_("kanz.compliance"),
                     json={"decision": "MORE_INFO", "reason": "photos were blank"})
     assert r.json()["state"] == "MORE_INFO"
     _, img, res = document(client, app, spec=spec)
@@ -404,11 +404,11 @@ def test_k14_real_models_end_to_end_with_a_drawn_synthetic_face(client):
 def test_k15_integrity_monitor_covers_onboarding(client, as_):
     full(client)
     full(client, name="Zarak Khanzad")
-    checks = {c["check"]: c for c in client.get("/v1/finance/integrity", headers=as_("rabia.finance")).json()["checks"]}
+    checks = {c["check"]: c for c in client.get("/v1/finance/integrity", headers=as_("rufayl.finance")).json()["checks"]}
     assert checks["kyc_auto_approval_only_when_all_checks_pass"]["status"] == "PASS"
     assert checks["kyc_approved_has_verified_customer"]["status"] == "PASS"
     with session_scope() as s:  # simulate a bug that auto-approves despite a referral
         s.execute(update(KYCApplication).where(KYCApplication.full_name == "Zarak Khanzad")
                   .values(decision="AUTO_APPROVED"))
-    checks = {c["check"]: c for c in client.get("/v1/finance/integrity", headers=as_("rabia.finance")).json()["checks"]}
+    checks = {c["check"]: c for c in client.get("/v1/finance/integrity", headers=as_("rufayl.finance")).json()["checks"]}
     assert checks["kyc_auto_approval_only_when_all_checks_pass"]["status"] == "FAIL"

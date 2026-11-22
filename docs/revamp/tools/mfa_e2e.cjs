@@ -28,21 +28,21 @@ async function pick(c, name) { await c.getByRole("button", { name: new RegExp(na
 (async () => {
   const b = await chromium.launch();
   if (PHASE === "optin") {
-    // 1. Hamza turns on two-step verification from the Security page
+    // 1. Kanz turns on two-step verification from the Security page
     const c = await console_(b);
-    await pick(c, "Hamza"); await c.waitForTimeout(1500);
+    await pick(c, "Kanz"); await c.waitForTimeout(1500);
     await c.goto(`${WEB}/control/security`); await c.waitForTimeout(1200);
     await c.getByRole("button", { name: "Turn on two-step verification" }).click();
     const secret = (await c.getByTestId("mfa-secret").innerText()).replace(/\s/g, "");
     await c.screenshot({ path: `${OUT}/1-enrol.png` });
     await c.getByLabel(/6-digit code/).fill(totp(secret)); await c.getByRole("button", { name: "Confirm" }).click(); await c.waitForTimeout(1500);
-    check("enrolled from the Security page", /Signing in as hamza.compliance needs a code/.test(await c.locator("main").innerText()));
+    check("enrolled from the Security page", /Signing in as kanz.compliance needs a code/.test(await c.locator("main").innerText()));
     // 2. The password alone no longer opens anything
-    const r = await rawLogin("hamza.compliance");
+    const r = await rawLogin("kanz.compliance");
     check("password alone returns a challenge, not an access token", r.mfa_required && !r.access_token && (await me(r.challenge)) === 401);
     // 3. Sign in through the console: wrong code refused, right code accepted
-    await c.getByRole("button", { name: /Hamza/ }).first().click(); await c.getByRole("menu").getByRole("button", { name: "Sign out" }).click(); await c.waitForTimeout(800);
-    await pick(c, "Hamza"); await c.waitForTimeout(800);
+    await c.getByRole("button", { name: /Kanz/ }).first().click(); await c.getByRole("menu").getByRole("button", { name: "Sign out" }).click(); await c.waitForTimeout(800);
+    await pick(c, "Kanz"); await c.waitForTimeout(800);
     await c.getByLabel(/6-digit code/).fill("000000"); await c.getByRole("button", { name: "Verify" }).click(); await c.waitForTimeout(800);
     check("wrong code refused in the console", /not valid/.test(await c.getByRole("dialog").innerText()));
     await c.screenshot({ path: `${OUT}/2-code-prompt.png` });
@@ -50,7 +50,7 @@ async function pick(c, name) { await c.getByRole("button", { name: new RegExp(na
     check("right code opens Mission Control", /Overview|Cases/.test(await c.locator("nav").innerText()));
     // 4. "Sign out everywhere else" ends a second browser's session, and it does not silently come back
     const c2 = await console_(b);
-    await pick(c2, "Hamza"); await c2.waitForTimeout(800);
+    await pick(c2, "Kanz"); await c2.waitForTimeout(800);
     // The last code used was one step ahead; like a person, wait for the authenticator's next code.
     await new Promise((res) => setTimeout(res, (30 - ((Date.now() / 1000) % 30)) * 1000 + 1000));
     await c2.getByLabel(/6-digit code/).fill(nextCode(secret)); await c2.getByRole("button", { name: "Verify" }).click(); await c2.waitForTimeout(1500);
@@ -65,15 +65,15 @@ async function pick(c, name) { await c.getByRole("button", { name: new RegExp(na
     const afterReload = await c2.locator("body").innerText();
     check("after a reload: still not signed in (asks for a code again)", /Verification code|Who is operating\?/.test(afterReload) && !/Cases & approvals/.test(afterReload));
     // 5. Administrator ends a person's sessions, with a reason in the audit chain
-    const victim = (await rawLogin("sana.ops")).access_token;
-    await c.getByRole("button", { name: /Hamza/ }).first().click(); await c.getByRole("menuitemradio", { name: /^Admin/ }).first().click(); await c.waitForTimeout(1500);
+    const victim = (await rawLogin("mudaser.ops")).access_token;
+    await c.getByRole("button", { name: /Kanz/ }).first().click(); await c.getByRole("menuitemradio", { name: /^Admin/ }).first().click(); await c.waitForTimeout(1500);
     await c.goto(`${WEB}/control/security`); await c.waitForTimeout(1500);
     const row = c.getByRole("row", { name: /sana\.ops/ });
     await row.getByRole("button", { name: "End sessions" }).click();
     await c.getByLabel("Reason (goes into the audit log)").fill("laptop reported stolen");
     await c.getByRole("dialog").getByRole("button", { name: "End sessions" }).click(); await c.waitForTimeout(1200);
-    check("admin ends Sana's sessions: her token stops at once", (await me(victim)) === 401);
-    check("staff table shows Hamza's two-step verification on", /hamza\.compliance\s*COMPLIANCE\s*on/.test(await c.locator("main").innerText()));
+    check("admin ends Mudaser's sessions: her token stops at once", (await me(victim)) === 401);
+    check("staff table shows Kanz's two-step verification on", /hamza\.compliance\s*COMPLIANCE\s*on/.test(await c.locator("main").innerText()));
     await c.screenshot({ path: `${OUT}/5-admin.png` });
     // 6. Wallet sign-out ends the token on the server
     const w = await (await b.newContext({ ...devices["iPhone 13"] })).newPage();
@@ -84,10 +84,10 @@ async function pick(c, name) { await c.getByRole("button", { name: new RegExp(na
     await w.getByRole("button", { name: /Sign out/ }).click(); await w.waitForTimeout(1200);
     check("wallet sign-out revokes the token on the server", tok && (await me(tok)) === 401);
   } else {
-    const r = await rawLogin("rabia.finance");
+    const r = await rawLogin("rufayl.finance");
     check("enforced: staff password alone yields only a set-up challenge", r.mfa_setup_required && !r.access_token);
     const c = await console_(b);
-    await pick(c, "Rabia"); await c.waitForTimeout(1500);
+    await pick(c, "Rufayl"); await c.waitForTimeout(1500);
     const secret = (await c.getByTestId("mfa-secret").innerText()).replace(/\s/g, "");
     await c.screenshot({ path: `${OUT}/6-enforced-setup.png` });
     await c.getByLabel(/6-digit code/).fill(totp(secret)); await c.getByRole("button", { name: "Confirm and sign in" }).click(); await c.waitForTimeout(2000);

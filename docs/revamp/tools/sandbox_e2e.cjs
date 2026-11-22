@@ -26,7 +26,7 @@ async function until(fn, ms = 20000) { const t = Date.now(); while (Date.now() -
   await p.goto(`${WEB}/app`); await p.evaluate(() => { localStorage.clear(); sessionStorage.clear(); }); await p.goto(`${WEB}/app`);
   await p.getByText("Sara Ahmed", { exact: true }).click(); await p.waitForTimeout(1200);
   const c = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
-  await c.goto(`${WEB}/control`); await c.evaluate(() => { localStorage.clear(); localStorage.setItem("paya.operator", "sana.ops"); });
+  await c.goto(`${WEB}/control`); await c.evaluate(() => { localStorage.clear(); localStorage.setItem("paya.operator", "mudaser.ops"); });
 
   if (PHASE === "off") {
     await p.goto(`${WEB}/app/services`); await p.waitForTimeout(1500);
@@ -62,18 +62,18 @@ async function until(fn, ms = 20000) { const t = Date.now(); while (Date.now() -
     await p.getByLabel("Address", { exact: true }).fill("0xbad0000000000000000000000000000000000001");
     await p.getByLabel("Amount (test tokens)").fill("50"); await p.getByRole("button", { name: "Send" }).click(); await p.waitForTimeout(1000);
     check("screened address blocked, with a Compliance case", (await api("sara", "/v1/sandbox/wallet")).body.transfers[0].status === "BLOCKED"
-      && (await api("hamza.compliance", "/v1/cases")).body.some((x) => x.kind === "TOKEN_SCREENING"));
+      && (await api("kanz.compliance", "/v1/cases")).body.some((x) => x.kind === "TOKEN_SCREENING"));
 
-    await api("sana.ops", "/v1/chaos/chain", { method: "POST", body: JSON.stringify({ mode: "DOWN" }) });
+    await api("mudaser.ops", "/v1/chaos/chain", { method: "POST", body: JSON.stringify({ mode: "DOWN" }) });
     const down = await api("sara", "/v1/sandbox/transfers", { method: "POST", headers: { "Idempotency-Key": `sb-${Date.now()}` }, body: JSON.stringify({ merchant_id: (await api("sara", "/v1/sandbox/wallet")).body.merchants[0].id, amount_units: 10_00 }) });
     check("chain down: transfer recorded as not sent, nothing reserved", down.body.status === "FAILED" && !down.body.chain_tx);
-    await api("sana.ops", "/v1/chaos/chain", { method: "POST", body: JSON.stringify({ mode: "NORMAL" }) });
+    await api("mudaser.ops", "/v1/chaos/chain", { method: "POST", body: JSON.stringify({ mode: "NORMAL" }) });
 
     await c.goto(`${WEB}/control/sandbox`); await c.waitForTimeout(2500);
     text = await c.locator("main").innerText();
     check("Mission Control: chain, transfers and reconciliation matched", /Chain height/i.test(text) && /matched/.test(text) && /blocked/.test(text));
     await c.screenshot({ path: `${OUT}/3-console-on.png` });
-    const integ = (await api("rabia.finance", "/v1/finance/integrity")).body.checks;
+    const integ = (await api("rufayl.finance", "/v1/finance/integrity")).body.checks;
     check("integrity: chain reconciliation and no tokens in the rupee ledger",
       ["token_transfers_match_chain", "sandbox_tokens_never_in_rupee_ledger", "trial_balance_balanced"].every((w) => integ.find((x) => x.check === w)?.status === "PASS"));
     check("rupee wallet balance unchanged by sandbox activity", (await api("sara", "/v1/wallet")).body.ledger_balance.minor === rupees0);

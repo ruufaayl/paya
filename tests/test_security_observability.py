@@ -12,14 +12,14 @@ from conftest import new_request, pay
 
 def test_login_locks_after_five_failures_and_denials_are_audited(client):
     for _ in range(5):
-        assert client.post("/v1/auth/login", json={"username": "rabia.finance", "password": "wrong"}).status_code == 401
-    r = client.post("/v1/auth/login", json={"username": "rabia.finance", "password": "paya-demo-2026"})
+        assert client.post("/v1/auth/login", json={"username": "rufayl.finance", "password": "wrong"}).status_code == 401
+    r = client.post("/v1/auth/login", json={"username": "rufayl.finance", "password": "paya-demo-2026"})
     assert r.status_code == 429 and r.json()["error"]["code"] == "LOGIN_LOCKED"   # even the right password
     with session_scope() as s:
-        rows = s.execute(select(AuditLog).where(AuditLog.actor == "rabia.finance", AuditLog.outcome == "DENIED")).scalars().all()
+        rows = s.execute(select(AuditLog).where(AuditLog.actor == "rufayl.finance", AuditLog.outcome == "DENIED")).scalars().all()
     assert len(rows) == 6 and rows[-1].reason.startswith("locked")
     # other users are unaffected
-    assert client.post("/v1/auth/login", json={"username": "sana.ops", "password": "paya-demo-2026"}).status_code == 200
+    assert client.post("/v1/auth/login", json={"username": "mudaser.ops", "password": "paya-demo-2026"}).status_code == 200
 
 
 def test_security_headers_and_correlation_id(client, as_):

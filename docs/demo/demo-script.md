@@ -22,7 +22,7 @@
 | 1 | Demo after 21:00 Pakistan time? Set `PAYA_SETTLEMENT_CUTOFF_UTC_HOUR=24` in `.env` first (see Scene 5). Then `make demo-reset`: **fresh synthetic data**. Never rehearse on live data. The velocity rule (5 payments per customer per 10 min) correctly holds a 6th payment | `curl localhost:8000/healthz` → ok |
 | 2 | `make models` once (face models), then `cd web && npm run build && npx vite preview --port 4173`, or the Vercel URL | Start page loads |
 | 3 | (iPhone) `cloudflared tunnel --url http://localhost:8000`; on the phone's start page paste the tunnel URL into **Paya server address**; Share → Add to Home Screen | Wallet sign-in loads |
-| 4 | Laptop on the projector: `/control` → sign in as **Sana (Operations)** | Top bar shows **Live**, Raast rail **Simulated · NORMAL**, **Integrity pass** |
+| 4 | Laptop on the projector: `/control` → sign in as **Mudaser (Operations)** | Top bar shows **Live**, Raast rail **Simulated · NORMAL**, **Integrity pass** |
 | 5 | Phone 1: **Ayesha** (Chai Junction till). Phone 2: **Sara Ahmed** | Till shows "New sale"; wallet shows the balance |
 | 6 | Volume up (the till says "Rupees … received") | — |
 
@@ -65,14 +65,14 @@
 | Do | Say | See |
 |---|---|---|
 | Rail lab → pay as **Zarak (watch-list match)** → **Trigger test payment** | "Zarak matches our synthetic watch-list." | Run shows **Under review**: money reserved, not sent |
-| Mission Control → **Cases & approvals** → open the **compliance hold** | "As Sana, from Operations, I can see it, but the drawer says only Compliance can decide." | No decision buttons for Ops |
-| **Act as → Hamza** → **Release hold** → reason | "Only Compliance can release it, and the reason goes into the hash-chained audit log. Then the normal path resumes." | Payment settles; decision trail shows Hamza |
+| Mission Control → **Cases & approvals** → open the **compliance hold** | "As Mudaser, from Operations, I can see it, but the drawer says only Compliance can decide." | No decision buttons for Ops |
+| **Act as → Kanz** → **Release hold** → reason | "Only Compliance can release it, and the reason goes into the hash-chained audit log. Then the normal path resumes." | Payment settles; decision trail shows Kanz |
 
 ### 5:00 – 6:00 · Scene 4: Raast outage (Speaker E)
 
 | Do | Say | See |
 |---|---|---|
-| **Act as → Sana** → Rail lab → **Outage** → Apply; pay as **Omar**; **Trigger test payment** ×4 | "Raast is down. After three failures the circuit breaker opens." | 4th run: **refused: RAIL_UNAVAILABLE**; top bar: breaker OPEN |
+| **Act as → Mudaser** → Rail lab → **Outage** → Apply; pay as **Omar**; **Trigger test payment** ×4 | "Raast is down. After three failures the circuit breaker opens." | 4th run: **refused: RAIL_UNAVAILABLE**; top bar: breaker OPEN |
 | — | "The 4th payment is refused **before** any debit. Nothing is half-done." | — |
 | **Restore healthy** → **Ask the rail about all pending payments** | "Payments sent before the breaker opened are recovered by enquiry, and settle exactly once." | Runs turn **Settled** |
 
@@ -81,19 +81,19 @@
 | Do | Say | See |
 |---|---|---|
 | Rail lab → **Missing line** → Apply; pay as **Sara**; Trigger; **Restore healthy** | "Raast pays, but leaves the line out of its settlement file." | Run settles |
-| **Act as → Rabia** → **Reconciliation** → **Import and reconcile** | "Finance verifies the file's control totals and hash, then matches every line." | Match rate < 100%; a **Missing in Raast file** line with its case |
-| **Act as → Sana** → open the case → **Take it** | "The AI agent already looked at this break when it was opened. It proposes a cause and an action, with evidence. It's advisory: it can't move money, and we prove that with a test that reads its source." | Purple suggestion box, e.g. *raise with rail · 80%* (use **Re-run** to ask again) |
+| **Act as → Rufayl** → **Reconciliation** → **Import and reconcile** | "Finance verifies the file's control totals and hash, then matches every line." | Match rate < 100%; a **Missing in Raast file** line with its case |
+| **Act as → Mudaser** → open the case → **Take it** | "The AI agent already looked at this break when it was opened. It proposes a cause and an action, with evidence. It's advisory: it can't move money, and we prove that with a test that reads its source." | Purple suggestion box, e.g. *raise with rail · 80%* (use **Re-run** to ask again) |
 | **Accept suggestion** → **Resolve with evidence** | "Only the owning role decides, and every step is in the decision trail." | Case resolved |
-| **Act as → Rabia** → **Import the same file again** | "The same file twice is refused by its SHA-256." | Toast: *File already imported* |
+| **Act as → Rufayl** → **Import the same file again** | "The same file twice is refused by its SHA-256." | Toast: *File already imported* |
 
 ### 8:00 – 9:30 · Scene 6: the new themes, onboarding and the assistant (Speaker C)
 
 | Do | Say | See |
 |---|---|---|
 | Phone: sign out → **Open a new Paya wallet** → name **Zarak Khanzad** → specimen card → head-turn check | "Digital onboarding with a synthetic SPECIMEN card, no real CNIC. Photos are checked in memory and never stored." | **A person is checking a few details** (nothing said about screening) |
-| **Act as → Hamza** → **Identity & KYC** → open the referral → **Recommend approval** | "A possible watch-list match needs **two** compliance officers." | "Waiting for a second officer" |
-| Hamza tries **Confirm** | "The server refuses: same person." | Toast **Needs a different person** |
-| **Act as → Nadia** → **Confirm approval** | "A second officer confirms. The database itself enforces it." | Phone flips to **Your wallet is open** |
+| **Act as → Kanz** → **Identity & KYC** → open the referral → **Recommend approval** | "A possible watch-list match needs **two** compliance officers." | "Waiting for a second officer" |
+| Kanz tries **Confirm** | "The server refuses: same person." | Toast **Needs a different person** |
+| **Act as → Harris** → **Confirm approval** | "A second officer confirms. The database itself enforces it." | Phone flips to **Your wallet is open** |
 | Phone (Sara): **Ask Paya** → "mera balance kitna hai", then "send 500 to Ali" | "Conversational banking in Roman Urdu, answered from the ledger. And it can't move money, even if you ask nicely." | Balance card; "I can't send money from chat" |
 | (Only if the server was started with `PAYA_STABLECOIN_SANDBOX=true`) Phone: **Services** → **Stablecoin sandbox** → join → **Get test tokens**; Mission Control → **Stablecoin sandbox** → **reorg** | "Stablecoin payments aren't permitted for us, so this is a switched-off sandbox with worthless test tokens. The point is the engineering: it counts only at three confirmations, a reorg can't fool it, and it's reconciled against the chain. Nothing touches the rupee ledger." | 0/3 → 3/3 confirmations; orphaned block; reconciliation *matched* |
 | (If time) Phone (Sara): **Services** → Indus Power → any 10-digit number → **Pay** → slide | "The super app adds bills, top-up, shopping and takaful, but no new money path: it's the same review, ledger and Raast. The order says *Bill paid* only after settlement, and the same bill can't be paid twice." | My orders: **Done · Bill paid to the biller** |
@@ -109,7 +109,7 @@
 | Symptom | Say | Do |
 |---|---|---|
 | A payment stays **Processing** | "This is the system being honest about uncertainty." | Rail lab → Restore healthy → Ask the rail about all pending payments |
-| A payment is held unexpectedly | "The velocity rule just did its job." | Release it as Hamza, or pay as another customer |
+| A payment is held unexpectedly | "The velocity rule just did its job." | Release it as Kanz, or pay as another customer |
 | Top bar shows **Reconnecting…** | "The stream is display-only; the money is in the database." | Wait, or refresh the page |
 | Onboarding liveness says **Try again** | "It wants a clearer head turn. That's the anti-spoofing check." | Turn further; it allows 3 attempts, then refers to a person |
 | Missing line shows **Timing difference** and no case (demo after 21:00 PKT) | "Correct: after the cut-off, Raast's line is expected in tomorrow's file. That's the rule, not a bug." | Before the demo: `PAYA_SETTLEMENT_CUTOFF_UTC_HOUR=24` in `.env`, then `make demo-reset` |

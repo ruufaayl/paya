@@ -67,7 +67,7 @@ def pay(client, as_, pr_id: str, key: str | None = None, customer: str = "sara")
                        json={"payment_request_id": pr_id})
 
 
-def detail(client, as_, ref: str, who: str = "auditor") -> dict:
+def detail(client, as_, ref: str, who: str = "taha.audit") -> dict:
     r = client.get(f"/v1/transactions/{ref}", headers=as_(who))
     assert r.status_code == 200, r.text
     return r.json()
