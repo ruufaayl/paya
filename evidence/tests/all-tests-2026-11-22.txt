@@ -1,21 +1,4 @@
-============================= test session starts ==============================
-platform linux -- Python 3.13.18, pytest-9.0.3, pluggy-1.7.0
-rootdir: /home/user/paya
-configfile: pyproject.toml
-plugins: platformdirs-4.14.8, anyio-4.16.0
-collected 140 items
-
-tests/test_ai_triage.py ......                                           [  4%]
-tests/test_assistant.py ..........                                       [ 11%]
-tests/test_auth.py ..............                                        [ 21%]
-tests/test_green.py ...........                                          [ 29%]
-tests/test_kyc.py ...............                                        [ 40%]
-tests/test_migrations_roles.py ...............                           [ 50%]
-tests/test_ops_api.py .........                                          [ 57%]
-tests/test_ratelimit.py .........                                        [ 63%]
-tests/test_sandbox.py ............                                       [ 72%]
-tests/test_scenarios.py ......................                           [ 87%]
-tests/test_security_observability.py ....                                [ 90%]
-tests/test_services.py .............                                     [100%]
-
-======================= 140 passed in 161.02s (0:02:41) ========================
+........................................................................ [ 48%]
+........................................................................ [ 96%]
+......                                                                   [100%]
+150 passed in 144.00s (0:02:24)

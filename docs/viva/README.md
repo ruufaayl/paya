@@ -34,7 +34,7 @@ The brief (§10): *"Each member must explain design decisions, code ownership, t
 
 | Fact | Value | Source |
 |---|---|---|
-| Automated tests | 140, all passing as the data-only app role (CI green) | `evidence/tests/`, GitHub Actions |
+| Automated tests | 150, all passing as the data-only app role (CI green) | `evidence/tests/`, GitHub Actions |
 | Crash recovery | healthy 1.3 s; in-flight payments settled exactly once in 6.0 s | `evidence/resilience/` |
 | DB restart | API back in 0.7 s | same |
 | Load test | 400 payments, 0 duplicate settlements; p95 792 ms at 10 concurrent; ~16 payments/s per process | `evidence/performance/` |

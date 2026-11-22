@@ -282,7 +282,8 @@ export function KycInspector() {
           <div className="flex flex-wrap items-center gap-2"><StatusBadge meta={KYC_STATUS[a.state] || KYC_STATUS.STARTED} />{a.decision && <Badge tone="neutral">{a.decision.replace(/_/g, " ").toLowerCase()}{a.decided_by ? ` by ${a.decided_by}` : ""}</Badge>}</div>
           {a.two_person_rule && (
             <div className="mt-3"><Alert tone="review" title="Two-person rule applies">Possible watch-list match. Approval needs a recommendation and a confirmation by two different compliance officers (enforced by the service and a database constraint).
-              {a.recommended_by && <p className="mt-1 font-semibold text-fg">Recommended by {a.recommended_by}. Waiting for a second officer.</p>}</Alert></div>
+              {a.recommended_by && <p className="mt-1 font-semibold text-fg">{a.state === "APPROVED" && a.decided_by && a.decided_by !== a.recommended_by
+                ? `Recommended by ${a.recommended_by}, confirmed by ${a.decided_by}.` : a.state === "REFERRED" || a.state === "AWAITING_SECOND_OFFICER" ? `Recommended by ${a.recommended_by}. Waiting for a second officer.` : `Recommended by ${a.recommended_by}.`}</p>}</Alert></div>
           )}
           <div className="mt-4">
             <Section title="Applicant (synthetic)">

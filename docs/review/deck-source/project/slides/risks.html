@@ -1,15 +1,14 @@
 <section id="risks">
-<p class="eyebrow">Risks and limits</p>
-<h2>What we accept, and who owns it</h2>
-<table class="data">
-<tr><th style="width:38%;">Limit</th><th style="width:20%;">Risk</th><th style="width:42%;">Next step (owner)</th></tr>
-<tr><td>One API process, about 14 payments/s</td><td>Medium</td><td>More processes plus separate worker; locks already safe (Integrity lead)</td></tr>
-<tr><td>Tokens in browser storage (revocation and staff MFA done, ADR-017)</td><td>Low-medium</td><td>httpOnly cookies or OIDC; MFA recovery codes (Security lead)</td></tr>
-<tr><td>App DB role could disable triggers</td><td>Closed</td><td>Done: data-only app role, migrations as owner (ADR-015)</td></tr>
-<tr><td>Simulated rail; assumptions A3 and A4</td><td>Medium</td><td>Licensed sandbox behind RailPort (Integrity lead)</td></tr>
-<tr><td>Riskiest assumption A1 is unvalidated</td><td>High for the business</td><td>10–15 merchant and cashier interviews (Product lead)</td></tr>
-<tr><td>AI and biometrics not evaluated on real data</td><td>Medium</td><td>LLM: same 120-case evaluation; certified liveness and a consented fairness study (AI, Security leads)</td></tr>
+<p class="eyebrow">Limits</p>
+<h2>What is not done yet, and who owns it</h2>
+<table class="data" style="font-size:28px;">
+<tr><th style="width:38%;">Limit</th><th style="width:14%;">Risk</th><th style="width:34%;">Next step</th><th style="width:14%;">Owner</th></tr>
+<tr><td>Not yet checked with real shopkeepers</td><td>High</td><td>Interview 10–15 merchants and cashiers</td><td>Rufayl</td></tr>
+<tr><td>Raast is simulated</td><td>Medium</td><td>Connect a licensed bank sandbox</td><td>Taha</td></tr>
+<tr><td>AI and face checks not tested on real data</td><td>Medium</td><td>Same evaluation for any AI model; certified face checks</td><td>Harris</td></tr>
+<tr><td>One server: about 14 payments a second</td><td>Medium</td><td>More servers and a separate worker</td><td>Mudaser</td></tr>
+<tr><td>Sign-in tokens kept in the browser</td><td>Low</td><td>Secure cookies; backup codes for staff</td><td>Kanz</td></tr>
 </table>
-<div class="footer"><p>Full register: docs/architecture/tech-debt-register.md · threat model T-01 to T-30</p><p class="page"></p></div>
-<aside>Speaker D (Kanz). Each limit has an owner and a next step in the technical-debt register. The one that matters most before any pilot is validating assumption A1, the claim that cashiers trust screenshots; authentication hardening is now done (MFA, revocation, rate limits). Several of our best improvements came from evidence: the load-test race, the identical-file gap, the lost denial audit and the missing restart policy.</aside>
+<div class="footer"><p>Full list: docs/architecture/tech-debt-register.md · threats T-01 to T-30</p><p class="page"></p></div>
+<aside>Speaker D (Kanz). Every limit has a next step and an owner. The biggest one is not technical: we have not yet confirmed with real shopkeepers that they trust screenshots today, so interviews come first. The rail is simulated, so a licensed bank sandbox is next. AI and face checks have not been tested on real data. One server handles about 14 payments a second, and sign-in tokens are stored in the browser. The security fixes from our review (two-step sign-in, instant sign-out, rate limits and a restricted database role) are already done.</aside>
 </section>
