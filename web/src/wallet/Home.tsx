@@ -21,7 +21,7 @@ const greeting = () => { const h = new Date().getHours(); return h < 12 ? "Good 
 
 export function useWallet(user: string) {
   const qc = useQueryClient();
-  const q = useApi<Wallet>(user, "/v1/wallet");
+  const q = useApi<Wallet>(user, "/v1/wallet", { refetchInterval: 5000 });   // belt and braces next to the live feed
   useStream(user, (m) => { if (m.kind === "event") qc.invalidateQueries({ queryKey: [user, "/v1/wallet"] }); });
   return q;
 }

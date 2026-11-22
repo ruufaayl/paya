@@ -47,8 +47,9 @@ async def lifespan(app: FastAPI):
     notifications.register()
     ai_service.register()
     if get_settings().demo_mode:
-        from ..seed import seed
+        from ..seed import ensure_demo_extras, seed
         seed()
+        ensure_demo_extras()
     if not getattr(app.state, "disable_worker", False):
         _worker = Worker(interval_s=1.0)
         _worker.start()
@@ -793,6 +794,23 @@ async def stream(ws: WebSocket, token: str = Query(...)):
         pass
     finally:
         events.remove_live_listener(listener)
+
+
+@app.get("/v1/live", tags=["observability"])
+def live(after_event: int = Query(-1, ge=-1), after_tel: int = Query(-1, ge=-1), p: Principal = Depends(principal)):
+    """The live feed by polling, for deployments with several server instances (the WebSocket only carries what
+    its own instance saw). Same visibility rules as /v1/stream: staff see everything, customers and merchants
+    see only their own payments; telemetry (topology animation) is for back office only."""
+    full_view = can(p, "backoffice:read")
+
+    def visible(msg: dict) -> bool:
+        if full_view:
+            return True
+        payload = msg.get("payload") or {}
+        return bool((p.customer_id and payload.get("customer_id") == p.customer_id) or
+                    (p.merchant_id and payload.get("merchant_id") == p.merchant_id))
+
+    return events.live_since(after_event, after_tel, telemetry_ok=full_view, visible=visible)
 
 
 @app.get("/healthz", tags=["observability"])

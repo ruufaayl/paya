@@ -616,3 +616,14 @@ class AuthSession(Base):
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     revoked_by: Mapped[str | None] = mapped_column(String(64))
     revoked_reason: Mapped[str | None] = mapped_column(String(128))
+
+
+# ---------------------------------------------------------------- Live feed (Vercel: several instances)
+class TelemetryLog(Base):
+    """Short-lived copy of telemetry so every server instance (and every screen) sees every live event.
+    Display-only: never read by the money path; purged after 30 minutes."""
+    __tablename__ = "telemetry_log"
+    seq: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    at: Mapped[datetime] = TS()
+    msg: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    __table_args__ = (Index("ix_telemetry_log_at", "at"),)

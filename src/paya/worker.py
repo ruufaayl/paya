@@ -9,6 +9,7 @@ import time
 from sqlalchemy import select
 
 from . import assistant, events, kyc, payments, ratelimit, tokens
+from .config import get_settings
 from .db import session_scope
 from .models import Transaction
 
@@ -32,7 +33,8 @@ def tick() -> dict:
         "kyc_abandoned": kyc.abandon_stale(),
         "chats_purged": assistant.purge_expired(),
         "sandbox": tokens.tick(),
-        "rate_windows_purged": ratelimit.purge_expired(),   # no-op unless PAYA_STABLECOIN_SANDBOX=true
+        "rate_windows_purged": ratelimit.purge_expired(),
+        "telemetry_purged": events.purge_telemetry() if get_settings().live_feed_persist else 0,   # no-op unless PAYA_STABLECOIN_SANDBOX=true
     }
     out["relayed"] = events.relay_once()
     return out

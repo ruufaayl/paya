@@ -6,7 +6,7 @@
 import { BaseEdge, Background, BackgroundVariant, Controls, Handle, MiniMap, Position, ReactFlow, ReactFlowProvider, getBezierPath, useReactFlow,
   type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Crosshair, Maximize2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Legend } from "../../ds/charts";
@@ -32,6 +32,10 @@ function Inner() {
   const [focus, setFocus] = useState(false);
   const [hidden, setHidden] = useState<Set<Layer>>(new Set());
   const [q, setQ] = useState("");
+  // Settlements seen live (any user, any till): a ticker, a wave along the payment path and glowing components.
+  const [settled, setSettled] = useState<{ id: string; ref: string; amount: number; merchant: string; at: number }[]>([]);
+  const [totals, setTotals] = useState({ n: 0, minor: 0 });
+  const [glow, setGlow] = useState<Record<string, number>>({});
   const seq = useRef(0);
   const [, tick] = useState(0);
   useEffect(() => { const t = setInterval(() => tick((n) => n + 1), 5000); return () => clearInterval(t); }, []);
@@ -54,6 +58,24 @@ function Inner() {
       });
       return next;
     });
+    if (m.kind === "telemetry" && m.node === "ledger" && m.phase === "settled") {
+      const at = Date.parse(m.at || "") || Date.now();
+      if (Date.now() - at < 60_000) {               // live only: never replayed history
+        const d = m.detail || {};
+        setSettled((cur) => [{ id: `${m.txn_ref}-${at}`, ref: m.txn_ref || "", amount: d.amount_minor || 0, merchant: d.merchant || "merchant", at }, ...cur].slice(0, 6));
+        setTotals((t) => ({ n: t.n + 1, minor: t.minor + (d.amount_minor || 0) }));
+        const path = ["phone-gateway", "gateway-risk", "risk-ledger", "ledger-rail", "ledger-outbox", "outbox-notification"];
+        const nodesOnPath = ["phone", "gateway", "risk", "ledger", "rail", "outbox", "notification", "cashier"];
+        path.forEach((edge, i) => window.setTimeout(() => {
+          const pid = `w${++seq.current}`;
+          setPackets((cur) => ({ ...cur, [edge]: [...(cur[edge] || []), { id: pid, color: COLORS.info, wave: true } as Packet] }));
+          window.setTimeout(() => setPackets((cur) => ({ ...cur, [edge]: (cur[edge] || []).filter((p) => p.id !== pid) })), 1300);
+        }, 1100 + i * 260));
+        const until = Date.now() + 3500;
+        setGlow((g) => { const n = { ...g }; nodesOnPath.forEach((id) => { n[id] = until; }); return n; });
+        window.setTimeout(() => setGlow((g) => { const n = { ...g }; nodesOnPath.forEach((id) => { if (n[id] <= Date.now()) delete n[id]; }); return n; }), 3600);
+      }
+    }
     if (fx.hops.length) {
       const id = `p${++seq.current}`;
       setPackets((cur) => { const n = { ...cur }; fx.hops.forEach((h, i) => { n[h.edge] = [...(n[h.edge] || []), { id: `${id}-${i}`, color: h.color, reverse: h.reverse }]; }); return n; });
@@ -71,8 +93,8 @@ function Inner() {
 
   const nodes: Node[] = useMemo(() => NODES.filter((n) => !hidden.has(NODE_INFO[n.id].layer)).map((n) => ({
     id: n.id, type: "svc", position: { x: n.x, y: n.y }, selected: n.id === selected,
-    data: { def: n, obs: observed[n.id], dim: focus && neighbours ? !neighbours.has(n.id) : false, match: q && (n.title + n.sub).toLowerCase().includes(q.toLowerCase()) } as any,
-  })), [observed, hidden, selected, focus, neighbours, q]);
+    data: { def: n, obs: observed[n.id], glow: !!glow[n.id], dim: focus && neighbours ? !neighbours.has(n.id) : false, match: q && (n.title + n.sub).toLowerCase().includes(q.toLowerCase()) } as any,
+  })), [observed, hidden, selected, focus, neighbours, q, glow]);
   const visible = new Set(nodes.map((n) => n.id));
   const edges: Edge[] = useMemo(() => EDGES.filter((e) => visible.has(e.source) && visible.has(e.target)).map((e) => ({
     id: e.id, source: e.source, target: e.target, type: "wire", sourceHandle: `s-${e.sh || "r"}`, targetHandle: `t-${e.th || "l"}`,
@@ -116,6 +138,27 @@ function Inner() {
             <MiniMap pannable zoomable position="bottom-right" style={{ width: 160, height: 100 }} maskColor="rgba(9,13,18,0.7)" nodeColor={(n) => {
               const o = observed[n.id]; return o?.lastErrorAt && Date.now() - o.lastErrorAt < 60000 ? COLORS.error : o?.lastAt ? "#3D7FE6" : "#303E4D"; }} />
           </ReactFlow>
+          <div className="pointer-events-none absolute bottom-3 left-1/2 z-10 w-[min(560px,calc(100%-380px))] -translate-x-1/2" aria-live="polite">
+            <div className="rounded-md border border-line bg-surface/95 p-2.5 shadow-e2">
+              <div className="flex items-center justify-between text-caption text-fg-2">
+                <span className="flex items-center gap-1.5"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" /><span className="relative inline-flex h-2 w-2 rounded-full bg-success" /></span>Live settlements, any user</span>
+                <span className="num">{totals.n} settled · Rs {(totals.minor / 100).toLocaleString("en-US")} since you opened this page</span>
+              </div>
+              {settled.length === 0 ? <p className="mt-1.5 text-caption text-fg-muted">Pay any till QR from a phone: the settlement appears here and a wave runs along the payment path.</p> : (
+                <ul className="mt-1.5 space-y-1">
+                  <AnimatePresence initial={false}>
+                    {settled.map((x, i) => (
+                      <motion.li key={x.id} layout initial={{ opacity: 0, y: 14, scale: 0.96 }} animate={{ opacity: i === 0 ? 1 : 0.75 - i * 0.1, y: 0, scale: 1 }} exit={{ opacity: 0 }}
+                        className={cx("flex items-center justify-between rounded px-2 py-1 text-body-sm", i === 0 ? "bg-success-soft text-fg" : "text-fg-2")}>
+                        <span className="truncate"><span className="font-semibold">Rs {(x.amount / 100).toLocaleString("en-US")}</span> settled · {x.merchant}</span>
+                        <span className="ref ml-3 shrink-0 text-[11px] text-fg-muted">{x.ref}</span>
+                      </motion.li>
+                    ))}
+                  </AnimatePresence>
+                </ul>
+              )}
+            </div>
+          </div>
           <div className="pointer-events-none absolute left-3 top-3 rounded-md border border-line bg-surface/95 p-2.5">
             <Legend series={[{ key: "f", label: "message in flight", color: COLORS.flow }, { key: "i", label: "confirmed fact", color: COLORS.info },
               { key: "w", label: "uncertainty / retry", color: COLORS.warn }, { key: "e", label: "failure / denial", color: COLORS.error }, { key: "h", label: "waiting for a person", color: COLORS.human }]} />
@@ -171,7 +214,7 @@ function SvcNode({ data, selected }: NodeProps) {
   const simulated = NODE_INFO[def.id].layer === "simulated";
   return (
     <motion.div key={obs?.count} initial={{ scale: recent ? 1.03 : 1 }} animate={{ scale: 1 }} transition={{ duration: 0.25 }}
-      className={cx("w-[224px] rounded-md border bg-surface px-3 py-2.5 transition-[opacity,border-color] duration-base", selected ? "border-focus" : recentErr ? "border-danger-line" : "border-line-strong",
+      className={cx("w-[224px] rounded-md border bg-surface px-3 py-2.5 transition-[opacity,border-color,box-shadow] duration-base", d.glow && "!border-success shadow-[0_0_0_3px_rgb(var(--success)/0.35),0_0_28px_rgb(var(--success)/0.45)]", selected ? "border-focus" : recentErr ? "border-danger-line" : "border-line-strong",
         d.dim && "opacity-25", d.match && "ring-2 ring-focus", simulated && "border-dashed")}>
       {(["l", "t", "b", "r"] as const).map((side) => {
         const pos = { l: Position.Left, t: Position.Top, b: Position.Bottom, r: Position.Right }[side];
@@ -194,7 +237,16 @@ function Wire(props: EdgeProps) {
   return (
     <g opacity={d.dim ? 0.15 : 1}>
       <BaseEdge id={id} path={path} style={{ stroke: "rgb(var(--line-strong))", strokeWidth: 1.5, strokeDasharray: d.dashed ? "5 6" : undefined }} />
-      {(d.packets || []).map((p) => (
+      {(d.packets || []).some((p) => p.wave) && <path d={path} fill="none" stroke="rgb(var(--success))" strokeWidth={4} opacity={0.35} className="animate-pulse" />}
+      {(d.packets || []).map((p) => p.wave ? (
+        <g key={p.id}>
+          {[0, 0.08, 0.16].map((lag, k) => (
+            <circle key={k} r={7 - k * 2} fill="rgb(var(--success))" opacity={1 - k * 0.3} stroke={k === 0 ? "rgb(var(--surface))" : "none"} strokeWidth={2}>
+              <animateMotion dur="1.1s" begin={`${lag}s`} fill="freeze" path={path} keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.4 0 0.2 1" />
+            </circle>
+          ))}
+        </g>
+      ) : (
         <circle key={p.id} r={5} fill={p.color} stroke="rgb(var(--surface))" strokeWidth={2}>
           <animateMotion dur="0.95s" fill="freeze" path={path} keyPoints={p.reverse ? "1;0" : "0;1"} keyTimes="0;1" calcMode="linear" />
         </circle>

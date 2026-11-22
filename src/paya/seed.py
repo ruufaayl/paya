@@ -2,7 +2,7 @@
 
 No real CNIC, account, card, biometric or credential data is ever stored in Paya.
 """
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 from . import ledger
 from .db import session_scope
@@ -86,6 +86,47 @@ def seed() -> dict:
             s.add(User(username=username, password_hash=pw, display_name=display, role=role,
                        merchant_id=merchants[mreg].id if mreg else None))
         return {"seeded": True, "customers": len(CUSTOMERS), "merchants": len(MERCHANTS), "staff": len(STAFF)}
+
+
+# More synthetic tills for live demos (QR wall). Added idempotently at startup in demo mode, so an already-seeded
+# database gains them too. Fictional businesses; aliases and IBANs are synthetic.
+EXTRA_MERCHANTS = [
+    ("MRC-0004", "Lahore Tikka House", "FOOD_BEVERAGE", "tikkahouse@paya", "PK** PAYA **** **** 0004"),
+    ("MRC-0005", "Clifton Fuel Stop", "FUEL", "cliftonfuel@paya", "PK** PAYA **** **** 0005"),
+    ("MRC-0006", "Saddar Book Corner", "RETAIL", "saddarbooks@paya", "PK** PAYA **** **** 0006"),
+]
+EXTRA_CASHIERS = [
+    ("noor.cashier", "Noor (Cashier, Green Leaf Grocers)", "MRC-0003"),
+    ("danish.cashier", "Danish (Cashier, Lahore Tikka House)", "MRC-0004"),
+    ("sadia.cashier", "Sadia (Cashier, Clifton Fuel Stop)", "MRC-0005"),
+    ("imran.cashier", "Imran (Cashier, Saddar Book Corner)", "MRC-0006"),
+]
+
+
+def ensure_demo_extras() -> dict:
+    added = 0
+    with session_scope() as s:
+        if not s.execute(select(User).limit(1)).scalar_one_or_none():
+            return {"added": 0}
+        s.execute(text("SELECT pg_advisory_xact_lock(hashtext('seed:extras'))"))
+        merchants = {m.registration_ref: m for m in s.execute(select(Merchant)).scalars()}
+        for reg, name, cat, alias, iban in EXTRA_MERCHANTS:
+            if reg not in merchants:
+                m = Merchant(registration_ref=reg, trading_name=name, category=cat, raast_alias=alias,
+                             settlement_iban_masked=iban)
+                s.add(m)
+                s.flush()
+                merchants[reg] = m
+                added += 1
+        have = set(s.execute(select(User.username)).scalars())
+        pw = None
+        for username, display, reg in EXTRA_CASHIERS:
+            if username not in have:
+                pw = pw or hash_password(DEMO_PASSWORD)
+                s.add(User(username=username, password_hash=pw, display_name=display, role="CASHIER",
+                           merchant_id=merchants[reg].id))
+                added += 1
+    return {"added": added}
 
 
 if __name__ == "__main__":

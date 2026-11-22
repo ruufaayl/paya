@@ -72,8 +72,21 @@ def _broadcast(msg: dict) -> None:
 
 def telemetry(node: str, phase: str, *, txn_ref: str | None = None, detail: dict | None = None,
               level: str = "info") -> None:
-    _broadcast({"kind": "telemetry", "node": node, "phase": phase, "txn_ref": txn_ref,
-                "level": level, "detail": detail or {}, "at": now().isoformat()})
+    msg = {"kind": "telemetry", "node": node, "phase": phase, "txn_ref": txn_ref,
+           "level": level, "detail": detail or {}, "at": now().isoformat()}
+    from .config import get_settings
+    if get_settings().live_feed_persist:
+        # Several server instances (Vercel): keep a short-lived copy so /v1/live can show it on every screen.
+        try:
+            from .models import TelemetryLog
+            with session_scope() as s:
+                row = TelemetryLog(msg=msg)
+                s.add(row)
+                s.flush()
+                msg["tseq"] = row.seq
+        except Exception:  # noqa: BLE001  display-only: never let it affect the money path
+            pass
+    _broadcast(msg)
     from .observability import emit
     emit(f"{node}.{phase}", {"warn": "warning"}.get(level, level), txn_ref=txn_ref, **(detail or {}))
 
@@ -118,6 +131,41 @@ def consume_once(consumer: str, env: dict, handler: Callable[[Session, dict], An
         telemetry(consumer, "duplicate_ignored", detail={"event_id": env["event_id"], "type": env["type"]},
                   level="warn")
         return False
+
+
+def live_since(after_event: int, after_tel: int, *, telemetry_ok: bool, visible, limit: int = 200) -> dict:
+    """The live feed from the database, for screens that cannot rely on one instance's WebSocket.
+    Events are committed facts (outbox); telemetry is display-only. A cursor of -1 means "start from now"."""
+    from sqlalchemy import func
+
+    from .models import TelemetryLog
+    with session_scope() as s:
+        top_e = s.execute(select(func.coalesce(func.max(OutboxEvent.seq), 0))).scalar_one()
+        top_t = s.execute(select(func.coalesce(func.max(TelemetryLog.seq), 0))).scalar_one() if telemetry_ok else 0
+        if after_event < 0:
+            return {"messages": [], "cursor": {"event": top_e, "tel": top_t}}
+        rows = s.execute(select(OutboxEvent).where(OutboxEvent.seq > after_event)
+                         .order_by(OutboxEvent.seq).limit(limit)).scalars().all()
+        msgs = [{"kind": "event", **envelope(r)} for r in rows]
+        last_e = rows[-1].seq if rows else max(after_event, 0)
+        msgs = [m for m in msgs if visible(m)]
+        last_t = max(after_tel, 0)
+        if telemetry_ok:
+            trows = s.execute(select(TelemetryLog).where(TelemetryLog.seq > after_tel)
+                              .order_by(TelemetryLog.seq).limit(limit)).scalars().all()
+            msgs += [{**t.msg, "tseq": t.seq} for t in trows]
+            last_t = trows[-1].seq if trows else last_t
+        return {"messages": msgs, "cursor": {"event": last_e, "tel": last_t}}
+
+
+def purge_telemetry(minutes: int = 30) -> int:
+    from datetime import timedelta
+
+    from sqlalchemy import delete
+
+    from .models import TelemetryLog
+    with session_scope() as s:
+        return s.execute(delete(TelemetryLog).where(TelemetryLog.at < now() - timedelta(minutes=minutes))).rowcount
 
 
 def reset_for_tests() -> None:

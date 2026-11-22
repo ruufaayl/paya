@@ -265,8 +265,10 @@ def _settle(s: Session, txn: Transaction, *, actor: str, evidence: dict) -> None
     if txn.payment_request_id:
         pr = s.get(PaymentRequest, txn.payment_request_id)
         pr.status = "PAID"
+    m = s.get(Merchant, txn.merchant_id) if txn.merchant_id else None
     events.telemetry("ledger", "settled", txn_ref=txn.txn_ref,
-                     detail={"journal": "SETTLE", "dr": "2150 in transit", "cr": "1010 settlement", "fee_minor": fee})
+                     detail={"journal": "SETTLE", "dr": "2150 in transit", "cr": "1010 settlement", "fee_minor": fee,
+                             "amount_minor": txn.amount_minor, "merchant": m.trading_name if m else None})
 
 
 def _reverse(s: Session, txn: Transaction, *, actor: str, reason: str, initiated_via: str,

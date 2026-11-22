@@ -72,6 +72,10 @@ class Settings(BaseSettings):
     def _empty_is_unset(cls, v):
         return None if v == "" else v   # docker compose passes "" for an unset ${VAR:-}
 
+    # Live feed: persist telemetry so every instance can serve it (/v1/live). On by default on Vercel only:
+    # a single local process does not need it, and it costs a small write per telemetry message.
+    live_feed_persist: bool = False
+
     # Stablecoin sandbox (Theme 5). OFF unless explicitly enabled. Test tokens only; no rupee conversion.
     stablecoin_sandbox: bool = False
     token_confirmations: int = 3             # "confirmed" only at this depth (a reorg can undo less)
@@ -116,6 +120,8 @@ def get_settings() -> Settings:
     if on_vercel() and (s.jwt_secret == "dev-only-change-me" or len(s.jwt_secret) < 32):
         # The development default is public in the repository: anyone could forge sign-in tokens with it.
         raise RuntimeError("PAYA_JWT_SECRET must be set to 32+ random characters in the Vercel project settings")
+    if on_vercel() and not os.getenv("PAYA_LIVE_FEED_PERSIST"):
+        s.live_feed_persist = True
     if on_vercel() and not os.getenv("PAYA_KYC_MODEL_DIR"):
         s.kyc_model_dir = "/tmp/paya-models"   # the only writable place; models are fetched there on first use
     return s

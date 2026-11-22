@@ -137,6 +137,12 @@ export function ServiceScreen({ user }: { user: string }) {
   );
 }
 
+// Synthetic consumer numbers for the demo (any 10 digits work; these are listed so a presenter can tap one).
+const DEMO_CONSUMERS: Record<string, { no: string; label: string }[]> = {
+  INDUSPOWER: [{ no: "0412345678", label: "Home, Gulberg" }, { no: "0498765432", label: "Shop, Saddar" }, { no: "0455501234", label: "Flat, Clifton" }, { no: "0477712345", label: "Office, Blue Area" }],
+  RAVIGAS: [{ no: "2201234567", label: "Home, Johar Town" }, { no: "2209876543", label: "Restaurant, MM Alam" }, { no: "2205550123", label: "Flat, DHA" }, { no: "2207771234", label: "Hostel, Model Town" }],
+};
+
 function Bill({ user, s, onPay, busy }: { user: string; s: Service; onPay: (b: Record<string, unknown>) => void; busy: boolean }) {
   const [no, setNo] = useState("");
   const [bill, setBill] = useState<any>(null);
@@ -150,6 +156,19 @@ function Bill({ user, s, onPay, busy }: { user: string; s: Service; onPay: (b: R
     <Card className="p-4">
       <Input label="Consumer number" inputMode="numeric" maxLength={10} value={no} onChange={(e) => { setNo(e.target.value.replace(/\D/g, "")); setBill(null); }}
         hint="10 digits, printed on your bill. Any 10 digits work in the demo." error={err} />
+      {(DEMO_CONSUMERS[s.code] || []).length > 0 && (
+        <div className="mt-3">
+          <p className="text-caption text-fg-2">Demo consumer numbers (synthetic), tap one:</p>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {DEMO_CONSUMERS[s.code].map((c) => (
+              <button key={c.no} type="button" onClick={() => { setNo(c.no); setBill(null); setErr(null); }}
+                className={`rounded-full border px-2.5 py-1 text-left text-caption transition-colors ${no === c.no ? "border-brand bg-brand-soft text-fg" : "border-line bg-raised text-fg-2 hover:bg-hover"}`}>
+                <span className="ref font-semibold">{c.no}</span> · {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <Button className="mt-3" block variant="secondary" disabled={no.length !== 10} onClick={lookup}>Find bill</Button>
       {bill && (
         <div className="mt-4 rounded-md bg-sunken p-3.5">

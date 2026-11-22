@@ -6,7 +6,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { useSearchParams } from "react-router-dom";
 import { EmptyState } from "../ds/ui";
 import { call, ensure, login, logout, sessions, wsUrl } from "../lib/api";
-import type { StreamMsg } from "../lib/stream";
+import { msgId, startLivePoll, type StreamMsg } from "../lib/stream";
 
 // ------------------------------------------------------------------ operator
 export const STAFF = [
@@ -74,14 +74,8 @@ export function StreamProvider({ as, children }: { as: string; children: ReactNo
 
   useEffect(() => {
     let ws: WebSocket | null = null, stop = false, retry = 0, timer: number | undefined;
-    const open = async () => {
-      try {
-        const s = await ensure(as);
-        ws = new WebSocket(wsUrl(s.token));
-        ws.onopen = () => { retry = 0; setConnected(true); setReconnecting(false); };
-        ws.onmessage = (e) => {
-          let m: StreamMsg; try { m = JSON.parse(e.data); } catch { return; }
-          const id = m.kind === "event" ? `e:${m.event_id}` : `t:${m.node}:${m.phase}:${m.at}:${m.txn_ref || ""}:${JSON.stringify(m.detail || {}).length}`;
+    const deliver = (m: StreamMsg) => {
+          const id = msgId(m);
           if (seen.current.has(id)) return;
           seen.current.add(id);
           if (seen.current.size > 5000) seen.current = new Set(Array.from(seen.current).slice(-2500));
@@ -94,13 +88,21 @@ export function StreamProvider({ as, children }: { as: string; children: ReactNo
             window.clearTimeout(inval.current);
             inval.current = window.setTimeout(() => qc.invalidateQueries(), 600); // refresh read models after facts change
           }
-        };
+    };
+    // Database-backed poller alongside the WebSocket: on several server instances it is the one that sees everything.
+    const stopPoll = startLivePoll(as, (m) => { setConnected(true); setReconnecting(false); deliver(m); });
+    const open = async () => {
+      try {
+        const s = await ensure(as);
+        ws = new WebSocket(wsUrl(s.token));
+        ws.onopen = () => { retry = 0; setConnected(true); setReconnecting(false); };
+        ws.onmessage = (e) => { try { deliver(JSON.parse(e.data)); } catch { /* ignore */ } };
         ws.onclose = () => { setConnected(false); if (!stop) { setReconnecting(true); timer = window.setTimeout(open, Math.min(8000, 500 * 2 ** retry++)); } };
         ws.onerror = () => ws?.close();
       } catch { if (!stop) { setReconnecting(true); timer = window.setTimeout(open, 3000); } }
     };
     open();
-    return () => { stop = true; window.clearTimeout(timer); ws?.close(); };
+    return () => { stop = true; stopPoll(); window.clearTimeout(timer); ws?.close(); };
   }, [as, qc]);
 
   useEffect(() => {

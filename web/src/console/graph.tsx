@@ -7,7 +7,7 @@ import type { StreamMsg } from "../lib/stream";
 
 export type Level = "idle" | "info" | "warn" | "error" | "human";
 export interface NodeState { level: Level; last?: string; count: number; badge?: number; pulseKey?: number }
-export interface Packet { id: string; color: string; reverse?: boolean }
+export interface Packet { id: string; color: string; reverse?: boolean; wave?: boolean }
 
 // Wire colours: confirmed fact = green, message in flight = blue, uncertainty = amber, failure = red-orange, human = violet.
 export const COLORS = { info: "#2FA36B", flow: "#3D7FE6", warn: "#D9A23A", error: "#E0603A", human: "#A86BC0" };

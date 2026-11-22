@@ -2,8 +2,7 @@
 // performed as the signed-in operator and checked by the server.
 import {
   Activity, ArrowLeftRight, Bot, ChevronDown, FileCheck2, FlaskConical, Gauge, FlaskRound, KeyRound, Leaf, Store, LogOut, Menu, Network, Radio, Search,
-  ShieldCheck, ScrollText, UserCheck, UserRoundCog, Users,
-} from "lucide-react";
+  ShieldCheck, ScrollText, UserCheck, UserRoundCog, Users, QrCode } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { Badge, Button, Card, Dot, Logo, Spinner, cx } from "../ds/ui";
@@ -25,6 +24,7 @@ import Overview from "./pages/Overview";
 import RailLab from "./pages/RailLab";
 import Recon from "./pages/Recon";
 import Topology from "./pages/Topology";
+import QrWall from "./pages/QrWall";
 import Transactions from "./pages/Transactions";
 
 interface NavItem { to: string; label: string; icon: any; perm: string; end?: boolean; badge?: "cases" | "kyc" }
@@ -33,6 +33,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
     { to: "/control", label: "Overview", icon: Gauge, end: true, perm: "backoffice:read" },
     { to: "/control/transactions", label: "Transactions", icon: ArrowLeftRight, perm: "backoffice:read" },
     { to: "/control/topology", label: "System topology", icon: Network, perm: "backoffice:read" },
+    { to: "/control/qr-wall", label: "QR wall (tills)", icon: QrCode, perm: "backoffice:read" },
     { to: "/control/events", label: "Event stream", icon: Activity, perm: "backoffice:read" },
   ] },
   { group: "Work", items: [
@@ -173,6 +174,7 @@ function Shell() {
             <Route index element={<Overview />} />
             <Route path="transactions" element={<Transactions />} />
             <Route path="topology" element={<Topology />} />
+            <Route path="qr-wall" element={<QrWall />} />
             <Route path="events" element={<Events />} />
             <Route path="cases" element={<Cases />} />
             <Route path="kyc" element={<Kyc />} />

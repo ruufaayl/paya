@@ -17,6 +17,10 @@ const DEMO = [
 const TILLS = [
   { username: "ayesha.cashier", name: "Ayesha", note: "Chai Junction till" },
   { username: "kamran.cashier", name: "Kamran", note: "Shifa Pharmacy till" },
+  { username: "noor.cashier", name: "Noor", note: "Green Leaf Grocers till" },
+  { username: "danish.cashier", name: "Danish", note: "Lahore Tikka House till" },
+  { username: "sadia.cashier", name: "Sadia", note: "Clifton Fuel Stop till" },
+  { username: "imran.cashier", name: "Imran", note: "Saddar Book Corner till" },
 ];
 
 export default function SignIn({ onSignedIn, notice }: { onSignedIn: (u: string) => void; notice?: string }) {
