@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fadeUp, stagger } from "../ds/motion";
 import { Alert, Button, Card, Input, Logo } from "../ds/ui";
+import { ServerStatus } from "../ds/server";
 import { ApiError, DEMO_PASSWORD, login } from "../lib/api";
 
 const DEMO = [
@@ -27,7 +28,7 @@ export default function SignIn({ onSignedIn, notice }: { onSignedIn: (u: string)
   const go = async (u: string, pw = DEMO_PASSWORD) => {
     setBusy(u); setErr(null);
     try { await login(u, pw); onSignedIn(u); }
-    catch (e) { setErr(e instanceof ApiError ? e.message : "Cannot reach the Paya server. Check the server address on the start page."); }
+    catch (e) { setErr(e instanceof ApiError ? e.message : "Cannot reach the Paya server. Check the server address below."); }
     finally { setBusy(null); }
   };
 
@@ -51,6 +52,7 @@ export default function SignIn({ onSignedIn, notice }: { onSignedIn: (u: string)
           </motion.form>
 
           {err && <div className="mt-4"><Alert tone="danger" title="Couldn't sign in">{err}</Alert></div>}
+          <motion.div variants={fadeUp} className="mt-4"><ServerStatus compact /></motion.div>
 
           <motion.section variants={fadeUp} className="mt-9" aria-labelledby="demo-h">
             <div className="flex items-center gap-2">

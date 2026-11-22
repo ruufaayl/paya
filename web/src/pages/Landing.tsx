@@ -1,16 +1,16 @@
 // Entry page: two surfaces of one product, and the server address for demos on other devices.
 import { motion } from "framer-motion";
-import { ArrowRight, MonitorDot, Server, Smartphone } from "lucide-react";
-import { useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
+import { ArrowRight, MonitorDot, Smartphone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { fadeUp, stagger } from "../ds/motion";
-import { Badge, Card, Input, Logo } from "../ds/ui";
-import { apiBase, setApiBase } from "../lib/api";
+import { ServerStatus } from "../ds/server";
+import { Badge, Card, Logo } from "../ds/ui";
+import { apiBase } from "../lib/api";
 import { useTheme } from "../lib/hooks";
 
 export default function Landing() {
   useTheme("wallet");
-  const [base, setBase] = useState(apiBase());
   return (
     <div className="min-h-full bg-canvas">
       <motion.div variants={stagger(0.06)} initial="hidden" animate="show" className="mx-auto max-w-[1080px] px-5 py-8 md:py-14">
@@ -42,15 +42,29 @@ export default function Landing() {
             </Card>
           </Link>
         </motion.div>
-        <motion.div variants={fadeUp}>
-          <Card className="mt-4 flex flex-wrap items-end gap-3 p-4">
-            <Server className="mb-3 h-5 w-5 text-fg-muted" aria-hidden />
-            <Input className="min-w-[260px] flex-1" size2="md" label="Paya server address" hint="Used by both surfaces on this device. For a phone, use the laptop's LAN or tunnel address."
-              value={base} onChange={(e) => { setBase(e.target.value); setApiBase(e.target.value); }} />
-          </Card>
+        <motion.div variants={fadeUp} className="mt-4 grid gap-4 md:grid-cols-[1fr_300px]">
+          <ServerStatus />
+          <PhoneQr />
         </motion.div>
         <motion.p variants={fadeUp} className="mt-8 text-caption text-fg-muted">FAST CS3017 Enterprise Systems semester project. Simulated Raast rail and identity registry; no real money, cards, CNICs or biometrics.</motion.p>
       </motion.div>
     </div>
+  );
+}
+
+/** Scan with the iPhone camera: opens the wallet on this deployment, already pointed at this backend.
+ *  Then Share -> Add to Home Screen inside that page, so the Home Screen app keeps the same address. */
+function PhoneQr() {
+  const link = `${window.location.origin}/app?api=${encodeURIComponent(apiBase())}`;
+  const local = /localhost|127\.0\.0\.1/.test(window.location.origin + apiBase());
+  return (
+    <Card className="flex items-center gap-4 p-4">
+      <div className="shrink-0 rounded-md bg-white p-1.5"><QRCodeSVG value={link} size={108} aria-label="QR code to open the wallet on a phone" /></div>
+      <div className="min-w-0">
+        <p className="text-label text-fg">Open on your phone</p>
+        <p className="mt-1 text-caption text-fg-2">Scan with the camera, then Share → Add to Home Screen.</p>
+        {local && <p className="mt-1 text-caption text-warning">This uses a localhost address; a phone needs the public (Vercel and tunnel) addresses.</p>}
+      </div>
+    </Card>
   );
 }

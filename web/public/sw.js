@@ -1,6 +1,6 @@
 // Minimal service worker: caches the app shell so the PWA opens instantly from the home screen.
 // API calls are never cached - payment status must always come from the server.
-const CACHE = "paya-shell-v1";
+const CACHE = "paya-shell-v2";
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(["/", "/manifest.webmanifest", "/icon.svg"])));
   self.skipWaiting();

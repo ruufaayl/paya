@@ -1,3 +1,4 @@
+import { adoptApiFromUrl } from "./lib/api";
 import "@fontsource-variable/inter";
 import "@fontsource-variable/manrope";
 import "@fontsource/jetbrains-mono/400.css";
@@ -32,6 +33,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     </QueryClientProvider>
   </React.StrictMode>,
 );
+
+adoptApiFromUrl();   // ?api=https://backend on any link points this device at that backend
 
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => undefined));

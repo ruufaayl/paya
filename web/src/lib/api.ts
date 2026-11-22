@@ -15,6 +15,29 @@ export function apiBase(): string {
 }
 export function setApiBase(url: string) { safeSet(KEY_BASE, url.trim().replace(/\/$/, "")); }
 
+/** A link like https://<vercel-app>/app?api=https://<backend> points this device at that backend. Needed on iPhone:
+ *  a Home Screen app has its own storage, separate from Safari, so the address must reach it via its own link/QR
+ *  or the setting on the sign-in screen. Only http(s) URLs are accepted; the parameter is removed after use. */
+export function adoptApiFromUrl() {
+  try {
+    const u = new URL(window.location.href);
+    const api = u.searchParams.get("api");
+    if (!api) return;
+    const parsed = new URL(api);
+    if (parsed.protocol === "https:" || parsed.protocol === "http:") setApiBase(parsed.origin);
+    u.searchParams.delete("api");
+    window.history.replaceState(null, "", u.pathname + (u.search ? u.search : "") + u.hash);
+  } catch { /* ignore a malformed link */ }
+}
+
+/** A page served over HTTPS cannot call an http:// backend (the browser blocks it); localhost is the exception. */
+export function mixedContent(base = apiBase()): boolean {
+  try {
+    const b = new URL(base);
+    return window.location.protocol === "https:" && b.protocol === "http:" && !["localhost", "127.0.0.1"].includes(b.hostname);
+  } catch { return false; }
+}
+
 export type Role = "CUSTOMER" | "CASHIER" | "MERCHANT_ADMIN" | "OPS" | "COMPLIANCE" | "FINANCE" | "SYSADMIN" | "AUDITOR";
 export interface Session { username: string; token: string; role: Role; display_name: string; customer_id?: string; merchant_id?: string; }
 
