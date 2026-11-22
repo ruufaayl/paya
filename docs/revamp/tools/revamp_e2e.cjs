@@ -281,7 +281,7 @@ async function onboard(p, who) {
   await switchOp(c, "Mudaser");
   await c.goto(`${WEB}/control/audit`); await c.waitForTimeout(900);
   check("audit page restricted for Ops", /Not available for your role/.test(await c.locator("body").innerText()));
-  await switchOp(c, "Auditor");
+  await switchOp(c, "Taha");
   await c.goto(`${WEB}/control/audit`); await c.waitForTimeout(1500);
   const auditText = await c.locator("body").innerText();
   check("audit log: chain intact and denials visible", /Hash chain intact/.test(auditText) && /DENIED/.test(auditText));

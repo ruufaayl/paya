@@ -97,7 +97,7 @@ export default function Assistant({ user }: { user: string }) {
           <label htmlFor="chat-input" className="sr-only">Message the assistant</label>
           <textarea id="chat-input" rows={1} value={text} maxLength={500} onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(text); } }}
-            placeholder="Ask about your balance or a payment…" className="max-h-28 min-h-[44px] flex-1 resize-none rounded-md border border-line-control bg-canvas px-3 py-2.5 text-body text-fg outline-none placeholder:text-fg-muted focus:border-focus" />
+            placeholder="Ask Paya…" className="max-h-28 min-h-[44px] flex-1 resize-none rounded-md border border-line-control bg-canvas px-3 py-2.5 text-body text-fg outline-none placeholder:text-fg-muted focus:border-focus" />
           <button type="submit" disabled={!text.trim() || busy} aria-label="Send" className="grid h-11 w-11 shrink-0 place-items-center rounded-md bg-brand text-brand-fg disabled:opacity-40"><SendHorizontal className="h-5 w-5" /></button>
         </form>
         <p className="py-1.5 text-center text-[11.5px] text-fg-muted">Never share your PIN, OTP or password. Paya will never ask for them.</p>

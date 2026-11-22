@@ -252,7 +252,7 @@ const FAKE_CAMERA = () => {
   });
 
   await scene("7. Evidence: audit chain intact, denials visible (as Auditor)", () => mc.screenshot({ path: `${OUT}/scene-7-audit.png` }), async (check) => {
-    await actAs("Auditor");
+    await actAs("Taha");
     await mc.goto(`${WEB}/control/audit`); await sleep(1400);
     const a = await mc.locator("body").innerText();
     check("hash chain intact", /Hash chain intact/.test(a));

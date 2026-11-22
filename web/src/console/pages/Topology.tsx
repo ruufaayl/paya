@@ -4,7 +4,7 @@
 //   OBSERVED (runtime): telemetry this console actually received in the last 5 minutes.
 // A node is never shown as "healthy" because of a colour. With no telemetry it says so.
 import { BaseEdge, Background, BackgroundVariant, Controls, Handle, MiniMap, Position, ReactFlow, ReactFlowProvider, getBezierPath, useReactFlow,
-  type Edge, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
+  type Edge, type EdgeProps, type Node, type NodeChange, type NodeProps } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { AnimatePresence, motion } from "framer-motion";
 import { Crosshair, Maximize2, X } from "lucide-react";
@@ -36,6 +36,13 @@ function Inner() {
   const [settled, setSettled] = useState<{ id: string; ref: string; amount: number; merchant: string; at: number }[]>([]);
   const [totals, setTotals] = useState({ n: 0, minor: 0 });
   const [glow, setGlow] = useState<Record<string, number>>({});
+  // React Flow 12 forgets a node's measured size when it receives a new node object and hides it until it is
+  // re-measured, which never happens if the size did not change. Keep the measurements and hand them back.
+  const [dims, setDims] = useState<Record<string, { width: number; height: number }>>({});
+  const onNodesChange = useCallback((chs: NodeChange[]) => {
+    const d = chs.filter((c): c is Extract<NodeChange, { type: "dimensions" }> => c.type === "dimensions" && !!(c as any).dimensions);
+    if (d.length) setDims((cur) => { const n = { ...cur }; d.forEach((c) => { n[c.id] = c.dimensions!; }); return n; });
+  }, []);
   const seq = useRef(0);
   const [, tick] = useState(0);
   useEffect(() => { const t = setInterval(() => tick((n) => n + 1), 5000); return () => clearInterval(t); }, []);
@@ -92,9 +99,9 @@ function Inner() {
   }, [selected]);
 
   const nodes: Node[] = useMemo(() => NODES.filter((n) => !hidden.has(NODE_INFO[n.id].layer)).map((n) => ({
-    id: n.id, type: "svc", position: { x: n.x, y: n.y }, selected: n.id === selected,
+    id: n.id, type: "svc", position: { x: n.x, y: n.y }, selected: n.id === selected, measured: dims[n.id],
     data: { def: n, obs: observed[n.id], glow: !!glow[n.id], dim: focus && neighbours ? !neighbours.has(n.id) : false, match: q && (n.title + n.sub).toLowerCase().includes(q.toLowerCase()) } as any,
-  })), [observed, hidden, selected, focus, neighbours, q, glow]);
+  })), [observed, hidden, selected, focus, neighbours, q, glow, dims]);
   const visible = new Set(nodes.map((n) => n.id));
   const edges: Edge[] = useMemo(() => EDGES.filter((e) => visible.has(e.source) && visible.has(e.target)).map((e) => ({
     id: e.id, source: e.source, target: e.target, type: "wire", sourceHandle: `s-${e.sh || "r"}`, targetHandle: `t-${e.th || "l"}`,
@@ -131,7 +138,7 @@ function Inner() {
 
       <div className="relative mt-3">
         <div className="relative h-[calc(100vh-230px)] min-h-[540px] overflow-hidden rounded-lg border border-line bg-sunken">
-          <ReactFlow nodes={nodes} edges={edges} nodeTypes={NODE_TYPES} edgeTypes={EDGE_TYPES} fitView fitViewOptions={{ padding: 0.03 }} minZoom={0.3} style={{ background: "transparent" }} maxZoom={1.8}
+          <ReactFlow nodes={nodes} edges={edges} onNodesChange={onNodesChange} nodeTypes={NODE_TYPES} edgeTypes={EDGE_TYPES} fitView fitViewOptions={{ padding: 0.03 }} minZoom={0.3} style={{ background: "transparent" }} maxZoom={1.8}
             nodesConnectable={false} proOptions={{ hideAttribution: true }} colorMode="dark" onNodeClick={(_, n) => setSelected(n.id)} onPaneClick={() => setSelected(null)}>
             <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="rgba(255,255,255,0.06)" />
             <Controls showInteractive={false} position="bottom-left" />
