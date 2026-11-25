@@ -13,7 +13,7 @@ A tokenised rail does differ from Raast in ways an EIS must handle:
 - finality is a depth of confirmations, not an acknowledgement;
 - addresses need screening;
 - the travel rule asks for beneficiary data;
-- Paya's records must be reconciled against a chain it does not control.
+- Rupay's records must be reconciled against a chain it does not control.
 
 ## Decision
 

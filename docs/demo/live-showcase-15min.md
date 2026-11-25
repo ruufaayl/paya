@@ -1,6 +1,6 @@
-# Paya live showcase: a 15-minute tour of everything
+# Rupay live showcase: a 15-minute tour of everything
 
-This is the presenter's guide for showing **every part of Paya** on the live deployment in 15 minutes: the customer wallet on an iPhone, the merchant tills, Mission Control on the projector, and the backend behind them. It complements `demo-script.md` (the 10-minute failure-and-recovery script for the viva). Use this one when the audience wants to see the whole product.
+This is the presenter's guide for showing **every part of Rupay** on the live deployment in 15 minutes: the customer wallet on an iPhone, the merchant tills, Mission Control on the projector, and the backend behind them. It complements `demo-script.md` (the 10-minute failure-and-recovery script for the viva). Use this one when the audience wants to see the whole product.
 
 Everything is synthetic: synthetic customers, merchants and identities, a simulated Raast rail and identity registry, and no real money. Say so once at the start, and point to the **Simulated** badge in the top bar.
 
@@ -14,7 +14,7 @@ Everything is synthetic: synthetic customers, merchants and identities, a simula
 | Scan / pay | https://paya-six.vercel.app/app/scan | Camera, or tap an open till request |
 | Services (super app) | https://paya-six.vercel.app/app/services | Bills, top-up, shop, takaful, green |
 | Green pot and footprint | https://paya-six.vercel.app/app/green | |
-| Paya Assistant | https://paya-six.vercel.app/app/assistant | English and Roman Urdu |
+| Rupay Assistant | https://paya-six.vercel.app/app/assistant | English and Roman Urdu |
 | Mission Control | https://paya-six.vercel.app/control | Sign in as a staff member |
 | QR wall (six tills) | https://paya-six.vercel.app/control/qr-wall | Put this on a second screen |
 | System topology | https://paya-six.vercel.app/control/topology | Live settlement ticker and wave |
@@ -33,7 +33,7 @@ Demo password for every account: `paya-demo-2026`.
 | Zarak Khanzada (customer) | `zarak` | Synthetic watch-list match → compliance hold |
 | Hina Baig (KYC pending) | `hina` | Unverified: can't pay |
 | Ayesha, Kamran, Noor, Danish, Sadia, Imran | `<name>.cashier` | Tills: Chai Junction, Shifa Pharmacy, Green Leaf Grocers, Lahore Tikka House, Clifton Fuel Stop, Saddar Book Corner |
-| Mudaser, Faisal | `mudaser.ops`, `faisal.ops` | Operations |
+| Mudaser, Ateeq | `mudaser.ops`, `ateeq.ops` | Operations |
 | Kanz, Harris | `kanz.compliance`, `harris.compliance` | Compliance (two officers) |
 | Rufayl | `rufayl.finance` | Finance and reconciliation |
 | Admin, Auditor | `admin`, `auditor` | Security; read-only audit |
@@ -69,11 +69,11 @@ The live database is shared and is not reset between demos. That is fine: the le
 
 ## The 15 minutes
 
-### 0:00–1:00 · What Paya is (Speaker A)
+### 0:00–1:00 · What Rupay is (Speaker A)
 
 *Show:* the start page, then Mission Control **Overview**.
 
-> "Raast P2M grew from 4.9 million to about 180 million payments between FY25 and FY26 (SBP Governor's Annual Reports 2024–25 and 2025–26, page 58). But at the counter, a cashier still decides a payment worked by looking at the customer's screenshot. Paya's promise: the till says **PAID** only after the money has moved and our double-entry ledger says so. Everything here is synthetic and the rail is a simulator."
+> "Raast P2M grew from 4.9 million to about 180 million payments between FY25 and FY26 (SBP Governor's Annual Reports 2024–25 and 2025–26, page 58). But at the counter, a cashier still decides a payment worked by looking at the customer's screenshot. Rupay's promise: the till says **PAID** only after the money has moved and our double-entry ledger says so. Everything here is synthetic and the rail is a simulator."
 
 **Overview** shows payments today, settlement rate, work waiting for people (cases, KYC referrals, approvals), rail health and integrity status.
 
@@ -133,7 +133,7 @@ The live database is shared and is not reset between demos. That is fine: the le
 | Tap the same number again | — | "This bill is already paid" |
 | **Raabta Mobile** top-up or **Bazaar Lane** | "Partners get only the data you consent to, per partner, and you can revoke it." | Consent dialog |
 | **Green** → footprint estimate; move Rs 200 into the green pot | "An estimate with a ±50% band, not a precise number. The pot is a real ledger account." | Footprint card; pot balance |
-| **Ask Paya** → "mera balance kitna hai", then "send 500 to Ali" | "Roman Urdu, answered from the ledger. It can't move money, however you ask." | Balance card; refusal |
+| **Ask Rupay** → "mera balance kitna hai", then "send 500 to Ali" | "Roman Urdu, answered from the ledger. It can't move money, however you ask." | Balance card; refusal |
 | Mission Control: **Green banking**, **Partners & services**, **Stablecoin sandbox** | "Staff see aggregates only, can switch off a partner, and the stablecoin sandbox is off on this server by design." | Aggregates; kill switch; "Switched off on this server" |
 
 ### 12:30–13:45 · Digital onboarding with two officers (Speaker D)

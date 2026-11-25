@@ -1,4 +1,4 @@
-# API changes (Paya 2.0)
+# API changes (Rupay 2.0)
 
 All changes are **additive**. No existing endpoint changed its path, input, or meaning. Financial domain modules (`ledger`, `payments`, `state`, `rail`, `recon`, `kyc`, `idempotency`) were **not modified**. The new endpoints live in `src/paya/api/ops.py`; tests are in `tests/test_ops_api.py` (O1–O9). OpenAPI: 41 → 55 operations (`api/openapi.json`).
 
@@ -16,7 +16,7 @@ All changes are **additive**. No existing endpoint changed its path, input, or m
 | `GET /v1/audit/log?actor&action&outcome&object_id&before_id&limit` | `audit:read` (AUDITOR, COMPLIANCE) | Audit rows with hashes, plus a chain verification result | No |
 | `GET /v1/admin/access` | `access:read` (AUDITOR, SYSADMIN, COMPLIANCE) | Permission matrix and users (names and roles only) | No |
 | `GET /v1/ops/staff?role` | `cases:read` | Names of active staff in a role (assignment picker) | No |
-| `POST /v1/assistant/messages` `{text, conversation_ref?}` | `assistant:use` (CUSTOMER) | Theme 3: the Paya Assistant replies from the customer's own data; returns reply, cards, suggestions, handoff, redaction kinds | **No** (source-checked) |
+| `POST /v1/assistant/messages` `{text, conversation_ref?}` | `assistant:use` (CUSTOMER) | Theme 3: the Rupay Assistant replies from the customer's own data; returns reply, cards, suggestions, handoff, redaction kinds | **No** (source-checked) |
 | `GET /v1/assistant/conversations/{ref}` | `assistant:use` (owner only) | The customer's own transcript (redacted) | No |
 | `GET /v1/ops/assistant/conversations/{ref}` | `cases:read` | Staff transcript for a handoff; **each read audited** | No |
 | `GET /v1/ops/assistant/metrics` | `backoffice:read` | Conversations, intents, handoff, unknown and redaction counts | No |

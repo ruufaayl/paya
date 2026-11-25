@@ -1,4 +1,4 @@
-"""Paya Assistant: conversational banking (Theme 3), bounded by design.
+"""Rupay Assistant: conversational banking (Theme 3), bounded by design.
 
 What it is: a customer-facing assistant that answers questions about the customer's OWN wallet from the ledger
 (balance, recent payments, a payment's status and why, limits, verification), in English and Roman Urdu, and
@@ -201,7 +201,7 @@ def respond(customer_id: str, text: str, conversation_ref: str | None = None) ->
         merchants = {m.id: m.trading_name for m in s.execute(select(Merchant)).scalars()}
         reply, cards, suggestions, tools, handoff = _answer(s, cust, conv, intent, clean, merchants)
         if kinds:
-            reply = ("I removed sensitive details from your message and did not store them. Paya will never ask for your "
+            reply = ("I removed sensitive details from your message and did not store them. Rupay will never ask for your "
                      "PIN, OTP, password or full card number. ") + reply
         s.add(ChatMessage(conversation_id=conv.id, role="USER", text=clean, intent=intent, redactions=kinds))
         s.add(ChatMessage(conversation_id=conv.id, role="ASSISTANT", text=reply, intent=intent, tools=tools))
@@ -212,7 +212,7 @@ def respond(customer_id: str, text: str, conversation_ref: str | None = None) ->
                                                      "handoff": bool(handoff)}, level="warn" if handoff or kinds else "info")
     return {"conversation_ref": ref, "intent": intent, "reply": reply, "cards": cards, "suggestions": suggestions,
             "handoff": handoff, "redacted": kinds, "rules_version": RULES_VERSION,
-            "disclosure": "Paya Assistant answers from your wallet's ledger. It cannot move money."}
+            "disclosure": "Rupay Assistant answers from your wallet's ledger. It cannot move money."}
 
 
 def _answer(s: Session, cust: Customer, conv: Conversation, intent: str, text: str, merchants: dict):
@@ -245,7 +245,7 @@ def _answer(s: Session, cust: Customer, conv: Conversation, intent: str, text: s
         t = tool_find_payment(s, cid, text, merchants)
         tools.append("find_payment")
         if t is None:
-            msg = "I couldn't find that payment in your wallet. Check the reference on your receipt (it looks like PAYA-20261121-ABC123)."
+            msg = "I couldn't find that payment in your wallet. Check the reference on your receipt (it looks like RUPAY-20261121-ABC123)."
             return msg, cards, ["Show my recent payments"], tools, handoff
         cards.append(_txn_card(t, merchants))
         who = merchants.get(t.merchant_id) or "the shop"
@@ -304,11 +304,11 @@ def _answer(s: Session, cust: Customer, conv: Conversation, intent: str, text: s
                 "automatically, and any reversal needs two staff members. If you think something is wrong, I can pass this to a person."
                 ), cards, ["Talk to a person", "Did my last payment go through?"], tools, handoff
     if intent == "SECURITY":
-        msg = ("Paya will never ask for your PIN, OTP or password, in chat or on a call. Don't share them with anyone. "
+        msg = ("Rupay will never ask for your PIN, OTP or password, in chat or on a call. Don't share them with anyone. "
                "If you think someone has your details, sign out and talk to a person now.")
         return msg, cards, ["Talk to a person"], tools, handoff
     if intent == "OUT_OF_SCOPE":
-        return ("I can only help with your Paya wallet and payments. I can't give investment, loan or crypto advice."
+        return ("I can only help with your Rupay wallet and payments. I can't give investment, loan or crypto advice."
                 ), cards, sugg[:3], tools, handoff
     if intent == "HUMAN":
         handoff = _handoff(s, cust, conv)

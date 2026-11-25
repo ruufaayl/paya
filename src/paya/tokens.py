@@ -1,6 +1,6 @@
 """Theme 5: the stablecoin sandbox. DISABLED unless PAYA_STABLECOIN_SANDBOX=true.
 
-What it is: a design and a working prototype of how Paya would integrate a tokenised-money rail
+What it is: a design and a working prototype of how Rupay would integrate a tokenised-money rail
 (wallets, compliance, merchant acceptance, finality, reconciliation) if an SBP-approved instrument
 existed. What it is not: a payment method, an asset, or money. Pakistan's virtual-asset rules
 (PVARA/SBP) do not permit stablecoin payments for us, so:
@@ -12,7 +12,7 @@ existed. What it is not: a payment method, an asset, or money. Pakistan's virtua
 * every transfer is screened (synthetic blocked-address list), limited per transfer and per day, and an
   external transfer at or above the travel-rule threshold must carry beneficiary details;
 * "Confirmed" is shown only at the configured confirmation depth, because a reorg can undo less;
-* Paya's records are reconciled against the chain continuously (integrity checks).
+* Rupay's records are reconciled against the chain continuously (integrity checks).
 """
 import hashlib
 import re
@@ -246,7 +246,7 @@ def tick() -> dict:
 
 # ------------------------------------------------------------------ reconciliation and Mission Control
 def reconcile() -> dict:
-    """Paya's records against the chain (on-chain/off-chain reconciliation)."""
+    """Rupay's records against the chain (on-chain/off-chain reconciliation)."""
     need = get_settings().token_confirmations
     breaks = []
     with session_scope() as s:

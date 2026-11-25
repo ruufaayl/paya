@@ -1,8 +1,8 @@
-# Paya 2.0 product experience
+# Rupay 2.0 product experience
 
-**Paya** is a payment-assurance layer for Raast person-to-merchant (P2M) payments, built as a technology service provider to a licensed partner. It has two connected surfaces.
+**Rupay** is a payment-assurance layer for Raast person-to-merchant (P2M) payments, built as a technology service provider to a licensed partner. It has two connected surfaces.
 
-| | Paya Wallet | Paya Mission Control |
+| | Rupay Wallet | Rupay Mission Control |
 |---|---|---|
 | For | Customers (and cashiers, via the till) | Operations, compliance, finance, audit |
 | Device | Phone, mobile-first PWA | Laptop/desktop (1280–1920 px) |

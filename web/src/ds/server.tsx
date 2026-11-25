@@ -37,7 +37,7 @@ export function ServerStatus({ compact = false }: { compact?: boolean }) {
       <div className="flex items-center gap-2">
         <Server className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
         <span className="min-w-0 flex-1">
-          <span className="block text-caption text-fg-2">Paya server</span>
+          <span className="block text-caption text-fg-2">Rupay server</span>
           <span className="ref block truncate text-[12.5px] text-fg">{host}</span>
         </span>
         <span className="flex items-center gap-1.5 text-caption text-fg-2" role="status">{dot}{h.state === "ok" ? "Connected" : h.state === "checking" ? "Checking" : "Not reachable"}</span>
@@ -47,7 +47,7 @@ export function ServerStatus({ compact = false }: { compact?: boolean }) {
       {open && (
         <form className="mt-3 flex items-end gap-2" onSubmit={(e) => { e.preventDefault(); save(); }}>
           <Input className="flex-1" size2="md" label="Server address" placeholder="https://xxxx.trycloudflare.com" autoCapitalize="none" autoCorrect="off"
-            inputMode="url" value={draft} onChange={(e) => setDraft(e.target.value)} hint="The HTTPS address of the Paya backend (e.g. your tunnel)." />
+            inputMode="url" value={draft} onChange={(e) => setDraft(e.target.value)} hint="The HTTPS address of the Rupay backend (e.g. your tunnel)." />
           <Button type="submit" size="md" className="mb-6">Save</Button>
         </form>
       )}

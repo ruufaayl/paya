@@ -1,14 +1,14 @@
-# Paya design system
+# Rupay design system
 
 One visual language, two densities: **Wallet** (light, calm, roomy, for customers on a phone) and **Console** (dark, dense, precise, for operators on a laptop). Both read the same semantic tokens, so a component written once works in both.
 
 **Source of truth:** `web/src/ds/tokens.css` (tokens) → `web/tailwind.config.js` (semantic classes) → `web/src/ds/*` (components). The contrast of every text pairing is computed by `docs/revamp/tools/contrast_check.py` → `contrast-report.md` (0 failing pairs).
 
-**Learning from the reference brand book, without borrowing its identity.** The NayaPay guidelines show the discipline a fintech brand needs: a defined core and supporting palette, AA-checked pairings, a display-plus-text type pair with set line-height and tracking rules, logo clear-space and minimum-size rules, and a "don'ts" list. Paya follows the same structure with its own decisions. It uses none of NayaPay's colours (Electric Orange, Blackberry), fonts (Poppins, DM Sans), symbol or layouts.
+**Learning from the reference brand book, without borrowing its identity.** The NayaPay guidelines show the discipline a fintech brand needs: a defined core and supporting palette, AA-checked pairings, a display-plus-text type pair with set line-height and tracking rules, logo clear-space and minimum-size rules, and a "don'ts" list. Rupay follows the same structure with its own decisions. It uses none of NayaPay's colours (Electric Orange, Blackberry), fonts (Poppins, DM Sans), symbol or layouts.
 
 ## 1. Brand
 
-**Idea:** *payment, pakka*. "Paid" means confirmed by the ledger and the rail.
+**Idea:** *dedo mujhay!*. "Paid" means confirmed by the ledger and the rail.
 
 **Symbol.** A geometric "P" whose bowl closes into a confirmation tick (`Symbol` in `ds/ui.tsx`, `public/icon.svg`). It evolves the 1.x mark: the gradient is removed (flat, two colours), and the stroke weights are unified.
 

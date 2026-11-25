@@ -123,13 +123,13 @@ def run(s: Session) -> dict:
             overshared += 1
     out.append(_check("operational", "partner_data_shared_only_with_consent", overshared == 0, overshared,
                       "a partner received customer data without a matching, live consent"))
-    # Stablecoin sandbox (Theme 5): Paya's confirmed transfers must agree with the chain, and no sandbox
+    # Stablecoin sandbox (Theme 5): Rupay's confirmed transfers must agree with the chain, and no sandbox
     # token movement may ever appear in the rupee ledger.
     from . import tokens
     from .models import Journal, TokenTransfer
     rec = tokens.reconcile()
     out.append(_check("financial", "token_transfers_match_chain", not rec["breaks"], len(rec["breaks"]),
-                      "a transfer Paya shows as confirmed is missing, different or not final on the sandbox chain"))
+                      "a transfer Rupay shows as confirmed is missing, different or not final on the sandbox chain"))
     leaked = s.execute(select(func.count()).select_from(Journal).where(
         Journal.txn_id.in_(select(TokenTransfer.id)) | Journal.reason_code.ilike("%TOKEN%"))).scalar_one()
     out.append(_check("financial", "sandbox_tokens_never_in_rupee_ledger", leaked == 0, leaked,

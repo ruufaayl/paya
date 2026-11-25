@@ -276,7 +276,7 @@ class Case(Base):
     details: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
     resolution: Mapped[str | None] = mapped_column(String(48))
     resolved_by: Mapped[str | None] = mapped_column(String(64))
-    assigned_to: Mapped[str | None] = mapped_column(String(64))  # the person working it (Paya 2.0)
+    assigned_to: Mapped[str | None] = mapped_column(String(64))  # the person working it (Rupay 2.0)
     assigned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     sla_due_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     created_at: Mapped[datetime] = TS()
@@ -479,7 +479,7 @@ class KYCCheck(Base):
 
 # ---------------------------------------------------------------- Conversational banking (Theme 3)
 class Conversation(Base):
-    """A customer's chat with the Paya Assistant. Text is stored only AFTER redaction; purged after retention."""
+    """A customer's chat with the Rupay Assistant. Text is stored only AFTER redaction; purged after retention."""
     __tablename__ = "conversations"
     id: Mapped[uuid.UUID] = UUIDPK()
     ref: Mapped[str] = mapped_column(String(24), unique=True, nullable=False)
@@ -506,7 +506,7 @@ class ChatMessage(Base):
 # ---------------------------------------------------------------- Super app (Theme 4)
 class Partner(Base):
     """A third-party service inside the wallet (biller, shop, insurer). Synthetic. Payment always goes through
-    the normal payment path to the partner's merchant record; Paya never holds partner funds."""
+    the normal payment path to the partner's merchant record; Rupay never holds partner funds."""
     __tablename__ = "partners"
     code: Mapped[str] = mapped_column(String(16), primary_key=True)
     name: Mapped[str] = mapped_column(String(128), nullable=False)
@@ -564,7 +564,7 @@ class TokenWallet(Base):
 
 
 class TokenTransfer(Base):
-    """Paya's record of a sandbox token movement. The chain is the system of record for token balances;
+    """Rupay's record of a sandbox token movement. The chain is the system of record for token balances;
     this row is the audit and reconciliation mirror. It is never posted to the rupee ledger."""
     __tablename__ = "token_transfers"
     id: Mapped[uuid.UUID] = UUIDPK()

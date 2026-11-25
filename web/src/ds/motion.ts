@@ -1,4 +1,4 @@
-// Paya motion tokens (mirrors the CSS variables in tokens.css). Motion explains change; it never decides it.
+// Rupay motion tokens (mirrors the CSS variables in tokens.css). Motion explains change; it never decides it.
 // Rule: an animation may only show a financial outcome that the server has already confirmed.
 import type { Transition, Variants } from "framer-motion";
 

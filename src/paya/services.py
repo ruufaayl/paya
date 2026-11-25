@@ -56,7 +56,7 @@ CATALOG: dict[str, dict] = {
                 "items": {"PHONE-M": ("Phone screen cover, 1 month", 149_00),
                           "HOSP-M": ("Hospital cash Rs 2,000/day, 1 month", 299_00)}},
 }
-NOT_OFFERED = [{"name": "Investments", "reason": "Paya is an e-money wallet and is not licensed to offer investment products."}]
+NOT_OFFERED = [{"name": "Investments", "reason": "Rupay is an e-money wallet and is not licensed to offer investment products."}]
 MAX_QTY, MAX_LINES = 10, 10
 
 
@@ -70,7 +70,7 @@ def ensure_partners(s: Session) -> dict[str, Partner]:
         m = s.execute(select(Merchant).where(Merchant.registration_ref == c["reg"])).scalar_one_or_none()
         if m is None:
             m = Merchant(registration_ref=c["reg"], trading_name=c["name"], category=c["category"],
-                         raast_alias=f"{code.lower()}@paya", settlement_iban_masked=f"PK** PAYA **** **** {c['reg'][-4:]}")
+                         raast_alias=f"{code.lower()}@rupay", settlement_iban_masked=f"PK** RUPY **** **** {c['reg'][-4:]}")
             s.add(m)
             s.flush()
         p = Partner(code=code, name=c["name"], kind=c["kind"], merchant_id=m.id, data_scopes=c["scopes"])

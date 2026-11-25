@@ -1,7 +1,7 @@
 {
-  "name": "Paya",
-  "short_name": "Paya",
-  "description": "Payment pakka hai - Raast P2M payments with ledger-grade certainty (synthetic demo).",
+  "name": "Rupay",
+  "short_name": "Rupay",
+  "description": "Rupay - dedo mujhay! Raast payments and bank transfers with ledger-grade certainty (synthetic demo).",
   "start_url": "/app",
   "scope": "/",
   "display": "standalone",

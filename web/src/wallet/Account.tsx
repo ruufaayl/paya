@@ -1,4 +1,4 @@
-// Account: who you are, your verification and limits, how Paya protects your money, and sign out.
+// Account: who you are, your verification and limits, how Rupay protects your money, and sign out.
 import { BadgeCheck, BookOpenCheck, FlaskConical, KeyRound, LifeBuoy, LogOut, Repeat2, ShieldCheck } from "lucide-react";
 import { Badge, Button, Card, KV, Skeleton } from "../ds/ui";
 import { apiBase, session } from "../lib/api";
@@ -32,7 +32,7 @@ export default function Account({ user, onSignOut }: { user: string; onSignOut: 
       </Card>
 
       <Card as="section" aria-labelledby="sec-h" className="mt-3 px-4 py-2">
-        <h2 id="sec-h" className="pt-2 text-title-3 text-fg">How Paya protects your money</h2>
+        <h2 id="sec-h" className="pt-2 text-title-3 text-fg">How Rupay protects your money</h2>
         <ul className="divide-y divide-line">
           {row(BookOpenCheck, "Every rupee is double-entry", "Each payment is a balanced ledger posting that can never be edited, only corrected.")}
           {row(Repeat2, "Retries can't charge twice", "Each payment carries a unique key; resending returns the same result.")}
@@ -43,7 +43,7 @@ export default function Account({ user, onSignOut }: { user: string; onSignOut: 
 
       <Card as="section" aria-labelledby="demo-h" className="mt-3 px-4 py-3">
         <h2 id="demo-h" className="flex items-center gap-2 text-title-3 text-fg"><FlaskConical className="h-4 w-4" aria-hidden />About this prototype <Badge tone="info">Synthetic</Badge></h2>
-        <p className="mt-1 text-caption text-fg-2">Paya is an academic prototype. People, merchants and identities are synthetic; the Raast rail and identity registry are simulators; no real money moves.</p>
+        <p className="mt-1 text-caption text-fg-2">Rupay is an academic prototype. People, merchants and identities are synthetic; the Raast rail and identity registry are simulators; no real money moves.</p>
         <dl className="mt-2"><KV k="Server" v={apiBase().replace(/^https?:\/\//, "")} mono /></dl>
       </Card>
 

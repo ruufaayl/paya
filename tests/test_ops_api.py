@@ -81,14 +81,14 @@ def test_o6_assignment_is_owner_only_audited_and_moves_no_money(client, as_, set
     assert client.post(url, headers=as_(  # wrong role for this case
         "kanz.compliance"), json={"assignee": "kanz.compliance"}).status_code == 403
     assert client.post(url, headers=as_("mudaser.ops"), json={"assignee": "rufayl.finance"}).status_code == 422
-    r = client.post(url, headers=as_("mudaser.ops"), json={"assignee": "faisal.ops"}).json()
-    assert r["assigned_to"] == "faisal.ops" and r["state"] == "IN_REVIEW"
+    r = client.post(url, headers=as_("mudaser.ops"), json={"assignee": "ateeq.ops"}).json()
+    assert r["assigned_to"] == "ateeq.ops" and r["state"] == "IN_REVIEW"
     actions = [(a["action"], a["outcome"]) for a in r["audit"]]
     assert ("CASE_ASSIGN", "ALLOWED") in actions and ("CASE_ASSIGN", "DENIED") in actions
     with session_scope() as s:
         tb = trial_balance(s)
     assert tb["balanced"] and payments_tb["balanced"]
-    assert client.post(url, headers=as_("sara"), json={"assignee": "faisal.ops"}).status_code == 403
+    assert client.post(url, headers=as_("sara"), json={"assignee": "ateeq.ops"}).status_code == 403
 
 
 def test_o7_audit_log_and_access_matrix_are_restricted(client, as_):

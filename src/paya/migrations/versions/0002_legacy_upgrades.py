@@ -1,5 +1,5 @@
 """Idempotent upgrades for databases created before migrations existed (by create_all), which are stamped
-at the baseline: Paya 2.0 case assignment columns, and the Theme 2 widening of three CHECK lists.
+at the baseline: Rupay 2.0 case assignment columns, and the Theme 2 widening of three CHECK lists.
 On a database built from the baseline every statement is a no-op.
 
 Revision ID: 0002

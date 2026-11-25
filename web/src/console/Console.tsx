@@ -1,4 +1,4 @@
-// Paya Mission Control: a financial-operations console. Every number is read from the backend; every action is
+// Rupay Mission Control: a financial-operations console. Every number is read from the backend; every action is
 // performed as the signed-in operator and checked by the server.
 import {
   Activity, ArrowLeftRight, Bot, ChevronDown, FileCheck2, FlaskConical, Gauge, FlaskRound, KeyRound, Leaf, Store, LogOut, Menu, Network, Radio, Search,
@@ -91,9 +91,9 @@ function OperatorGate({ onReady, notice }: { onReady: (o: Operator) => void; not
       }
       try { localStorage.setItem(OP_KEY, u); } catch { /* */ }
       onReady(o);
-    } catch (e) { setErr(e instanceof ApiError ? e.message : "Cannot reach the Paya server."); } finally { setBusy(null); }
+    } catch (e) { setErr(e instanceof ApiError ? e.message : "Cannot reach the Rupay server."); } finally { setBusy(null); }
   };
-  useEffect(() => { document.title = "Sign in · Paya Mission Control"; }, []);
+  useEffect(() => { document.title = "Sign in · Rupay Mission Control"; }, []);
   return (
     <div className="grid min-h-full place-items-center bg-canvas p-6 grid-dots">
       <Card className="w-full max-w-[520px] p-6 shadow-e3">

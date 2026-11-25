@@ -6,7 +6,7 @@
 
 ## 1. Chart of accounts
 
-These are the Partner EMI's books as Paya records them. All figures are synthetic.
+These are the Partner EMI's books as Rupay records them. All figures are synthetic.
 
 | Code | Account | Type | Normal balance | Meaning |
 |---|---|---|---|---|

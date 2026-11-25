@@ -8,7 +8,7 @@ Three bounded features, all on the existing systems of record:
    factor-set version, so a figure can always be traced to the table that produced it.
 2. Green pot (a savings product). Money ring-fenced inside the customer's own wallet, booked on chart
    account 2110. Moving money in or out is an internal double-entry journal (2100 <-> 2110) with an
-   Idempotency-Key, a wallet row lock and the same balance checks as a payment. No money leaves Paya,
+   Idempotency-Key, a wallet row lock and the same balance checks as a payment. No money leaves Rupay,
    no interest is promised, and nothing here issues money.
 3. Offsets. A contribution to a SYNTHETIC offset project is an ordinary Raast P2M payment: the customer
    gets a payment request and goes through the normal review, screening, ledger and rail path. A
@@ -55,7 +55,7 @@ POT_MAX_MINOR = 500_000_00      # Rs 500,000 per pot (synthetic product limit)
 ROUND_TO_MINOR = 100_00         # round-ups to the next Rs 100
 
 OFFSET_MERCHANT = ("MRC-0900", "Indus Delta Mangroves (synthetic project)", "CARBON_OFFSET",
-                   "indusmangroves@paya", "PK** PAYA **** **** 0900")
+                   "indusmangroves@rupay", "PK** RUPY **** **** 0900")
 OFFSET_KIND = "GREEN_OFFSET"
 PRICE_PER_TONNE_MINOR = 3_000_00  # illustrative Rs 3,000 per tonne
 OFFSET_MIN_MINOR, OFFSET_MAX_MINOR = 100_00, 10_000_00

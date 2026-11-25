@@ -1,4 +1,4 @@
-"""Paya 2.0 operations API: read models for Mission Control, plus one control (case assignment).
+"""Rupay 2.0 operations API: read models for Mission Control, plus one control (case assignment).
 
 Everything here is either READ-ONLY over existing systems of record, or (assignment) a work-management
 change that moves no money. Every endpoint is behind an existing or newly added permission, and the
@@ -377,7 +377,7 @@ class ChatIn(BaseModel):
 
 @router.post("/v1/assistant/messages", tags=["assistant"])
 def assistant_message(body: ChatIn, p: Principal = Depends(authorised("assistant:use"))):
-    """Ask the Paya Assistant about your own wallet. Read-only; it cannot move money."""
+    """Ask the Rupay Assistant about your own wallet. Read-only; it cannot move money."""
     from .. import assistant
     return assistant.respond(p.customer_id, body.text, body.conversation_ref)
 

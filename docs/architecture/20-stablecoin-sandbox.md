@@ -1,6 +1,6 @@
 # 20. Stablecoin sandbox (Theme 5): off by default
 
-**Goal.** Show how Paya would integrate a tokenised-money rail (wallets, compliance, merchant acceptance, finality and reconciliation) **without offering a stablecoin**. Under current Pakistani rules (virtual assets are not legal tender; the Virtual Assets Act 2026 and PVARA regulations) Paya may not offer stablecoin payments. So the sandbox is a switched-off prototype with worthless test tokens on a simulated chain (ADR-014).
+**Goal.** Show how Rupay would integrate a tokenised-money rail (wallets, compliance, merchant acceptance, finality and reconciliation) **without offering a stablecoin**. Under current Pakistani rules (virtual assets are not legal tender; the Virtual Assets Act 2026 and PVARA regulations) Rupay may not offer stablecoin payments. So the sandbox is a switched-off prototype with worthless test tokens on a simulated chain (ADR-014).
 
 **Switch:** `PAYA_STABLECOIN_SANDBOX=true` (default `false`). When off, every endpoint answers `404 FEATURE_DISABLED`, the worker does nothing, the wallet shows no tile, and Mission Control says why.
 
@@ -29,14 +29,14 @@ stateDiagram-v2
     CONFIRMED --> [*]
 ```
 
-- **Spendable** = confirmed (≥3) balance on the chain − Paya's pending outgoing transfers.
+- **Spendable** = confirmed (≥3) balance on the chain − Rupay's pending outgoing transfers.
 - **Reconciliation** (`token_transfers_match_chain`): every CONFIRMED record must still be included on the chain with the same addresses and amount, at depth ≥3.
 - **No rupees** (`sandbox_tokens_never_in_rupee_ledger`): no journal may reference a token transfer.
-- **Source of truth:** the chain, for token balances. Paya's `token_transfers` table is the audit and reconciliation mirror.
+- **Source of truth:** the chain, for token balances. Rupay's `token_transfers` table is the audit and reconciliation mirror.
 
 ## Chain chaos (Mission Control, `chaos:control`)
 
-| Mode | Behaviour | What Paya does |
+| Mode | Behaviour | What Rupay does |
 |---|---|---|
 | NORMAL | A block every 2 s | Confirms at depth 3 |
 | CONGESTED | Empty blocks | Transfers stay PENDING with 0 confirmations |
@@ -46,5 +46,5 @@ stateDiagram-v2
 ## Limits
 
 - The chain is simulated: no signatures, gas, mempool fees or network.
-- Faucet issuance is the only token source. That is deliberate: Paya does not issue value.
+- Faucet issuance is the only token source. That is deliberate: Rupay does not issue value.
 - A real integration needs an SBP- or PVARA-approved instrument and partner, regulated custody, chain analytics, and its own reconciliation agreements.

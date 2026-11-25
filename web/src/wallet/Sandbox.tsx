@@ -50,7 +50,7 @@ export default function Sandbox({ user }: { user: string }) {
       {w && !w.enrolled && (
         <Card className="mt-4 p-4">
           <h2 className="text-title-3 text-fg">Try a tokenised payment</h2>
-          <p className="mt-1 text-body-sm text-fg-2">See how Paya would handle a regulated digital-rupee or stablecoin rail: a wallet address, screening, limits, and payments that count only once the chain makes them final.</p>
+          <p className="mt-1 text-body-sm text-fg-2">See how Rupay would handle a regulated digital-rupee or stablecoin rail: a wallet address, screening, limits, and payments that count only once the chain makes them final.</p>
           {!w.eligible ? <div className="mt-3"><Alert tone="info" title="Fully verified wallets only">The sandbox is open to tier-2 verified wallets.</Alert></div> : (
             <>
               <label className="mt-4 flex items-start gap-2 text-body-sm text-fg">

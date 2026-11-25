@@ -1,4 +1,4 @@
-# Paya Wallet UX
+# Rupay Wallet UX
 
 Code: `web/src/wallet/`. Mobile-first: one column capped at 480 px; tested at 360, 390 and 430 px (no horizontal overflow, as checked by the acceptance run).
 
@@ -13,7 +13,7 @@ Code: `web/src/wallet/`. Mobile-first: one column capped at 480 px; tested at 36
 | Scan / Pay a shop | `Scan.tsx` | `GET /v1/payment-requests?status=OPEN` | Camera with clear permission states; QR accepted only as `paya://pay?pr=<UUID>`; open tills list (labelled "Demo") as an accessible alternative |
 | Review & authorise | `Review.tsx` | `GET /v1/payment-requests/{id}`, `POST /v1/payments` | Merchant identity from **our server, not the QR**. Amount set by the shop. Available now and after, fee, network, expiry. Slide to authorise with an Enter/Space alternative. One idempotency key per payment request, stored in `sessionStorage`, so a refresh or retry reuses it |
 | Payment result & detail | `Txn.tsx` | `GET /v1/transactions/{ref}` (polls until final) + stream | Headline from server status only. Pending shows "Processing" with an explanation that it's safe to leave. Review / declined / returned show explicit callouts. Timeline, money trail, references with copy, receipt (Paid only) with print |
-| Account | `Account.tsx` | `GET /v1/wallet`, session | Verification, limits, velocity rule, how Paya protects money, about the prototype (synthetic, simulated), server address, sign out |
+| Account | `Account.tsx` | `GET /v1/wallet`, session | Verification, limits, velocity rule, how Rupay protects money, about the prototype (synthetic, simulated), server address, sign out |
 | Till (cashier) | `Cashier.tsx` | payment requests, merchant transactions | Large keypad, QR with live overlay, PAID only after settlement (voice), today's sales |
 
 ## States covered

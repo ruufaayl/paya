@@ -6,7 +6,7 @@
 The brief requires OpenAPI for synchronous services and at least one durable asynchronous flow. The team is small, the time frame is short, and operational complexity is a real cost (Week 11).
 
 ## Decision
-- Paya is one deployable service with separate modules: payments, ledger, risk, rail, recon, events and security.
+- Rupay is one deployable service with separate modules: payments, ledger, risk, rail, recon, events and security.
 - Commands and queries are synchronous HTTP: paying, creating QR requests, and back-office decisions.
 - State facts (`payment.*`, `case.opened`, `recon.completed`) are asynchronous events published through a transactional outbox.
 - The settlement file is a batch exchange with a control trailer.

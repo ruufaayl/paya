@@ -35,7 +35,7 @@ from .models import AuthSession, User, now
 from .security import Principal, issue_token
 
 STAFF_ROLES = ("OPS", "COMPLIANCE", "FINANCE", "SYSADMIN", "AUDITOR")
-ISSUER = "Paya (synthetic)"
+ISSUER = "Rupay (synthetic)"
 STEP, DIGITS, DRIFT = 30, 6, 1
 
 

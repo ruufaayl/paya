@@ -11,7 +11,7 @@ sequenceDiagram
   autonumber
   actor C as Customer (PWA)
   actor K as Cashier (till)
-  participant API as Paya API (gateway)
+  participant API as Rupay API (gateway)
   participant DB as PostgreSQL (ledger, outbox)
   participant W as Recovery worker / relay
   participant R as Raast rail (mock)
@@ -59,7 +59,7 @@ sequenceDiagram
 sequenceDiagram
   autonumber
   actor C as Customer (PWA)
-  participant API as Paya API
+  participant API as Rupay API
   participant DB as PostgreSQL
   participant W as Recovery worker
   participant R as Raast rail (mock)

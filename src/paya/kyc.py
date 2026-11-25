@@ -43,7 +43,7 @@ OPEN_STATES = ("STARTED", "DOCUMENT_OK", "MORE_INFO")
 # Rough bounding box of Pakistan for the device-location check (synthetic rule; a real one uses geofences).
 PK_BOX = (23.5, 37.2, 60.8, 77.9)
 APPLICANT_MESSAGES = {
-    "APPROVED": "Your Paya wallet is open. Sign in with the username and password you chose.",
+    "APPROVED": "Your Rupay wallet is open. Sign in with the username and password you chose.",
     "REFERRED": "Thanks. A member of our team needs to check a few details. We will update you here.",
     "REJECTED": "We could not open a wallet for you. You can contact support for more information.",
     "MORE_INFO": "We need a clearer photo of your ID card. Please take it again.",
@@ -115,7 +115,7 @@ def start(*, full_name: str, date_of_birth: date, mobile: str, username: str, pa
         raise ValidationFailed("enter your full name as it appears on your ID card", field="full_name")
     today = now().date()
     if date_of_birth > today or _age(date_of_birth, today) < 18:
-        raise ValidationFailed("you must be 18 or older to open a Paya wallet", field="date_of_birth")
+        raise ValidationFailed("you must be 18 or older to open a Rupay wallet", field="date_of_birth")
     if _age(date_of_birth, today) > 120:
         raise ValidationFailed("check your date of birth", field="date_of_birth")
     uname = username.strip().lower()
@@ -164,7 +164,7 @@ def issue_specimen(app_id: str) -> dict:
     return {"specimen_id": ident.specimen_id, "full_name": ident.full_name,
             "date_of_birth": ident.date_of_birth.isoformat(), "expires_on": ident.expires_on.isoformat(),
             "qr_payload": payload, "qr_png": f"data:image/png;base64,{png}",
-            "notice": "SPECIMEN - synthetic test identity for the Paya prototype. Not an identity document."}
+            "notice": "SPECIMEN - synthetic test identity for the Rupay prototype. Not an identity document."}
 
 
 # ------------------------------------------------------------------ 2. document

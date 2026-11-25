@@ -1,4 +1,4 @@
-"""Paya API - gateway facade, commands, queries and the live stream for Mission Control.
+"""Rupay API - gateway facade, commands, queries and the live stream for Mission Control.
 
 Commands change state (POST), queries read it (GET), events report facts (WebSocket / outbox).
 """
@@ -59,9 +59,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Paya API",
+    title="Rupay API",
     version="0.1.0",
-    description="Paya - Raast P2M payment assurance platform (academic prototype; synthetic data; no real money).",
+    description="Rupay - Raast P2M payment assurance platform (academic prototype; synthetic data; no real money).",
     lifespan=lifespan,
 )
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
@@ -900,7 +900,7 @@ def prometheus():
     return "\n".join(lines) + "\n"
 
 
-# Paya 2.0 operations endpoints live in their own module (imported last: it reuses the helpers above).
+# Rupay 2.0 operations endpoints live in their own module (imported last: it reuses the helpers above).
 from .ops import router as ops_router  # noqa: E402
 
 app.include_router(ops_router)

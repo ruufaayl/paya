@@ -1,4 +1,4 @@
-// Mission Control graph: every node is a real Paya component; every packet is a real event from the live stream.
+// Mission Control graph: every node is a real Rupay component; every packet is a real event from the live stream.
 import {
   Bell, Bot, BrainCircuit, MessagesSquare, Database, FileCheck2, Fingerprint, Gavel, IdCard, Landmark, ScrollText, ShieldCheck, Smartphone, Store,
   UserCheck, Workflow, Zap,
@@ -46,7 +46,7 @@ export const TELEMETRY_NODE: Record<string, string> = {
 export const NODES: NodeDef[] = [
   { id: "phone", title: "Customer wallet", sub: "PWA on phone", icon: Smartphone, kind: "channel", x: 0, y: 80 },
   { id: "registry", title: "Identity registry", sub: "simulated - synthetic IDs only", icon: IdCard, kind: "service", x: 0, y: -130 },
-  { id: "assistant", title: "Paya Assistant", sub: "chat - read-only - can't move money", icon: MessagesSquare, kind: "agent", x: 270, y: 60 },
+  { id: "assistant", title: "Rupay Assistant", sub: "chat - read-only - can't move money", icon: MessagesSquare, kind: "agent", x: 270, y: 60 },
   { id: "kyc", title: "Onboarding & KYC", sub: "document - liveness - face - screening", icon: Fingerprint, kind: "service", x: 270, y: -130 },
   { id: "cashier", title: "Merchant till", sub: "Cashier screen", icon: Store, kind: "channel", x: 0, y: 430 },
   { id: "gateway", title: "API gateway", sub: "auth - idempotency - correlation", icon: ShieldCheck, kind: "service", x: 270, y: 250 },

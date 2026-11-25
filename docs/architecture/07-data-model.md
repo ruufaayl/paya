@@ -5,7 +5,7 @@
 
 ## Core view
 
-The brief lists the entities a minimum model must contain: customer, wallet/account, transaction, ledger entry, event, KYC/AML decision and reconciliation. Every one of them is below, with the relationships Paya actually implements:
+The brief lists the entities a minimum model must contain: customer, wallet/account, transaction, ledger entry, event, KYC/AML decision and reconciliation. Every one of them is below, with the relationships Rupay actually implements:
 
 ```mermaid
 erDiagram

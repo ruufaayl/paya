@@ -1,4 +1,4 @@
-# Testing report (Paya 2.0)
+# Testing report (Rupay 2.0)
 
 Run on 2026-11-21 against PostgreSQL 16 and the real face models (YuNet/SFace), on a **fresh database** for the acceptance run. All numbers below are from actual runs; nothing is estimated.
 

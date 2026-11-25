@@ -1,6 +1,6 @@
 """Synthetic seed data. Every person, business, alias and IBAN here is fictional.
 
-No real CNIC, account, card, biometric or credential data is ever stored in Paya.
+No real CNIC, account, card, biometric or credential data is ever stored in Rupay.
 """
 from sqlalchemy import select, text, update
 
@@ -21,16 +21,16 @@ CUSTOMERS = [
     ("Hina Baig", "+92 3xx xxx 3388", 0, "PENDING", "LOW", 5_000),            # not yet verified
 ]
 MERCHANTS = [
-    ("MRC-0001", "Chai Junction", "FOOD_BEVERAGE", "chaijunction@paya", "PK** PAYA **** **** 0001"),
-    ("MRC-0002", "Shifa Pharmacy", "PHARMACY", "shifapharmacy@paya", "PK** PAYA **** **** 0002"),
-    ("MRC-0003", "Green Leaf Grocers", "GROCERY", "greenleaf@paya", "PK** PAYA **** **** 0003"),
+    ("MRC-0001", "Chai Junction", "FOOD_BEVERAGE", "chaijunction@rupay", "PK** RUPY **** **** 0001"),
+    ("MRC-0002", "Shifa Pharmacy", "PHARMACY", "shifapharmacy@rupay", "PK** RUPY **** **** 0002"),
+    ("MRC-0003", "Green Leaf Grocers", "GROCERY", "greenleaf@rupay", "PK** RUPY **** **** 0003"),
 ]
 STAFF = [
     ("ayesha.cashier", "Ayesha (Cashier, Chai Junction)", "CASHIER", None, "MRC-0001"),
     ("bilal.admin", "Bilal (Merchant admin, Chai Junction)", "MERCHANT_ADMIN", None, "MRC-0001"),
     ("kamran.cashier", "Kamran (Cashier, Shifa Pharmacy)", "CASHIER", None, "MRC-0002"),
     ("mudaser.ops", "Mudaser Waleed (Operations)", "OPS", None, None),
-    ("faisal.ops", "Faisal (Operations)", "OPS", None, None),
+    ("ateeq.ops", "Ateeq Riaz (Operations)", "OPS", None, None),
     ("kanz.compliance", "Kanz ur Rehman (Compliance)", "COMPLIANCE", None, None),
     ("harris.compliance", "Harris Safi (Compliance, second officer)", "COMPLIANCE", None, None),
     ("rufayl.finance", "Rufayl Waseem (Finance & reconciliation)", "FINANCE", None, None),
@@ -91,9 +91,9 @@ def seed() -> dict:
 # More synthetic tills for live demos (QR wall). Added idempotently at startup in demo mode, so an already-seeded
 # database gains them too. Fictional businesses; aliases and IBANs are synthetic.
 EXTRA_MERCHANTS = [
-    ("MRC-0004", "Lahore Tikka House", "FOOD_BEVERAGE", "tikkahouse@paya", "PK** PAYA **** **** 0004"),
-    ("MRC-0005", "Clifton Fuel Stop", "FUEL", "cliftonfuel@paya", "PK** PAYA **** **** 0005"),
-    ("MRC-0006", "Saddar Book Corner", "RETAIL", "saddarbooks@paya", "PK** PAYA **** **** 0006"),
+    ("MRC-0004", "Lahore Tikka House", "FOOD_BEVERAGE", "tikkahouse@rupay", "PK** RUPY **** **** 0004"),
+    ("MRC-0005", "Clifton Fuel Stop", "FUEL", "cliftonfuel@rupay", "PK** RUPY **** **** 0005"),
+    ("MRC-0006", "Saddar Book Corner", "RETAIL", "saddarbooks@rupay", "PK** RUPY **** **** 0006"),
 ]
 EXTRA_CASHIERS = [
     ("noor.cashier", "Noor (Cashier, Green Leaf Grocers)", "MRC-0003"),
@@ -105,7 +105,7 @@ EXTRA_CASHIERS = [
 
 # Staff accounts renamed after the team (Fall 2026). Databases seeded earlier are renamed in place, idempotently.
 STAFF_RENAMES = {"sana.ops": "mudaser.ops", "hamza.compliance": "kanz.compliance", "nadia.compliance": "harris.compliance",
-                 "rabia.finance": "rufayl.finance", "auditor": "taha.audit"}
+                 "rabia.finance": "rufayl.finance", "auditor": "taha.audit", "faisal.ops": "ateeq.ops"}
 
 
 def ensure_demo_extras() -> dict:
@@ -122,6 +122,12 @@ def ensure_demo_extras() -> dict:
                 s.add(m)
                 s.flush()
                 merchants[reg] = m
+                added += 1
+        # Rebrand (Rupay): merchants seeded earlier keep their rows; only the alias and masked IBAN label change.
+        for m in merchants.values():
+            if m.raast_alias.endswith("@paya"):
+                m.raast_alias = m.raast_alias[:-5] + "@rupay"
+                m.settlement_iban_masked = m.settlement_iban_masked.replace("PAYA", "RUPY")
                 added += 1
         have = set(s.execute(select(User.username)).scalars())
         display = {u: d for u, d, *_ in STAFF}

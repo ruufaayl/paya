@@ -143,7 +143,7 @@ def test_s6_ops_requests_finance_approves_reversal_with_linked_reference(client,
     assert r.status_code == 201
     approval = r.json()["approval_id"]
     # OPS cannot approve (RBAC), and FINANCE is a different person (SoD)
-    assert client.post(f"/v1/finance/approvals/{approval}/approve", headers=as_("faisal.ops")).status_code == 403
+    assert client.post(f"/v1/finance/approvals/{approval}/approve", headers=as_("ateeq.ops")).status_code == 403
     r = client.post(f"/v1/finance/approvals/{approval}/approve", headers=as_("rufayl.finance"))
     assert r.status_code == 200 and r.json()["status"] == "REVERSED"
     d = detail(client, as_, ref)

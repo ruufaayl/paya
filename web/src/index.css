@@ -39,7 +39,7 @@
   .grid-dots { background-image: radial-gradient(circle at 1px 1px, rgb(var(--fg) / 0.07) 1px, transparent 0); background-size: 24px 24px; }
 }
 
-/* Legacy (Paya 1.x) helpers, still used by the cashier and landing pages. */
+/* Legacy (Rupay 1.x) helpers, still used by the cashier and landing pages. */
 .glass { @apply bg-white/[0.04] backdrop-blur-xl ring-1 ring-white/10; }
 .card { @apply rounded-3xl bg-ink-900/80 ring-1 ring-white/[0.07]; }
 .grid-bg { background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0); background-size: 22px 22px; }

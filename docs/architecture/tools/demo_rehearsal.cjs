@@ -90,7 +90,7 @@ const FAKE_CAMERA = () => {
     if (label) { await mc.getByRole("radio", { name: new RegExp(label) }).click(); const apply = mc.getByRole("button", { name: "Apply scenario" }); if (await apply.isEnabled()) await apply.click(); await sleep(600); }
     if (payer) await mc.getByLabel("Test payment made by").selectOption(payer);
   };
-  const trigger = async () => { await mc.getByRole("button", { name: /Trigger test payment/ }).click(); await sleep(2500); return (await mc.locator("ul li").filter({ hasText: /PAYA-|refused/ }).first().innerText()).trim(); };
+  const trigger = async () => { await mc.getByRole("button", { name: /Trigger test payment/ }).click(); await sleep(2500); return (await mc.locator("ul li").filter({ hasText: /(PAYA|RUPAY)-|refused/ }).first().innerText()).trim(); };
   const heading = async () => (await phone.locator("h1", { hasText: /Processing|Paid|Under review|Declined/ }).first().innerText().catch(() => "")).trim();
 
   await scene("0. Set-up: Mission Control as Mudaser, till and wallet signed in", () => mc.screenshot({ path: `${OUT}/scene-0-overview.png` }), async (check) => {
@@ -143,7 +143,7 @@ const FAKE_CAMERA = () => {
 
   await scene("3. Compliance hold: no money moves; Ops can't decide; Kanz releases with a reason", () => mc.screenshot({ path: `${OUT}/scene-3-hold.png` }), async (check) => {
     await railLab(null, "zarak");
-    const run = await trigger(); const ref = (run.match(/PAYA-\d{8}-[0-9A-F]{6}/) || [])[0];
+    const run = await trigger(); const ref = (run.match(/(?:PAYA|RUPAY)-\d{8}-[0-9A-F]{6}/) || [])[0];
     check("payment is under review", await waitFor(async () => (await status(ref)) === "UNDER_REVIEW"), ref);
     const tx = (await api(`/v1/transactions/${ref}`)).data;
     check("no ledger posting while held", tx.ledger.length === 0);
@@ -170,14 +170,14 @@ const FAKE_CAMERA = () => {
     check("circuit breaker OPEN", st.breaker === "OPEN");
     await mc.getByRole("button", { name: "Restore healthy" }).click(); await sleep(500);
     await mc.getByRole("button", { name: /Ask the rail about all pending/ }).click(); await sleep(1500);
-    const refs = runs.map((r) => (r.match(/PAYA-\d{8}-[0-9A-F]{6}/) || [])[0]).filter(Boolean);
+    const refs = runs.map((r) => (r.match(/(?:PAYA|RUPAY)-\d{8}-[0-9A-F]{6}/) || [])[0]).filter(Boolean);
     check("payments sent before the breaker opened settle exactly once",
       await waitFor(async () => (await Promise.all(refs.map(status))).every((s) => s === "SETTLED"), 30000), refs.join(","));
   });
 
   await scene("5. Reconciliation break → AI suggestion → owner resolves; same file refused", () => mc.screenshot({ path: `${OUT}/scene-5-resolved.png` }), async (check) => {
     await railLab("Missing line", "sara");
-    const run = await trigger(); const ref = (run.match(/PAYA-\d{8}-[0-9A-F]{6}/) || [])[0];
+    const run = await trigger(); const ref = (run.match(/(?:PAYA|RUPAY)-\d{8}-[0-9A-F]{6}/) || [])[0];
     await waitFor(async () => (await status(ref)) === "SETTLED");
     await mc.getByRole("button", { name: "Restore healthy" }).click(); await sleep(300);
     await actAs("Rufayl");

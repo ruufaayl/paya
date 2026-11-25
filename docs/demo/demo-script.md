@@ -1,7 +1,7 @@
-# Paya: technical demo script (Paya 2.0, about 10 minutes)
+# Rupay: technical demo script (Rupay 2.0, about 10 minutes)
 
 **The brief asks for:** the normal flow, at least two failure/recovery scenarios, and one reconciliation outcome.
-**This script shows:** a normal flow; **three** failure/recovery scenarios (lost request, compliance hold, Raast outage); a reconciliation break triaged by AI and resolved by its owner; and the four themes (digital onboarding with the two-person rule, the green pot and footprint estimate, the Paya Assistant, super-app services, and, if enabled, the stablecoin sandbox).
+**This script shows:** a normal flow; **three** failure/recovery scenarios (lost request, compliance hold, Raast outage); a reconciliation break triaged by AI and resolved by its owner; and the four themes (digital onboarding with the two-person rule, the green pot and footprint estimate, the Rupay Assistant, super-app services, and, if enabled, the stablecoin sandbox).
 
 **Rehearsal:** reset the data, then `make rehearse` plays this whole script against the real stack and checks every claim the presenter makes. Results: `evidence/demo/rehearsal-<date>.md` and `evidence/demo/scene-*.png`. (The 1.x rehearsal and screenshots are kept in `evidence/demo/v1/`.)
 
@@ -14,6 +14,7 @@
 | C | Harris Safi (24i-5652) | Scene 2, Scene 6 |
 | D | Kanz ur Rehman (24i-5544) | Scene 3 |
 | E | Mudaser Waleed (24i-5681) | Scene 4; runs Mission Control throughout |
+| F | Ateeq Riaz | Scene 6b: send money to a bank account |
 
 ## Before you start (T−15 min)
 
@@ -21,7 +22,7 @@
 |---|---|---|
 | 1 | Demo after 21:00 Pakistan time? Set `PAYA_SETTLEMENT_CUTOFF_UTC_HOUR=24` in `.env` first (see Scene 5). Then `make demo-reset`: **fresh synthetic data**. Never rehearse on live data. The velocity rule (5 payments per customer per 10 min) correctly holds a 6th payment | `curl localhost:8000/healthz` → ok |
 | 2 | `make models` once (face models), then `cd web && npm run build && npx vite preview --port 4173`, or the Vercel URL | Start page loads |
-| 3 | (iPhone) `cloudflared tunnel --url http://localhost:8000`; on the phone's start page paste the tunnel URL into **Paya server address**; Share → Add to Home Screen | Wallet sign-in loads |
+| 3 | (iPhone) `cloudflared tunnel --url http://localhost:8000`; on the phone's start page paste the tunnel URL into **Rupay server address**; Share → Add to Home Screen | Wallet sign-in loads |
 | 4 | Laptop on the projector: `/control` → sign in as **Mudaser (Operations)** | Top bar shows **Live**, Raast rail **Simulated · NORMAL**, **Integrity pass** |
 | 5 | Phone 1: **Ayesha** (Chai Junction till). Phone 2: **Sara Ahmed** | Till shows "New sale"; wallet shows the balance |
 | 6 | Volume up (the till says "Rupees … received") | — |
@@ -38,7 +39,7 @@
 
 *Show:* the start page (`/`), then Mission Control **Overview**.
 
-> "At a Pakistani counter, a cashier often decides a QR payment worked by looking at the customer's phone. Raast P2M grew from 4.9 million to about 180 million payments in a year, but a screenshot isn't a settlement. Paya's promise: the till says **PAID** only when the money has moved and the ledger says so. Everything here is synthetic, the Raast rail is a simulator (you can see it badged in the top bar), and no real money moves."
+> "At a Pakistani counter, a cashier often decides a QR payment worked by looking at the customer's phone. Raast P2M grew from 4.9 million to about 180 million payments in a year, but a screenshot isn't a settlement. Rupay's promise: the till says **PAID** only when the money has moved and the ledger says so. Everything here is synthetic, the Raast rail is a simulator (you can see it badged in the top bar), and no real money moves."
 
 ### 0:40 – 2:20 · Scene 1: a normal payment (Speaker B)
 
@@ -90,11 +91,11 @@
 
 | Do | Say | See |
 |---|---|---|
-| Phone: sign out → **Open a new Paya wallet** → name **Zarak Khanzad** → specimen card → head-turn check | "Digital onboarding with a synthetic SPECIMEN card, no real CNIC. Photos are checked in memory and never stored." | **A person is checking a few details** (nothing said about screening) |
+| Phone: sign out → **Open a new Rupay wallet** → name **Zarak Khanzad** → specimen card → head-turn check | "Digital onboarding with a synthetic SPECIMEN card, no real CNIC. Photos are checked in memory and never stored." | **A person is checking a few details** (nothing said about screening) |
 | **Act as → Kanz** → **Identity & KYC** → open the referral → **Recommend approval** | "A possible watch-list match needs **two** compliance officers." | "Waiting for a second officer" |
 | Kanz tries **Confirm** | "The server refuses: same person." | Toast **Needs a different person** |
 | **Act as → Harris** → **Confirm approval** | "A second officer confirms. The database itself enforces it." | Phone flips to **Your wallet is open** |
-| Phone (Sara): **Ask Paya** → "mera balance kitna hai", then "send 500 to Ali" | "Conversational banking in Roman Urdu, answered from the ledger. And it can't move money, even if you ask nicely." | Balance card; "I can't send money from chat" |
+| Phone (Sara): **Ask Rupay** → "mera balance kitna hai", then "send 500 to Ali" | "Conversational banking in Roman Urdu, answered from the ledger. And it can't move money, even if you ask nicely." | Balance card; "I can't send money from chat" |
 | (Only if the server was started with `PAYA_STABLECOIN_SANDBOX=true`) Phone: **Services** → **Stablecoin sandbox** → join → **Get test tokens**; Mission Control → **Stablecoin sandbox** → **reorg** | "Stablecoin payments aren't permitted for us, so this is a switched-off sandbox with worthless test tokens. The point is the engineering: it counts only at three confirmations, a reorg can't fool it, and it's reconciled against the chain. Nothing touches the rupee ledger." | 0/3 → 3/3 confirmations; orphaned block; reconciliation *matched* |
 | (If time) Phone (Sara): **Services** → Indus Power → any 10-digit number → **Pay** → slide | "The super app adds bills, top-up, shopping and takaful, but no new money path: it's the same review, ledger and Raast. The order says *Bill paid* only after settlement, and the same bill can't be paid twice." | My orders: **Done · Bill paid to the biller** |
 

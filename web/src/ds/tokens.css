@@ -1,4 +1,4 @@
-/* Paya design tokens — the single source of truth for colour, type, radius, elevation and motion.
+/* Rupay design tokens — the single source of truth for colour, type, radius, elevation and motion.
    Colours are RGB triplets so Tailwind can apply opacity: rgb(var(--fg) / 0.6).
    Two themes share one vocabulary: "wallet" (light, calm, roomy) and "console" (dark, dense, precise).
    Contrast of every text pairing is checked by docs/revamp/tools/contrast_check.py. */

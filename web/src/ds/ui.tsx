@@ -1,4 +1,4 @@
-// Paya design-system primitives. Semantic tokens only (no raw colours), so they work in both themes.
+// Rupay design-system primitives. Semantic tokens only (no raw colours), so they work in both themes.
 import { motion } from "framer-motion";
 import { Loader2, Search, X } from "lucide-react";
 import { forwardRef, useId, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from "react";
@@ -8,24 +8,24 @@ const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).jo
 export { cx };
 
 // ------------------------------------------------------------------ brand
-/** The Paya symbol: a "P" whose bowl closes into a confirmation tick ("payment pakka"). Flat, two colours. */
+/** The Rupay symbol: an "R" with a light leg. Flat, two colours. */
 export function Symbol({ size = 28, tone = "brand", title }: { size?: number; tone?: "brand" | "mono" | "inverse"; title?: string }) {
   const bg = tone === "inverse" ? "rgb(var(--night-fg))" : "rgb(var(--night))";
   const mark = tone === "mono" ? "rgb(var(--night-fg))" : tone === "inverse" ? "rgb(var(--night))" : "#2FD195";
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" role={title ? "img" : undefined} aria-label={title} aria-hidden={title ? undefined : true}>
       <rect width="64" height="64" rx="15" fill={bg} />
-      <path d="M21 48V16h13.5c7.5 0 12.5 4.4 12.5 10.8S42 37.6 34.5 37.6H29" fill="none" stroke={mark} strokeWidth="5.6" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M29.5 38.5l4.6 4.6 9.4-10.4" fill="none" stroke={tone === "inverse" ? "rgb(var(--night-fg))" : "#F0F7F4"} strokeWidth="4.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M20 48V16h14c7.5 0 12 4.3 12 10.6S41.5 37.2 34 37.2H20" fill="none" stroke={mark} strokeWidth="5.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M31 37.4L45 48" fill="none" stroke={tone === "inverse" ? "rgb(var(--night-fg))" : "#F0F7F4"} strokeWidth="5.6" strokeLinecap="round" />
     </svg>
   );
 }
 
 export function Logo({ size = 28, tone = "brand", suffix }: { size?: number; tone?: "brand" | "mono" | "inverse"; suffix?: string }) {
   return (
-    <span className="inline-flex items-center gap-2" role="img" aria-label={`Paya${suffix ? ` ${suffix}` : ""}`}>
+    <span className="inline-flex items-center gap-2" role="img" aria-label={`Rupay${suffix ? ` ${suffix}` : ""}`}>
       <Symbol size={size} tone={tone} />
-      <span className="font-display font-extrabold tracking-[-0.04em] text-fg" style={{ fontSize: size * 0.78, lineHeight: 1 }} aria-hidden>paya</span>
+      <span className="font-display font-extrabold tracking-[-0.04em] text-fg" style={{ fontSize: size * 0.78, lineHeight: 1 }} aria-hidden>rupay</span>
       {suffix && <span className="ml-1 border-l border-line-strong pl-2.5 text-label text-fg-2" aria-hidden>{suffix}</span>}
     </span>
   );

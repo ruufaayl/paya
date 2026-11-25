@@ -1,6 +1,6 @@
 """Identity-registry port and a SIMULATED registry (stand-in for a NADRA-style verification service).
 
-Paya cannot call a real identity registry, so the prototype uses a local simulator with its own storage
+Rupay cannot call a real identity registry, so the prototype uses a local simulator with its own storage
 (schema "registry") that only ever contains synthetic SPECIMEN identities. A licensed verification
 service could replace it later by implementing RegistryPort.
 

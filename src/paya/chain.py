@@ -8,7 +8,7 @@ It models the behaviours a tokenised-money rail has that Raast does not:
 
 The only asset is a TEST token with no value ("tPKR-TEST"). It is created solely by the sandbox faucet
 and cannot be exchanged for rupees: there is no on-ramp or off-ramp. Like the Raast simulator, it has
-its own schema ("chain"), so Paya's records can be reconciled against it. A real, SBP-approved
+its own schema ("chain"), so Rupay's records can be reconciled against it. A real, SBP-approved
 instrument would replace it behind the same small interface (submit / mine / status / balance).
 """
 import hashlib
@@ -22,7 +22,7 @@ from .db import session_scope
 
 FAUCET = "0x" + "0" * 36 + "fa0c"
 TOKEN = "tPKR-TEST"
-CHAIN_NAME = "Paya sandbox chain (simulated)"
+CHAIN_NAME = "Rupay sandbox chain (simulated)"
 MODES = ("NORMAL", "CONGESTED", "REORG", "DOWN")
 
 

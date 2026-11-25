@@ -108,7 +108,7 @@ export default function Txn({ user }: { user: string }) {
       {d.money_trail.length > 0 && (
         <Card as="section" aria-labelledby="mt-h" className="mt-3 p-4">
           <h2 id="mt-h" className="text-title-3 text-fg">Where your money went</h2>
-          <p className="text-caption text-fg-2">Straight from Paya's double-entry ledger.</p>
+          <p className="text-caption text-fg-2">Straight from Rupay's double-entry ledger.</p>
           <ul className="mt-3 space-y-2">
             {d.money_trail.map((m) => (
               <li key={m.journal_ref} className="flex items-start justify-between gap-3 text-body-sm">

@@ -1,4 +1,4 @@
-# 17. Conversational banking: the Paya Assistant (Theme 3)
+# 17. Conversational banking: the Rupay Assistant (Theme 3)
 
 **Goal.** Customers ask about their money in plain language, in English or Roman Urdu, and get an answer that is *true*: read from the ledger, not guessed. When they need a person, they reach one without repeating themselves.
 
@@ -37,7 +37,7 @@ flowchart LR
 | LIMITS, KYC | "what's my limit?", "am I verified?" | From the customer record |
 | PAY | "send 500 to Ali" | "I can't send money from chat" + a link to scan and authorise |
 | REFUND | "refund my last payment" | Explains automatic review after 15 min and two-person reversals; offers a person |
-| SECURITY | "someone asked for my OTP" | Paya never asks for PIN, OTP or password; offers a person |
+| SECURITY | "someone asked for my OTP" | Rupay never asks for PIN, OTP or password; offers a person |
 | OUT_OF_SCOPE | "should I buy bitcoin?" | Polite refusal |
 | HUMAN | "talk to a person", "shikayat" | One SUPPORT_HANDOFF case per conversation, owned by OPS, with an SLA |
 
@@ -59,4 +59,4 @@ flowchart LR
 - Rules-based understanding is narrow: anything outside the patterns gets help options. Mission Control shows the "not understood" rate. An LLM could later rephrase answers from the **same tool results**, behind the ADR-008 guardrails, but only after the same kind of evaluation the triage agent passed.
 - Roman Urdu coverage is keyword-based, not linguistic.
 - The rate limit is in-process (resets on restart); production needs a shared limiter.
-- Handoff creates a case; the actual call-back to the customer happens outside Paya.
+- Handoff creates a case; the actual call-back to the customer happens outside Rupay.

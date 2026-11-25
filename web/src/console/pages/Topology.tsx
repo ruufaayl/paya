@@ -1,4 +1,4 @@
-// System topology: the real components of Paya and how messages move between them.
+// System topology: the real components of Rupay and how messages move between them.
 // Two kinds of information are kept apart on purpose:
 //   ARCHITECTURE (static): what a node is, what it owns, where its code lives.
 //   OBSERVED (runtime): telemetry this console actually received in the last 5 minutes.
@@ -119,7 +119,7 @@ function Inner() {
   const deps = selected ? EDGES.filter((e) => e.source === selected || e.target === selected) : [];
 
   return (
-    <Page wide title="System topology" description="Real Paya components and the messages between them. Wires animate only when this console receives a real event."
+    <Page wide title="System topology" description="Real Rupay components and the messages between them. Wires animate only when this console receives a real event."
       actions={<>
         <span className={cx("text-caption", live.connected ? "text-success" : "text-warning")}>{live.connected ? "Receiving telemetry" : "Telemetry disconnected"}</span>
         <Button size="sm" variant="secondary" icon={<Maximize2 className="h-4 w-4" />} onClick={() => rf.fitView({ padding: 0.08, duration: 400 })}>Fit to screen</Button>

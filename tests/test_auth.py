@@ -61,9 +61,9 @@ def test_a3_sign_out_everywhere_else_keeps_only_this_session(client):
 
 
 def test_a4_deactivating_a_user_ends_their_sessions_at_once(client):
-    tok = raw_login(client, "faisal.ops")["access_token"]
+    tok = raw_login(client, "ateeq.ops")["access_token"]
     with session_scope() as s:
-        s.execute(update(User).where(User.username == "faisal.ops").values(active=False))
+        s.execute(update(User).where(User.username == "ateeq.ops").values(active=False))
     assert client.get("/v1/me", headers=bearer(tok)).status_code == 401
 
 

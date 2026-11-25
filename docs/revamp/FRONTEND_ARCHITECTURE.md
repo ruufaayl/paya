@@ -1,4 +1,4 @@
-# Frontend architecture (Paya 2.0)
+# Frontend architecture (Rupay 2.0)
 
 **Stack kept:** React 18.3 + TypeScript 5.6 (strict) + Vite 5.4 + Tailwind 3.4 + framer-motion 11 + @xyflow/react 12 + lucide-react. No framework rewrite: the existing stack fits, and replacing it would have added risk without benefit.
 

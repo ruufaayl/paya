@@ -11,6 +11,7 @@ The brief (§10): *"Each member must explain design decisions, code ownership, t
 | C: **Harris Safi** (24i-5652) | Reconciliation, data model, integrity checks, AI triage (`recon.py`, `integrity.py`, `ai_*.py`) | [member-c.md](member-c.md) |
 | D: **Kanz ur Rehman** (24i-5544) | Security, RBAC, SoD, KYC/AML rules, audit chain, threat model (`security.py`, `risk.py`, `audit.py`) | [member-d.md](member-d.md) |
 | E: **Mudaser Waleed** (24i-5681) | Rail and resilience, events, observability, Mission Control, PWA (`rail.py`, `events.py`, `worker.py`, `observability.py`, `web/`) | [member-e.md](member-e.md) |
+| F: **Ateeq Riaz** (roll no. to add) | Operations and bank transfers: send to any bank account, simulated title fetch, transfer screening and recovery (`banks.py`, `web/src/wallet/SendMoney.tsx`, ADR-018) | [member-f.md](member-f.md) |
 
 ## Common core: everyone, from memory
 

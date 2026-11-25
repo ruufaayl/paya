@@ -19,16 +19,16 @@ export default function Landing() {
           <Badge tone="info">Academic prototype · synthetic data</Badge>
         </motion.header>
         <motion.h1 variants={fadeUp} className="mt-12 max-w-3xl font-display text-[2.5rem] font-extrabold leading-[1.05] tracking-[-0.03em] text-fg md:text-[3.5rem]">
-          Raast payments a cashier can trust. <span className="text-brand-accent">Payment, pakka.</span>
+          Raast payments a cashier can trust. <span className="text-brand-accent">Dedo mujhay!</span>
         </motion.h1>
         <motion.p variants={fadeUp} className="mt-4 max-w-2xl text-body text-fg-2 md:text-[17px] md:leading-7">
-          Paya shows "Paid" only when a double-entry ledger and the Raast rail agree. Timeouts stay pending, retries never charge twice, and people decide what machines shouldn't.
+          Rupay shows "Paid" only when a double-entry ledger and the Raast rail agree. Timeouts stay pending, retries never charge twice, and people decide what machines shouldn't.
         </motion.p>
         <motion.div variants={fadeUp} className="mt-10 grid gap-4 md:grid-cols-2">
           <Link to="/app" className="group">
             <Card className="h-full p-6 transition-shadow duration-base group-hover:shadow-e2">
               <Smartphone className="h-6 w-6 text-brand-accent" aria-hidden />
-              <h2 className="mt-4 font-display text-title-2 text-fg">Paya Wallet</h2>
+              <h2 className="mt-4 font-display text-title-2 text-fg">Rupay Wallet</h2>
               <p className="mt-1 text-body-sm text-fg-2">Open a wallet with digital KYC, scan a Raast QR, pay, and get an authoritative receipt. Includes the merchant till.</p>
               <span className="mt-5 inline-flex items-center gap-1.5 text-label text-brand-accent">Open on a phone <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden /></span>
             </Card>

@@ -24,7 +24,7 @@ function Inner() {
     { key: "eng", header: "Engine", cell: (c) => <span className="ref text-[11.5px] text-fg-2">{c.ai.engine}</span> },
   ];
   return (
-    <Page title="AI operations" description="The reconciliation-triage agent (advisory, rules first) and the customer-facing Paya Assistant. Neither can move money; neither sees identity (KYC) decisions.">
+    <Page title="AI operations" description="The reconciliation-triage agent (advisory, rules first) and the customer-facing Rupay Assistant. Neither can move money; neither sees identity (KYC) decisions.">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
         <Metric label="Suggestions" value={m.data?.suggestions ?? "—"} icon={<Bot className="h-3.5 w-3.5" />} loading={!m.data} />
         <Metric label="Abstention rate" value={pct(m.data?.abstention_rate)} sub="high value, low confidence, missing evidence" loading={!m.data} />
@@ -34,7 +34,7 @@ function Inner() {
         <Metric label="Audit completeness" value={pct(m.data?.audit_completeness)} tone={m.data && m.data.suggestions && m.data.audit_completeness < 1 ? "danger" : undefined} loading={!m.data} />
       </div>
       <Card className="mt-4 p-4">
-        <SectionHeader level={3} title="Paya Assistant · conversational banking" description={`Deterministic intents (${chat.data?.rules_version || "…"}) over read-only, customer-scoped tools. It cannot move money; chats are deleted after ${chat.data?.retention_days ?? 30} days.`} />
+        <SectionHeader level={3} title="Rupay Assistant · conversational banking" description={`Deterministic intents (${chat.data?.rules_version || "…"}) over read-only, customer-scoped tools. It cannot move money; chats are deleted after ${chat.data?.retention_days ?? 30} days.`} />
         <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-5">
           <Metric label="Conversations" value={chat.data?.conversations ?? "—"} loading={!chat.data} />
           <Metric label="Customer messages" value={chat.data?.messages ?? "—"} loading={!chat.data} />

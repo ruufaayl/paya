@@ -46,7 +46,7 @@ function Inner() {
   const breaksValue = (it?.items || []).filter((i: any) => !["MATCHED", "TIMING_DIFFERENCE"].includes(i.category)).reduce((a: number, i: any) => a + Math.abs(i.difference_minor || i.internal?.minor || i.external?.minor || 0), 0);
 
   return (
-    <Page title="Reconciliation & settlement" description="Compare Paya's ledger with the Raast settlement file (simulated). Each break becomes an owned case; the same file can never be imported twice.">
+    <Page title="Reconciliation & settlement" description="Compare Rupay's ledger with the Raast settlement file (simulated). Each break becomes an owned case; the same file can never be imported twice.">
       <div className="grid gap-4 xl:grid-cols-[1fr_380px]">
         <Card className="p-4">
           <SectionHeader level={3} title="Import a settlement file" description="Fetches the simulated rail's file for a business date, verifies control totals and the file hash, then matches every line." />

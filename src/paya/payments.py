@@ -1,4 +1,4 @@
-"""Payment orchestration: the single money path every Paya feature must use.
+"""Payment orchestration: the single money path every Rupay feature must use.
 
 Journey: CREATED -> VALIDATED -> AUTHORISED -> POSTED -> PENDING -> SETTLED -> RECONCILED
 with UNDER_REVIEW for holds / uncertainty and REVERSED via a compensating journal.
@@ -33,7 +33,7 @@ from .state import transition
 SYSTEM = "system"
 
 
-def new_ref(prefix: str = "PAYA") -> str:
+def new_ref(prefix: str = "RUPAY") -> str:
     return f"{prefix}-{now():%Y%m%d}-{secrets.token_hex(3).upper()}"
 
 

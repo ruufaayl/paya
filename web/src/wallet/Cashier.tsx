@@ -31,7 +31,7 @@ export default function Cashier({ user, onSignOut }: { user: string; onSignOut: 
   useEffect(() => {
     if (paid && pr.data && announced.current !== pr.data.id) {
       announced.current = pr.data.id;
-      speak(`Rupees ${Math.round(pr.data.amount.minor / 100).toLocaleString("en-US")} received. Payment pakka.`);
+      speak(`Rupees ${Math.round(pr.data.amount.minor / 100).toLocaleString("en-US")} received. Dedo mujhay!`);
     }
   }, [paid, pr.data]);
 

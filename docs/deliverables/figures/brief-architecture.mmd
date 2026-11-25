@@ -1,7 +1,7 @@
 flowchart LR
   subgraph PAY["Money path: one ACID transaction, then the rail"]
     direction LR
-    C["Paya Wallet / Cashier till<br/>(PWA)"] --> G["API gateway<br/>JWT · RBAC · idempotency<br/>correlation ID"]
+    C["Rupay Wallet / Cashier till<br/>(PWA)"] --> G["API gateway<br/>JWT · RBAC · idempotency<br/>correlation ID"]
     G --> R["Risk rules<br/>KYC tier · velocity · watch-list"]
     R -- "PASS" --> L[("Double-entry ledger<br/>append-only · balanced")]
     L -- "credit, E2E id" --> RA["Raast rail<br/>simulated, RailPort"]
@@ -16,7 +16,7 @@ flowchart LR
   subgraph EXT["Themes 1–5"]
     direction TB
     K["Onboarding & KYC<br/>liveness · face match<br/>registry (simulated)"]
-    AS["Paya Assistant<br/>reads own ledger data<br/>redacts secrets"]
+    AS["Rupay Assistant<br/>reads own ledger data<br/>redacts secrets"]
     GR["Green pot · offsets<br/>2100 ↔ 2110 journals<br/>offset = normal payment"]
     SV["Super app services<br/>bills · top-up · shop · takaful<br/>order = normal payment"]
     SB["Stablecoin sandbox · OFF by default<br/>test tokens · simulated chain<br/>no rupee conversion"]

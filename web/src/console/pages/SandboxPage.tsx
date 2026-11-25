@@ -26,7 +26,7 @@ function Inner() {
   if (d && !d.enabled) return (
     <Page title="Stablecoin sandbox" description="A design prototype for a tokenised-money rail. Off by default.">
       <EmptyState icon={<Power className="h-5 w-5" />} title="Switched off on this server"
-        body={<>Stablecoin payments aren't permitted for Paya under current PVARA/SBP rules, so the sandbox runs only when an operator starts the server with <span className="ref">{d.flag}=true</span>. It uses worthless test tokens on a simulated chain and never touches the rupee ledger.</>} />
+        body={<>Stablecoin payments aren't permitted for Rupay under current PVARA/SBP rules, so the sandbox runs only when an operator starts the server with <span className="ref">{d.flag}=true</span>. It uses worthless test tokens on a simulated chain and never touches the rupee ledger.</>} />
     </Page>
   );
   const cols: Column<T>[] = [

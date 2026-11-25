@@ -63,7 +63,7 @@ export default function Review({ user }: { user: string }) {
 
       <Card className="mt-7 px-4 py-2">
         <dl>
-          <KV k="From" v="Your Paya wallet" />
+          <KV k="From" v="Your Rupay wallet" />
           <KV k="Available now" v={avail != null ? pkr(avail) : "—"} />
           <KV k="After this payment" v={avail != null && p ? pkr(avail - p.amount.minor) : "—"} />
           <KV k="Fee" v="Rs 0" />

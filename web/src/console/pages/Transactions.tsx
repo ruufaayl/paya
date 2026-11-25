@@ -58,7 +58,7 @@ function Inner() {
     <Page title="Transactions" description="Search by immutable reference, Raast end-to-end id or correlation id. Open any row for its full ledger and decision trail.">
       <Card className="p-3">
         <div className="flex flex-wrap items-end gap-2">
-          <SearchInput className="min-w-[260px] flex-1" value={q} onChange={setQ} placeholder="PAYA-…, E2E…, corr-…" label="Search transactions" />
+          <SearchInput className="min-w-[260px] flex-1" value={q} onChange={setQ} placeholder="RUPAY-…, E2E…, corr-…" label="Search transactions" />
           <Select label="Status" hideLabel value={g("status")} onChange={(e) => set("status", e.target.value)} className="w-40">
             <option value="">All statuses</option>{STATUSES.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ").toLowerCase()}</option>)}
           </Select>

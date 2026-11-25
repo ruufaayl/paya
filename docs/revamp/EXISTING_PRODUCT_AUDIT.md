@@ -1,4 +1,4 @@
-# Existing product audit (before Paya 2.0)
+# Existing product audit (before Rupay 2.0)
 
 **Audited:** commit `ac5164d` on `main`, 2026-11-21. Working tree clean. **Test baseline:** 47 backend tests pass (`pytest`); web `tsc -b && vite build` passes; CI green. The revamp is on branch `revamp/paya-2`.
 
@@ -10,7 +10,7 @@ This audit separates what **works end to end** from what is **only drawn on scre
 |---|---|---|
 | Frontend | React 18.3, TypeScript 5.6, Vite 5.4, Tailwind 3.4, framer-motion 11, @xyflow/react 12.3, lucide-react, jsQR, qrcode.react, react-router 6.30 | One SPA, three surfaces: landing `/`, phone PWA `/app/*`, Mission Control `/control` |
 | Backend | Python 3.12+, FastAPI 0.165 / Starlette 1.10, SQLAlchemy 2, psycopg 3, Pydantic 2 | Modular monolith (ADR-001), synchronous commands, background worker thread |
-| Database | PostgreSQL 16 | Schemas `public` (Paya), `rail` (simulated Raast), `registry` (simulated identity registry). Integrity enforced by triggers and constraints (`db.py: INTEGRITY_DDL`) |
+| Database | PostgreSQL 16 | Schemas `public` (Rupay), `rail` (simulated Raast), `registry` (simulated identity registry). Integrity enforced by triggers and constraints (`db.py: INTEGRITY_DDL`) |
 | Events | Transactional outbox → in-process relay → consumers with inbox (`processed_events`); live WebSocket `/v1/stream` | Two message kinds: domain **events** (persisted in `outbox_events`) and **telemetry** (in-memory ring buffer, not persisted) |
 | Auth | Local JWT (HS256, 60 min), Argon2 passwords, login lockout (5 failures / 15 min) | 8 roles + a scoped `APPLICANT` token for onboarding |
 | AI | Reconciliation-triage agent: rules first, optional Ollama LLM behind guardrails, suggestions only | Never on KYC cases; no money-moving capability |
@@ -37,7 +37,7 @@ This audit separates what **works end to end** from what is **only drawn on scre
 | Event history | **Missing.** The live feed is lost on refresh (last 200 messages replayed from memory) | |
 | Case assignment / ownership by person | **Missing.** Cases have `owner_role` only | |
 | Charts / trends | **Missing** | |
-| Customer receipt | **Missing.** There is a "What Paya did" timeline, but no receipt | |
+| Customer receipt | **Missing.** There is a "What Rupay did" timeline, but no receipt | |
 | Customer sign-in | Persona picker using the shared demo password; new onboarded users sign in at the end of onboarding | |
 | Mission Control identity | Silently logs in as `auditor` for reads and as named personas for each button. **The operator never chooses who they are**, so role boundaries are invisible in the UI (the server still enforces them) | `panels.tsx` |
 

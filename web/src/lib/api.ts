@@ -1,4 +1,4 @@
-// Thin, typed client for the Paya API. Payment status always comes from the server - never invented here.
+// Thin, typed client for the Rupay API. Payment status always comes from the server - never invented here.
 
 const KEY_BASE = "paya.apiBase";
 const KEY_SESSIONS = "paya.sessions";

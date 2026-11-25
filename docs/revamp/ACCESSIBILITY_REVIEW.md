@@ -1,4 +1,4 @@
-# Accessibility review (Paya 2.0)
+# Accessibility review (Rupay 2.0)
 
 **Standard:** WCAG 2.2 level AA (W3C Recommendation, October 2023; the current version). **Method:** computed contrast for every token pairing, an automated axe-core scan of 13 screens, scripted keyboard paths in the acceptance run, and a manual review against the criteria below. This is a self-assessment, not a third-party audit. Assistive-technology testing with real screen-reader users was **not** done.
 
@@ -17,7 +17,7 @@
 
 ## Criteria walk-through
 
-| Criterion | How Paya meets it |
+| Criterion | How Rupay meets it |
 |---|---|
 | 1.1.1 Non-text content | Icons are `aria-hidden` next to text; icon-only buttons have labels; charts have `role="img"`, an `aria-label` and a visually hidden data table; QR has a title |
 | 1.3.1 Info and relationships | Real headings, `<table>` with captions and `scope`, `<dl>` for key-value pairs, labelled forms, landmarks (`main`, `nav`, `aside`), skip links |

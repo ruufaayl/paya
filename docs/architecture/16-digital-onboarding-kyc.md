@@ -1,8 +1,8 @@
 # 16. Digital onboarding and KYC (Theme 1)
 
-**Goal.** A person opens a tier-1 Paya wallet from their phone in about two minutes, using only synthetic identity data. Clear cases are approved automatically. Everything else is decided by a compliance officer, with evidence.
+**Goal.** A person opens a tier-1 Rupay wallet from their phone in about two minutes, using only synthetic identity data. Clear cases are approved automatically. Everything else is decided by a compliance officer, with evidence.
 
-**What it is not.** Paya never photographs or stores a real CNIC, never calls NADRA, and never keeps a photo or face template. The identity registry is a simulator (like the Raast rail, ADR-005), and the ID card is a synthetic **SPECIMEN** issued by that simulator.
+**What it is not.** Rupay never photographs or stores a real CNIC, never calls NADRA, and never keeps a photo or face template. The identity registry is a simulator (like the Raast rail, ADR-005), and the ID card is a synthetic **SPECIMEN** issued by that simulator.
 
 Code: `src/paya/kyc.py` (journey and rules), `kyc_engines.py` (image and face engines), `registry.py` (simulated registry), `specimen_card.py`. UI: `web/src/pages/app/Onboarding.tsx` and the KYC review card in Mission Control. Decision record: [ADR-010](adr/ADR-010-onboarding-machines-approve-people-decide.md).
 
@@ -12,7 +12,7 @@ Code: `src/paya/kyc.py` (journey and rules), `kyc_engines.py` (image and face en
 sequenceDiagram
     autonumber
     actor A as Applicant (phone)
-    participant API as Paya API
+    participant API as Rupay API
     participant K as KYC service
     participant F as Face engine (YuNet + SFace)
     participant R as Identity registry (simulated)
@@ -130,7 +130,7 @@ Models are downloaded by `make models` (`python -m paya.fetch_models`) with pinn
 ## 7. Evidence
 
 - `tests/test_kyc.py`: K1–K15. A deterministic mock face engine drives the rules. K13 and K14 use the **real** models on a **drawn** synthetic face (`tests/synthetic_faces.py`): the real detector finds it, the head-turn ratios fall where expected, and the wallet opens.
-- `docs/architecture/tools/kyc_e2e.cjs` (rewritten for Paya 2.0, **12/12**): a real browser (emulated iPhone) whose camera is a canvas drawing a synthetic face that turns when the app asks, with the real models. It covers a clean applicant approved automatically (face match cosine 0.876 against the 0.363 threshold), a near watch-list name referred with no tipping off, the applicant token refused outside onboarding, and the two-person rule in Mission Control with the waiting phone updating by itself; the decisions and the refused self-confirmation are checked in the audit chain. Results and screenshots are in `evidence/kyc/` and `evidence/screenshots/kyc/`; the 1.x run is in their `v1/` folders.
+- `docs/architecture/tools/kyc_e2e.cjs` (rewritten for Rupay 2.0, **12/12**): a real browser (emulated iPhone) whose camera is a canvas drawing a synthetic face that turns when the app asks, with the real models. It covers a clean applicant approved automatically (face match cosine 0.876 against the 0.363 threshold), a near watch-list name referred with no tipping off, the applicant token refused outside onboarding, and the two-person rule in Mission Control with the waiting phone updating by itself; the decisions and the refused self-confirmation are checked in the audit chain. Results and screenshots are in `evidence/kyc/` and `evidence/screenshots/kyc/`; the 1.x run is in their `v1/` folders.
 
 ## 8. Limits we state plainly
 

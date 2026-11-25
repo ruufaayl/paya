@@ -75,7 +75,7 @@ export default function Green({ user }: { user: string }) {
       {/* Green pot */}
       <section aria-labelledby="pot-h" className="mt-6">
         <h2 id="pot-h" className="flex items-center gap-2 text-title-3 text-fg"><PiggyBank className="h-4 w-4" aria-hidden />Green pot</h2>
-        <p className="text-caption text-fg-2">Your own money, set aside for greener choices. It stays in your Paya wallet and you can move it back at any time.</p>
+        <p className="text-caption text-fg-2">Your own money, set aside for greener choices. It stays in your Rupay wallet and you can move it back at any time.</p>
         <Card className="mt-3 p-4">
           {pot.isLoading ? <Skeleton className="h-8 w-32" /> : pot.data && (
             <>

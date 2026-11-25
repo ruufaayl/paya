@@ -46,7 +46,7 @@ function Inner() {
       <Card className="mt-4 p-4">
         <SectionHeader level={3} title="Controls" />
         <ul className="mt-2 grid gap-2 text-body-sm text-fg-2 lg:grid-cols-2">
-          <li>Prices, bills and offers come from Paya's catalogue; the client only sends item codes and quantities.</li>
+          <li>Prices, bills and offers come from Rupay's catalogue; the client only sends item codes and quantities.</li>
           <li>One bill is paid once: a second order for the same consumer number and month is refused while one is live or done.</li>
           <li>A partner receives only the fields a customer consented to; what was shared is stored on the order. Integrity check: <span className="ref text-[11.5px]">partner_data_shared_only_with_consent</span>.</li>
           <li>Suspending a partner hides it and refuses new orders; payments already made settle normally. Investments are not offered.</li>

@@ -7,11 +7,11 @@
 
 ```mermaid
 C4Context
-  title Paya - system context (proposed reference architecture, synthetic data)
+  title Rupay - system context (proposed reference architecture, synthetic data)
   Person(customer, "Customer", "Partner EMI wallet holder. Pays by scanning a Raast QR.")
   Person(cashier, "Cashier / merchant admin", "Shows the QR. Hands over goods only on PAID.")
   Person(backoffice, "Back office", "Ops, Compliance, Finance and Audit staff. Make the human decisions.")
-  System(paya, "Paya", "Payment assurance platform: transaction state, double-entry ledger, risk screening, reconciliation, live operations view.")
+  System(paya, "Rupay", "Payment assurance platform: transaction state, double-entry ledger, risk screening, reconciliation, live operations view.")
   System_Ext(raast, "Raast P2M rail", "SBP instant payment system, reached via the licensed partner. SIMULATED in the prototype.")
   System_Ext(emi, "Partner EMI / MSP", "Licensed institution that holds customer funds and the merchant relationship. Synthetic.")
   System_Ext(registry, "Identity registry", "NADRA-style identity verification. Mocked; institutional access only.")
@@ -31,31 +31,31 @@ C4Context
 
 | Data object | System of record | Classification | Who may change it |
 |---|---|---|---|
-| Customer master, consent, KYC tier | Paya customer master (`customers`, `consents`) | Record | Onboarding/KYC process only |
-| Merchant master, Raast alias, settlement IBAN | Paya merchant master (`merchants`) | Record | Merchant onboarding; IBAN change needs dual approval (roadmap) |
-| Payment request (QR / order) | Paya payments (`payment_requests`) | Record | Cashier creates; system expires |
-| Transaction state | Paya transaction service (`transactions` + `transaction_status_history`) | Record | State machine only (`state.py`) |
-| **Internal financial truth** | **Paya ledger** (`journals`, `ledger_entries`) | **Record** | Posting service only; append-only |
+| Customer master, consent, KYC tier | Rupay customer master (`customers`, `consents`) | Record | Onboarding/KYC process only |
+| Merchant master, Raast alias, settlement IBAN | Rupay merchant master (`merchants`) | Record | Merchant onboarding; IBAN change needs dual approval (roadmap) |
+| Payment request (QR / order) | Rupay payments (`payment_requests`) | Record | Cashier creates; system expires |
+| Transaction state | Rupay transaction service (`transactions` + `transaction_status_history`) | Record | State machine only (`state.py`) |
+| **Internal financial truth** | **Rupay ledger** (`journals`, `ledger_entries`) | **Record** | Posting service only; append-only |
 | External rail claims | Raast (simulated: `rail.payments`, settlement file) | External record | Rail only. **Never copied into the ledger without a matching transaction.** |
-| Risk decisions | Paya risk (`screening_results`, `cases`) | Record | Rules engine; humans for holds |
-| Notifications | Paya notifier (`notifications`) | Engagement | Consumer of events. **Never a source of truth.** |
+| Risk decisions | Rupay risk (`screening_results`, `cases`) | Record | Rules engine; humans for holds |
+| Notifications | Rupay notifier (`notifications`) | Engagement | Consumer of events. **Never a source of truth.** |
 | Metrics, Mission Control view | Derived | Intelligence | Read-only |
-| Audit evidence | Paya audit chain (`audit_log`) | Record | Append-only, hash-linked |
+| Audit evidence | Rupay audit chain (`audit_log`) | Record | Append-only, hash-linked |
 
 ## Level 2: containers
 
 ```mermaid
 C4Container
-  title Paya - containers
+  title Rupay - containers
   Person(customer, "Customer")
   Person(cashier, "Cashier")
   Person(staff, "Back office")
-  System_Boundary(p, "Paya") {
+  System_Boundary(p, "Rupay") {
     Container(pwa, "Phone app", "React PWA", "Wallet: scan, slide-to-pay, live tracker. Till: keypad, QR, PAID.")
     Container(mc, "Mission Control", "React + React Flow", "Live service map, human gates, chaos panel, inspector.")
-    Container(api, "Paya API", "Python 3, FastAPI", "Gateway facade: JWT/RBAC, correlation ID, idempotency. Payments, risk, ledger, recon modules (modular monolith).")
+    Container(api, "Rupay API", "Python 3, FastAPI", "Gateway facade: JWT/RBAC, correlation ID, idempotency. Payments, risk, ledger, recon modules (modular monolith).")
     Container(worker, "Recovery worker", "Python thread", "Outbox relay, rail dispatch, callbacks, status enquiry, expiry.")
-    ContainerDb(db, "Paya database", "PostgreSQL 16", "Ledger, transactions, outbox/inbox, cases, audit chain. Integrity enforced by triggers and constraints.")
+    ContainerDb(db, "Rupay database", "PostgreSQL 16", "Ledger, transactions, outbox/inbox, cases, audit chain. Integrity enforced by triggers and constraints.")
   }
   System_Boundary(ext, "External (simulated)") {
     Container(rail, "Mock Raast rail", "Python + schema 'rail'", "Credit transfer, enquiry, callbacks, settlement file. Chaos modes.")

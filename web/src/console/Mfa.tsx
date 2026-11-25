@@ -78,7 +78,7 @@ export function SecretBlock({ setup }: { setup: { secret: string; otpauth_uri: s
       <div className="min-w-0 flex-1">
         <p className="text-caption text-fg-2">Or type this key:</p>
         <p className="ref mt-1 break-all text-body-sm text-fg" data-testid="mfa-secret">{setup.secret.match(/.{1,4}/g)?.join(" ")}</p>
-        <p className="mt-2 text-caption text-fg-muted">Shown once. Paya stores it encrypted and never shows it again.</p>
+        <p className="mt-2 text-caption text-fg-muted">Shown once. Rupay stores it encrypted and never shows it again.</p>
       </div>
     </div>
   );

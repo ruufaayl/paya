@@ -1,14 +1,14 @@
-# Paya
+# Rupay
 
-**Payment pakka hai.** Paya is a Raast person-to-merchant (P2M) payment assurance platform. When a customer pays a shop by scanning a QR code, the cashier sees **PAID** only once the money has actually moved and been recorded in a double-entry ledger. Customer screens, screenshots and notifications are never treated as proof of payment.
+**Dedo mujhay!** Rupay is a Raast person-to-merchant (P2M) payment assurance platform. When a customer pays a shop by scanning a QR code, the cashier sees **PAID** only once the money has actually moved and been recorded in a double-entry ledger. Customer screens, screenshots and notifications are never treated as proof of payment.
 
 > **Academic prototype – CS3017 Enterprise Systems & Applications, Fall 2026.**
-> Team: Rufayl Waseem (24i-5660), Taha Ali (24i-5525), Harris Safi (24i-5652), Kanz ur Rehman (24i-5544), Mudaser Waleed (24i-5681).
-> All people, merchants, aliases and IBANs are synthetic. **No real money moves.** The Raast rail is a local simulator. Paya does not claim to describe the internal systems of SBP, any bank, EMI or PSP. Its architecture is a *proposed reference architecture*.
+> Team: Rufayl Waseem (24i-5660), Taha Ali (24i-5525), Harris Safi (24i-5652), Kanz ur Rehman (24i-5544), Mudaser Waleed (24i-5681), Ateeq Riaz (roll no. to add).
+> All people, merchants, aliases and IBANs are synthetic. **No real money moves.** The Raast rail is a local simulator. Rupay does not claim to describe the internal systems of SBP, any bank, EMI or PSP. Its architecture is a *proposed reference architecture*.
 
 ## The problem
 
-Pakistani merchants increasingly take Raast QR payments, but a cashier usually confirms a payment by looking at the customer's phone screen or an SMS. Settlement credits then arrive with no link back to orders, and reconciliation is done by hand. Paya makes the **ledger the only source of payment truth**, reconciles it against the rail's settlement file, and puts every exception into a queue with a named owner.
+Pakistani merchants increasingly take Raast QR payments, but a cashier usually confirms a payment by looking at the customer's phone screen or an SMS. Settlement credits then arrive with no link back to orders, and reconciliation is done by hand. Rupay makes the **ledger the only source of payment truth**, reconciles it against the rail's settlement file, and puts every exception into a queue with a named owner.
 
 ## Architecture in one picture
 
@@ -49,7 +49,7 @@ Demo logins all use the password `paya-demo-2026` (synthetic, demo mode only):
 | `zarak` | Customer who triggers the synthetic watch-list hold |
 | `hina` | Customer who is not KYC-verified |
 | `ayesha.cashier`, `bilal.admin` | Chai Junction cashier / merchant admin |
-| `mudaser.ops`, `faisal.ops` | Operations (request reversals, status enquiries) |
+| `mudaser.ops`, `ateeq.ops` | Operations (request reversals, status enquiries) |
 | `kanz.compliance` | Compliance (release or reject holds) |
 | `harris.compliance` | Compliance (second officer for the onboarding two-person rule) |
 | `rufayl.finance` | Finance (approve reversals, run reconciliation) |
@@ -58,9 +58,9 @@ Demo logins all use the password `paya-demo-2026` (synthetic, demo mode only):
 
 ## Phone app and Mission Control (`/web`)
 
-`/web` is one React app with two surfaces that share one design system (**Paya 2.0**, see `docs/revamp/`):
+`/web` is one React app with two surfaces that share one design system (**Rupay 2.0**, see `docs/revamp/`):
 
-- **`/app` (Paya Wallet)** is a light, mobile-first PWA for customers. It covers sign-in, digital onboarding, home (available, ledger and reserved balances), activity, scan or pick a till, review and authorise, an authoritative payment result with timeline, money trail and receipt, and the account screen. Cashiers get the till: keypad, Raast QR, and **PAID** only after settlement.
+- **`/app` (Rupay Wallet)** is a light, mobile-first PWA for customers. It covers sign-in, digital onboarding, home (available, ledger and reserved balances), activity, scan or pick a till, review and authorise, an authoritative payment result with timeline, money trail and receipt, and the account screen. Cashiers get the till: keypad, Raast QR, and **PAID** only after settlement.
 - **`/control` (Mission Control)** is a dark operations console. You sign in as a synthetic staff member, and every action runs as that person and is checked by the server. Pages: Overview, Transactions, System topology, Event stream, Cases & approvals, Identity & KYC, Reconciliation, AI operations, Rail lab, Audit & access.
 
 ```bash
@@ -77,13 +77,13 @@ cd web && npm install && npm run dev      # http://localhost:5173  (API defaults
 3. On the iPhone, open the Vercel URL, go to `/app`, then tap **Share → Add to Home Screen**. Open Mission Control on the laptop.
 4. Only ever show synthetic data on a public URL. Close the tunnel after the demo.
 
-### Paya 2.0 documentation
+### Rupay 2.0 documentation
 
 `docs/revamp/`: audit of the 1.x product, product experience, design system (with a generated contrast report), wallet UX, Mission Control UX, motion system, frontend architecture, backend integration, API changes, accessibility review, testing report and changelog. The acceptance run is `docs/revamp/tools/revamp_e2e.cjs`; screenshots are in `evidence/screenshots/revamp/`.
 
 ## Digital onboarding and KYC (Theme 1)
 
-Open a wallet from the phone: tap **Open a new Paya wallet**, consent, enter synthetic details, make a SPECIMEN ID card on the device, take a selfie, turn your head left and right, and get a decision in seconds. Clear cases are approved automatically. Anything else goes to Compliance in Mission Control; a possible watch-list match needs two officers (Kanz, then Harris). Photos and face templates are never stored.
+Open a wallet from the phone: tap **Open a new Rupay wallet**, consent, enter synthetic details, make a SPECIMEN ID card on the device, take a selfie, turn your head left and right, and get a decision in seconds. Clear cases are approved automatically. Anything else goes to Compliance in Mission Control; a possible watch-list match needs two officers (Kanz, then Harris). Photos and face templates are never stored.
 
 Run `make models` once to fetch the face models (YuNet, MIT licence; SFace, Apache 2.0; checksums pinned). Without them, every application is referred to a person. Design: `docs/architecture/16-digital-onboarding-kyc.md`, ADR-010. Evidence: `evidence/kyc/`.
 
@@ -97,11 +97,11 @@ A **Services** tab turns the wallet into a daily-use app: pay an electricity or 
 
 ## Stablecoin sandbox (Theme 5), off by default
 
-Stablecoin payments aren't permitted for Paya under PVARA/SBP rules, so this is a **switched-off prototype**: start the server with `PAYA_STABLECOIN_SANDBOX=true` to see it. Fully verified customers acknowledge that the tokens have no value, then get worthless `tPKR-TEST` tokens from a faucet on a **simulated chain** (mempool, blocks, reorgs, outages). They can pay two synthetic merchants or an address. Transfers are screened, limited and travel-rule-checked, count only at 3 confirmations, and are reconciled against the chain. Nothing converts to rupees or touches the rupee ledger. Design: `docs/architecture/20-stablecoin-sandbox.md`, ADR-014.
+Stablecoin payments aren't permitted for Rupay under PVARA/SBP rules, so this is a **switched-off prototype**: start the server with `PAYA_STABLECOIN_SANDBOX=true` to see it. Fully verified customers acknowledge that the tokens have no value, then get worthless `tPKR-TEST` tokens from a faucet on a **simulated chain** (mempool, blocks, reorgs, outages). They can pay two synthetic merchants or an address. Transfers are screened, limited and travel-rule-checked, count only at 3 confirmations, and are reconciled against the chain. Nothing converts to rupees or touches the rupee ledger. Design: `docs/architecture/20-stablecoin-sandbox.md`, ADR-014.
 
 ## Conversational banking (Theme 3)
 
-**Ask Paya** in the wallet answers questions about your own money in English or Roman Urdu ("mera balance kitna hai", "did my payment to Chai Junction go through?"), using read-only data from the ledger. It cannot move money; for actions it links into the normal review-and-authorise flow. Card numbers, CNICs, OTPs and passwords are removed before anything is stored. "Talk to a person" opens a case for Operations, who can read the redacted transcript (each read is audited). Design: `docs/architecture/17-conversational-banking.md`, ADR-011.
+**Ask Rupay** in the wallet answers questions about your own money in English or Roman Urdu ("mera balance kitna hai", "did my payment to Chai Junction go through?"), using read-only data from the ledger. It cannot move money; for actions it links into the normal review-and-authorise flow. Card numbers, CNICs, OTPs and passwords are removed before anything is stored. "Talk to a person" opens a case for Operations, who can read the redacted transcript (each read is audited). Design: `docs/architecture/17-conversational-banking.md`, ADR-011.
 
 ## Database migrations and roles
 

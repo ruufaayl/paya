@@ -1,12 +1,12 @@
-# Paya 2.0 changelog
+# Rupay 2.0 changelog
 
 Branch `revamp/paya-2`. All 47 pre-existing backend tests still pass; 9 were added. The financial domain modules are unchanged.
 
 ## Before → after
 
-| Area | Paya 1.x | Paya 2.0 |
+| Area | Rupay 1.x | Rupay 2.0 |
 |---|---|---|
-| Visual identity | Neon green on near-black everywhere; gradient logo; glass and aurora backgrounds | Paya design system: light **Wallet** and dark **Console** themes from one token set; Jade brand; flat symbol; green reserved for confirmed outcomes |
+| Visual identity | Neon green on near-black everywhere; gradient logo; glass and aurora backgrounds | Rupay design system: light **Wallet** and dark **Console** themes from one token set; Jade brand; flat symbol; green reserved for confirmed outcomes |
 | Fonts | Inter + JetBrains Mono from Google Fonts at runtime | Self-hosted Manrope (display), Inter (text, tabular money), JetBrains Mono (references); works offline |
 | Status language | Colour pills, green for many positive-looking states | One status map (icon + word + tone); rail-accepted is "processing", not success |
 | Wallet | Persona picker → home → scan → slide → tracker | Sign-in with demo accounts or own credentials; home with balance explanation, hide/show, verification and limits, monthly insight; activity with filters; review step (balance after, fee, network); keyboard-accessible authorise; authoritative result; timeline; money trail from the ledger; receipt; account |

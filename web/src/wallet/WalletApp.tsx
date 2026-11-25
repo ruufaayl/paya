@@ -1,4 +1,4 @@
-// Paya Wallet: the customer (and cashier) phone experience. Light, calm, mobile-first.
+// Rupay Wallet: the customer (and cashier) phone experience. Light, calm, mobile-first.
 import { AnimatePresence, motion } from "framer-motion";
 import { Home, LayoutGrid, ListOrdered, ScanLine, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";

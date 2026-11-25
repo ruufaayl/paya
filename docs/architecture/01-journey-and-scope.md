@@ -7,11 +7,11 @@
 
 **Journey type in the brief:** *merchant payment*, with the linked *refund/reversal* path.
 
-> A customer of a licensed wallet provider (the *Partner EMI*, synthetic) pays a merchant by scanning a dynamic Raast QR at the counter. The cashier hands over the goods only when Paya shows **PAID**. Paya shows PAID only after the Raast rail confirms the credit and the ledger has posted settlement. The next day, Paya reconciles the payment against the rail's settlement file.
+> A customer of a licensed wallet provider (the *Partner EMI*, synthetic) pays a merchant by scanning a dynamic Raast QR at the counter. The cashier hands over the goods only when Rupay shows **PAID**. Rupay shows PAID only after the Raast rail confirms the credit and the ledger has posted settlement. The next day, Rupay reconciles the payment against the rail's settlement file.
 
 This trace covers every layer the brief lists, from channel to finance:
 
-| Brief layer | Paya component | Evidence in repository |
+| Brief layer | Rupay component | Evidence in repository |
 |---|---|---|
 | Channel | Customer wallet PWA and cashier till (`web/src/pages/app`) | `evidence/screenshots/06-*.jpg` to `11-*.jpg` |
 | Gateway | FastAPI façade: JWT, role check, correlation ID, idempotency (`src/paya/api/main.py`, `idempotency.py`) | `test_s2_*`, `test_s8_*` |
@@ -24,7 +24,7 @@ This trace covers every layer the brief lists, from channel to finance:
 | Notification | Outbox consumer that de-duplicates (`notifications.py`) | `test_s3_*` |
 | Finance/reporting | Trial balance, reconciliation runs, metrics (`/v1/finance/*`) | `evidence/screenshots/14-*.jpg` |
 
-**Case anchor.** The brief's default anchor is a Pakistani digital wallet such as SadaPay or NayaPay. We use its public product journey (a QR merchant payment from a wallet) **as context only**. Everything inside Paya is a **proposed reference architecture**. It makes no claim about any firm's proprietary systems.
+**Case anchor.** The brief's default anchor is a Pakistani digital wallet such as SadaPay or NayaPay. We use its public product journey (a QR merchant payment from a wallet) **as context only**. Everything inside Rupay is a **proposed reference architecture**. It makes no claim about any firm's proprietary systems.
 
 ## 2. Public context
 
@@ -69,7 +69,7 @@ Each assumption carries a risk level. "Highest" marks the one that would hurt mo
 - **Synthetic data only.** No real CNIC, biometric, card, bank-account, wallet or credential data is stored anywhere. Identity is represented by a synthetic `idv_token`. The `customers` table has no CNIC column at all.
 - **No probing of real services.** We do no scanning, load testing or reverse engineering of any real wallet, bank, Raast or payment endpoint. All failure testing runs against our own mock rail.
 - **No real money moves.** The UI, README and API description all say so.
-- **No impersonation.** Paya uses its own brand. We do not reproduce any SadaPay, NayaPay, Easypaisa, JazzCash or SBP branding or QR specification.
-- **Regulatory honesty.** Paya is positioned as a *technology service provider* to a licensed institution. It does not claim to be a bank, an EMI or a PSO/PSP. Stablecoin features stay a disabled sandbox design: PVARA's 2026 regulations bar virtual assets as a domestic means of payment without SBP approval.
+- **No impersonation.** Rupay uses its own brand. We do not reproduce any SadaPay, NayaPay, Easypaisa, JazzCash or SBP branding or QR specification.
+- **Regulatory honesty.** Rupay is positioned as a *technology service provider* to a licensed institution. It does not claim to be a bank, an EMI or a PSO/PSP. Stablecoin features stay a disabled sandbox design: PVARA's 2026 regulations bar virtual assets as a domestic means of payment without SBP approval.
 - **Bounded AI.** AI may suggest. It never moves money, posts to the ledger, releases holds or approves reversals (brief §7). See the AI governance document, which arrives with the AI extension.
 - **Every use of generative AI is recorded** in `AI_USE_LOG.md`.

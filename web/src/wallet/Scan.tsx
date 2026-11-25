@@ -79,7 +79,7 @@ export default function Scan({ user }: { user: string }) {
               {camera === "unsupported" && "The camera needs a secure (HTTPS) link. Pick a till below instead."}</div>
           </div>
         )}
-        <p role="status" className="absolute inset-x-0 bottom-3 text-center text-caption text-night-fg/85">{found ? "QR recognised" : "Point at a Paya Raast QR"}</p>
+        <p role="status" className="absolute inset-x-0 bottom-3 text-center text-caption text-night-fg/85">{found ? "QR recognised" : "Point at a Rupay Raast QR"}</p>
       </div>
 
       <section id="tills" aria-labelledby="tills-h" className="mt-7">

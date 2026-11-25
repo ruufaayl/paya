@@ -1,6 +1,6 @@
 """Render a SYNTHETIC specimen identity card for tests, documentation and demos.
 
-The layout is deliberately Paya's own (purple header, large SPECIMEN watermark, SPX- number) and does not
+The layout is deliberately Rupay's own (purple header, large SPECIMEN watermark, SPX- number) and does not
 imitate any government identity card. The phone app draws the same design on the device.
 """
 from datetime import date
@@ -20,7 +20,7 @@ def render(*, full_name: str, date_of_birth: date, specimen_id: str, expires_on:
     yy, xx = np.mgrid[0:H, 0:W]
     card[:] = (245 - (np.sin(xx / 9.0) * np.cos(yy / 11.0) * 6)).astype(np.uint8)[..., None]
     cv2.rectangle(card, (0, 0), (W, 96), PURPLE, -1)
-    cv2.putText(card, "PAYA", (32, 64), cv2.FONT_HERSHEY_DUPLEX, 1.6, (255, 255, 255), 3, cv2.LINE_AA)
+    cv2.putText(card, "RUPAY", (32, 64), cv2.FONT_HERSHEY_DUPLEX, 1.6, (255, 255, 255), 3, cv2.LINE_AA)
     cv2.putText(card, "SYNTHETIC TEST IDENTITY - NOT AN IDENTITY DOCUMENT", (210, 60), cv2.FONT_HERSHEY_SIMPLEX,
                 0.72, (255, 255, 255), 2, cv2.LINE_AA)
     # photo box

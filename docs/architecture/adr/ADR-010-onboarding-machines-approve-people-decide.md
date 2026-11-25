@@ -4,7 +4,7 @@
 
 ## Context
 
-Theme 1 asks for digital onboarding with biometrics, document reading and AI. Paya is a technology service provider to a licensed partner, so it cannot make the final legal KYC decision on its own. The course rules forbid real CNIC or biometric data. Face-matching models make mistakes, and their error rates can differ between groups of people.
+Theme 1 asks for digital onboarding with biometrics, document reading and AI. Rupay is a technology service provider to a licensed partner, so it cannot make the final legal KYC decision on its own. The course rules forbid real CNIC or biometric data. Face-matching models make mistakes, and their error rates can differ between groups of people.
 
 ## Decision
 

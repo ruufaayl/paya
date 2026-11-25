@@ -5,7 +5,7 @@
 
 | Field | Content |
 |---|---|
-| **Rule** | The Paya ledger is the only source of internal financial truth. No UI, notification, customer screenshot or external message is truth until it has been posted, or matched, against the ledger. |
+| **Rule** | The Rupay ledger is the only source of internal financial truth. No UI, notification, customer screenshot or external message is truth until it has been posted, or matched, against the ledger. |
 | **Rationale** | A payment can look "successful" before settlement finality (Week 9). Duplicates and timeouts are normal. |
 | **Implication** | Screens read state from the server. The rail's claims live in their own schema and enter the ledger only through a governed posting. |
 | **Trade-off** | The cashier waits a few seconds for settlement instead of trusting the customer's screen. |

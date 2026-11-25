@@ -53,7 +53,7 @@ export default function Services({ user }: { user: string }) {
         ))}
         {hub.data && <>
           {tile(Leaf, "Green", "Footprint, green pot, offsets", () => nav("/app/green"))}
-          {tile(Bot, "Ask Paya", "Questions about your money", () => nav("/app/assistant"))}
+          {tile(Bot, "Ask Rupay", "Questions about your money", () => nav("/app/assistant"))}
           {sandbox && tile(FlaskConical, "Stablecoin sandbox", "Test tokens only, no value", () => nav("/app/sandbox"),
             <Badge tone="warning" className="mt-0.5">Sandbox</Badge>)}
         </>}
@@ -119,7 +119,7 @@ export function ServiceScreen({ user }: { user: string }) {
         <span aria-hidden className="grid h-9 w-9 place-items-center rounded-md bg-brand-soft text-brand-accent"><Icon className="h-4.5 w-4.5" /></span>
         <div className="min-w-0"><h1 className="truncate text-title-3 text-fg">{s.name}</h1><p className="text-caption text-fg-2">{s.tagline}</p></div>
       </div>
-      {!s.available && <div className="mt-4"><Alert tone="warning" title="Temporarily unavailable">Paya has paused this partner. Payments you already made are not affected.</Alert></div>}
+      {!s.available && <div className="mt-4"><Alert tone="warning" title="Temporarily unavailable">Rupay has paused this partner. Payments you already made are not affected.</Alert></div>}
       {s.available && (
         <div className="mt-4">
           {s.kind === "BILLER" && <Bill user={user} s={s} onPay={buy} busy={place.isPending} />}
@@ -128,7 +128,7 @@ export function ServiceScreen({ user }: { user: string }) {
         </div>
       )}
       <p className="mt-5 text-caption text-fg-muted">
-        {s.scopes.length ? `This partner receives ${s.scopes.map((x) => SCOPE[x]).join(" and ")} with your consent${s.consented ? " (given)" : ""}.` : "This partner receives no personal data from Paya."}
+        {s.scopes.length ? `This partner receives ${s.scopes.map((x) => SCOPE[x]).join(" and ")} with your consent${s.consented ? " (given)" : ""}.` : "This partner receives no personal data from Rupay."}
         {" "}Synthetic partner for the demo.
       </p>
       {s.consented && s.scopes.length > 0 && <RevokeConsent user={user} code={s.code} />}
@@ -213,7 +213,7 @@ function Catalogue({ s, onPay, busy }: { s: Service; onPay: (b: Record<string, u
     <>
       {s.offer && <label className="mb-3 flex items-start gap-2 rounded-md border border-info-line bg-info-soft p-3 text-body-sm text-fg">
         <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[rgb(var(--brand))]" checked={offer} onChange={(e) => setOffer(e.target.checked)} />
-        <span><b>Use offer.</b> {s.offer}. The final price is calculated by Paya's server.</span></label>}
+        <span><b>Use offer.</b> {s.offer}. The final price is calculated by Rupay's server.</span></label>}
       <Card className="divide-y divide-line overflow-hidden">
         {s.items!.map((i) => (
           <div key={i.sku} className="flex items-center gap-3 px-3.5 py-3">
@@ -234,7 +234,7 @@ function Catalogue({ s, onPay, busy }: { s: Service; onPay: (b: Record<string, u
         onClick={() => onPay({ items: lines.map(([sku, q]) => ({ sku, qty: q })), use_offer: offer && !!s.offer })}>
         {lines.length ? `Continue · ${pkr(total)}${offer && s.offer ? " before offer" : ""}` : insurer ? "Choose cover" : "Add items"}
       </Button>
-      {insurer && <p className="mt-2 text-caption text-fg-2">Cover is provided by the partner, not by Paya. It starts once Raast confirms your payment and lasts one month.</p>}
+      {insurer && <p className="mt-2 text-caption text-fg-2">Cover is provided by the partner, not by Rupay. It starts once Raast confirms your payment and lasts one month.</p>}
     </>
   );
 }

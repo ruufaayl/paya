@@ -1,10 +1,10 @@
 ---
-title: "Paya: Architecture Brief"
+title: "Rupay: Architecture Brief"
 subtitle: "CS3017 Enterprise Systems & Applications · Fall 2026 · Raast P2M merchant payment with ledger-grade assurance"
-author: "Rufayl Waseem (24i-5660) · Taha Ali (24i-5525) · Harris Safi (24i-5652) · Kanz ur Rehman (24i-5544) · Mudaser Waleed (24i-5681)"
+author: "Rufayl Waseem (24i-5660) · Taha Ali (24i-5525) · Harris Safi (24i-5652) · Kanz ur Rehman (24i-5544) · Mudaser Waleed (24i-5681) · Ateeq Riaz (roll no. to add)"
 ---
 
-**Paya** makes a Raast QR payment *provably* paid. The cashier sees **PAID** only when the rail has confirmed and a double-entry ledger has posted settlement. A customer's screen, a screenshot or a notification is never treated as proof. Paya is a **technology service provider** to a licensed partner EMI (synthetic). It holds no funds and no licence. **This is an academic prototype on synthetic data. No real money moves, the Raast rail is simulated, and the internal architecture is a proposed reference design, not a claim about any firm.**
+**Rupay** makes a Raast QR payment *provably* paid. The cashier sees **PAID** only when the rail has confirmed and a double-entry ledger has posted settlement. A customer's screen, a screenshot or a notification is never treated as proof. Rupay is a **technology service provider** to a licensed partner EMI (synthetic). It holds no funds and no licence. **This is an academic prototype on synthetic data. No real money moves, the Raast rail is simulated, and the internal architecture is a proposed reference design, not a claim about any firm.**
 
 ## Journey and scope
 
@@ -12,13 +12,13 @@ author: "Rufayl Waseem (24i-5660) · Taha Ali (24i-5525) · Harris Safi (24i-565
 
 | In scope (built and tested) | Out of scope (stated) |
 |---|---|
-| Dynamic QR; idempotent pay; KYC tier, velocity and watch-list rules with compliance hold; reversal with maker-checker; simulated Raast with 9 failure modes; settlement-file reconciliation; AI triage of breaks; operations console; **digital onboarding & KYC** (Theme 1); **green pot, footprint estimate and offsets** (Theme 2); **conversational banking assistant** (Theme 3); **super-app partner services** (bills, top-up, shop, takaful; Theme 4); **stablecoin sandbox**, off by default, test tokens only (Theme 5) | Cards and chargebacks; real NADRA verification or certified liveness; real bank, EMI or Raast connectivity; post-settlement refunds; production HA |
+| Dynamic QR; idempotent pay; KYC tier, velocity and watch-list rules with compliance hold; reversal with maker-checker; simulated Raast with 9 failure modes; settlement-file reconciliation; AI triage of breaks; operations console; **digital onboarding & KYC** (Theme 1); **green pot, footprint estimate and offsets** (Theme 2); **conversational banking assistant** (Theme 3); **super-app partner services** (bills, top-up, shop, takaful; Theme 4); **send to any bank account** (simulated name lookup); **stablecoin sandbox**, off by default, test tokens only (Theme 5) | Cards and chargebacks; real NADRA verification or certified liveness; real bank, EMI or Raast connectivity; post-settlement refunds; production HA |
 
 ## Systems (C4 containers) and systems of record
 
 ![](figures/brief-architecture.png){width=100%}
 
-*Modular monolith (ADR-001): one API container (gateway, payments, risk, ledger, reconciliation, events, AI, KYC, assistant) plus a recovery worker, PostgreSQL 16, and simulated Raast rail and identity registry in their own schemas. Two surfaces share one design system: the Paya Wallet (phone) and Mission Control (operations). Full C4 views are in the dossier.*
+*Modular monolith (ADR-001): one API container (gateway, payments, risk, ledger, reconciliation, events, AI, KYC, assistant) plus a recovery worker, PostgreSQL 16, and simulated Raast rail and identity registry in their own schemas. Two surfaces share one design system: the Rupay Wallet (phone) and Mission Control (operations). Full C4 views are in the dossier.*
 
 | Truth | System of record | Never truth |
 |---|---|---|

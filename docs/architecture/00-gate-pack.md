@@ -1,4 +1,4 @@
-# Gate pack: Paya (Weeks 10 to 15)
+# Gate pack: Rupay (Weeks 10 to 15)
 
 **Course:** CS3017 Enterprise Systems & Applications, Fall 2026.
 **Submitted:** 2026-11-20.
@@ -100,5 +100,5 @@ Rebuild the PDFs and DOCX files with `node docs/architecture/tools/build_deliver
 
 ## Questions for the instructor
 
-1. **Framing.** Is it acceptable to frame Paya as a technology service provider operating for a synthetic licensed Partner EMI? The implemented journey is still a wallet merchant payment, as the brief requires.
+1. **Framing.** Is it acceptable to frame Rupay as a technology service provider operating for a synthetic licensed Partner EMI? The implemented journey is still a wallet merchant payment, as the brief requires.
 2. **Rail simulation.** Is a simulated Raast rail with documented assumptions (A3, A4) acceptable, given that no public Raast developer API exists?

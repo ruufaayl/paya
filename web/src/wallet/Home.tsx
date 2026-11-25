@@ -96,7 +96,7 @@ export default function HomeScreen({ user }: { user: string }) {
       {/* Conversational banking */}
       <motion.button variants={fadeUp} onClick={() => nav("/app/assistant")} className="mt-3 flex w-full items-center gap-3 rounded-lg border border-line bg-surface p-3.5 text-left shadow-e1 hover:bg-hover">
         <span aria-hidden className="grid h-10 w-10 place-items-center rounded-full bg-night text-night-fg"><Bot className="h-5 w-5" /></span>
-        <span className="min-w-0 flex-1"><span className="block text-body font-semibold text-fg">Ask Paya</span><span className="block truncate text-caption text-fg-2">"Did my payment go through?" · "mera balance kitna hai"</span></span>
+        <span className="min-w-0 flex-1"><span className="block text-body font-semibold text-fg">Ask Rupay</span><span className="block truncate text-caption text-fg-2">"Did my payment go through?" · "mera balance kitna hai"</span></span>
         <ChevronRight className="h-4 w-4 text-fg-muted" aria-hidden />
       </motion.button>
 

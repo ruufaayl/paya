@@ -1,4 +1,4 @@
-// Open a Paya wallet: consent -> details -> synthetic specimen ID -> head-turn liveness -> decision.
+// Open a Rupay wallet: consent -> details -> synthetic specimen ID -> head-turn liveness -> decision.
 // Photos are sent once for checking and are never stored, on the phone or on the server.
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Camera, Check, Clock, Fingerprint, IdCard, Lock, MapPin, RefreshCw, ScanFace, ShieldCheck, Sparkles } from "lucide-react";
@@ -14,7 +14,7 @@ interface Result { outcome: "APPROVED" | "REFERRED" | "RETRY"; message?: string;
 const DOC_PROBLEMS: Record<string, string> = {
   BLURRY: "The photo is blurry. Hold the phone still.", TOO_DARK: "It's too dark. Find more light.", TOO_BRIGHT: "It's too bright.",
   GLARE: "There's glare on the card. Tilt it away from the light.", CODE_NOT_FOUND: "We couldn't read the code on the card.",
-  NOT_A_PAYA_SPECIMEN: "That isn't a Paya specimen card.", NAME_DOES_NOT_MATCH: "The name on the card doesn't match the name you entered.",
+  NOT_A_PAYA_SPECIMEN: "That isn't a Rupay specimen card.", NAME_DOES_NOT_MATCH: "The name on the card doesn't match the name you entered.",
   DATE_OF_BIRTH_DOES_NOT_MATCH: "The date of birth on the card doesn't match.", DOCUMENT_EXPIRED: "This card has expired.",
   NO_FACE_ON_DOCUMENT: "We couldn't find a face in the card photo. Retake your photo with your face centred.",
   IMAGE_TOO_LARGE: "The photo is too large.", IMAGE_UNREADABLE: "We couldn't open that photo.",
@@ -82,7 +82,7 @@ function Intro({ onNext }: { onNext: () => void }) {
   );
   return (
     <>
-      <h1 className="mt-8 font-display text-display text-fg">Open a Paya wallet<br /><span className="text-brand-accent">in about two minutes.</span></h1>
+      <h1 className="mt-8 font-display text-display text-fg">Open a Rupay wallet<br /><span className="text-brand-accent">in about two minutes.</span></h1>
       <div className="mt-6 space-y-4 rounded-lg border border-line bg-surface p-4 shadow-e1">
         {row(IdCard, "A specimen ID card", "This prototype never asks for a real CNIC. We make you a synthetic SPECIMEN card instead.")}
         {row(ScanFace, "A quick selfie check", "Look at the camera, then turn left and right. This is a basic, demo-grade liveness check, not a certified anti-spoofing system.")}
@@ -90,8 +90,8 @@ function Intro({ onNext }: { onNext: () => void }) {
         {row(MapPin, "Your rough location", "Recorded to about 1 km, as onboarding rules require. Not tracked afterwards.")}
       </div>
       <div className="mt-5 space-y-3">
-        <Tick on={terms} set={setTerms}>I agree to the Paya prototype terms. I understand this is a demo with synthetic data and no real money.</Tick>
-        <Tick on={bio} set={setBio}>I agree to Paya processing my photos to check my identity. They will not be stored.</Tick>
+        <Tick on={terms} set={setTerms}>I agree to the Rupay prototype terms. I understand this is a demo with synthetic data and no real money.</Tick>
+        <Tick on={bio} set={setBio}>I agree to Rupay processing my photos to check my identity. They will not be stored.</Tick>
       </div>
       <div className="mt-auto pt-6"><Button size="lg" className="w-full" disabled={!terms || !bio} onClick={onNext}>Let's go <ArrowRight size={16} /></Button></div>
     </>
@@ -120,7 +120,7 @@ function Details({ form, setForm, onStarted }: { form: any; setForm: (f: any) =>
       const r = await onboard<{ onboarding_token: string; ref: string }>("/v1/onboarding/start", null,
         { ...form, username: form.username.trim().toLowerCase(), accept_terms: true, biometric_consent: true });
       onStarted(r.onboarding_token, r.ref);
-    } catch (e) { setErr(e instanceof ApiError ? e.message : "Cannot reach the Paya server."); } finally { setBusy(false); }
+    } catch (e) { setErr(e instanceof ApiError ? e.message : "Cannot reach the Rupay server."); } finally { setBusy(false); }
   };
   return (
     <>
@@ -180,7 +180,7 @@ function useCamera(facing: "user" | "environment", active: boolean) {
 
 const loadImg = (src: string) => new Promise<HTMLImageElement>((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
 
-/** Draw the specimen card on the device. Paya's own design - it does not imitate any government card. */
+/** Draw the specimen card on the device. Rupay's own design - it does not imitate any government card. */
 async function composeCard(spec: Specimen, photo: string): Promise<string> {
   const W = 1012, H = 638;
   const c = document.createElement("canvas"); c.width = W; c.height = H;
@@ -288,7 +288,7 @@ function CamMessage({ state }: { state: string }) {
         <Camera className="mx-auto mb-3 text-fg-muted" />
         {state === "idle" && "Starting camera..."}
         {state === "denied" && "Camera blocked. Allow camera access in your browser settings."}
-        {state === "unsupported" && "The camera needs HTTPS. Open Paya from its secure link."}
+        {state === "unsupported" && "The camera needs HTTPS. Open Rupay from its secure link."}
       </div>
     </div>
   );
@@ -411,7 +411,7 @@ function ResultStep({ result, appRef, token, form, onDone, onRetake }: { result:
       <p className="mt-2 max-w-xs text-sm text-fg-2">Tier 1 wallet for {form.full_name}. Demo mode adds Rs 5,000 of synthetic credit so you can try a payment.</p>
       <p className="mt-3 font-mono text-[11px] text-fg-muted">{appRef}</p>
       {err && <p className="mt-4 text-sm text-danger">{err}</p>}
-      <div className="mt-auto w-full pt-6"><Button size="lg" className="w-full" disabled={busy} onClick={enter}>{busy ? <Spinner /> : <><Sparkles size={16} /> Start using Paya</>}</Button></div>
+      <div className="mt-auto w-full pt-6"><Button size="lg" className="w-full" disabled={busy} onClick={enter}>{busy ? <Spinner /> : <><Sparkles size={16} /> Start using Rupay</>}</Button></div>
     </div>
   );
   if (state === "REJECTED") return (

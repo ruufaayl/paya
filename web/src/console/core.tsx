@@ -11,7 +11,7 @@ import { liveLink, msgId, type StreamMsg } from "../lib/stream";
 // ------------------------------------------------------------------ operator
 export const STAFF = [
   { username: "mudaser.ops", name: "Mudaser Waleed", role: "OPS", title: "Operations" },
-  { username: "faisal.ops", name: "Faisal", role: "OPS", title: "Operations" },
+  { username: "ateeq.ops", name: "Ateeq Riaz", role: "OPS", title: "Operations" },
   { username: "kanz.compliance", name: "Kanz ur Rehman", role: "COMPLIANCE", title: "Compliance" },
   { username: "harris.compliance", name: "Harris Safi", role: "COMPLIANCE", title: "Compliance (2nd officer)" },
   { username: "rufayl.finance", name: "Rufayl Waseem", role: "FINANCE", title: "Finance & reconciliation" },
@@ -102,7 +102,7 @@ export function StreamProvider({ as, children }: { as: string; children: ReactNo
 
 // ------------------------------------------------------------------ page frame & guards
 export function Page({ title, description, actions, children, wide }: { title: string; description?: ReactNode; actions?: ReactNode; children: ReactNode; wide?: boolean }) {
-  useEffect(() => { document.title = `${title} · Paya Mission Control`; }, [title]);
+  useEffect(() => { document.title = `${title} · Rupay Mission Control`; }, [title]);
   return (
     <div className={wide ? "px-6 py-5" : "mx-auto max-w-[1440px] px-6 py-5"}>
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">

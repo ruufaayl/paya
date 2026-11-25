@@ -32,7 +32,7 @@ export default function SignIn({ onSignedIn, notice }: { onSignedIn: (u: string)
   const go = async (u: string, pw = DEMO_PASSWORD) => {
     setBusy(u); setErr(null);
     try { await login(u, pw); onSignedIn(u); }
-    catch (e) { setErr(e instanceof ApiError ? e.message : "Cannot reach the Paya server. Check the server address below."); }
+    catch (e) { setErr(e instanceof ApiError ? e.message : "Cannot reach the Rupay server. Check the server address below."); }
     finally { setBusy(null); }
   };
 
@@ -41,11 +41,11 @@ export default function SignIn({ onSignedIn, notice }: { onSignedIn: (u: string)
       <div className="safe-top mx-auto max-w-[480px] px-5 pb-10">
         <div className="pt-4"><Logo size={30} /></div>
         <motion.div variants={stagger(0.05)} initial="hidden" animate="show">
-          <motion.h1 variants={fadeUp} className="mt-10 font-display text-display text-fg">Payment, <span className="text-brand-accent">pakka.</span></motion.h1>
+          <motion.h1 variants={fadeUp} className="mt-10 font-display text-display text-fg">Dedo <span className="text-brand-accent">mujhay!</span></motion.h1>
           <motion.p variants={fadeUp} className="mt-2 text-body text-fg-2">A wallet where "paid" means the ledger and Raast both agree.</motion.p>
 
           <motion.div variants={fadeUp} className="mt-6">
-            <Button size="lg" block icon={<UserPlus className="h-5 w-5" />} onClick={() => nav("/app/open")}>Open a new Paya wallet</Button>
+            <Button size="lg" block icon={<UserPlus className="h-5 w-5" />} onClick={() => nav("/app/open")}>Open a new Rupay wallet</Button>
           </motion.div>
 
           <motion.form variants={fadeUp} className="mt-6 space-y-3" onSubmit={(e) => { e.preventDefault(); go(form.username.trim().toLowerCase(), form.password); }}>

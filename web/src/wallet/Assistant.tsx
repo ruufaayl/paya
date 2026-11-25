@@ -1,4 +1,4 @@
-// Paya Assistant: conversational banking that answers from the customer's own ledger. It cannot move money:
+// Rupay Assistant: conversational banking that answers from the customer's own ledger. It cannot move money:
 // action cards only link into the normal, confirmed flows. Replies and cards come from the server.
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Bot, Info, SendHorizontal, ShieldCheck } from "lucide-react";
@@ -49,7 +49,7 @@ export default function Assistant({ user }: { user: string }) {
         <IconButton label="Back" onClick={() => nav("/app")}><ArrowLeft className="h-5 w-5" /></IconButton>
         <span aria-hidden className="grid h-9 w-9 place-items-center rounded-full bg-night text-night-fg"><Bot className="h-5 w-5" /></span>
         <div className="min-w-0 flex-1">
-          <h1 className="text-title-3 text-fg">Paya Assistant</h1>
+          <h1 className="text-title-3 text-fg">Rupay Assistant</h1>
           <p className="truncate text-caption text-fg-2">Answers from your wallet's ledger · can't move money</p>
         </div>
       </header>
@@ -97,10 +97,10 @@ export default function Assistant({ user }: { user: string }) {
           <label htmlFor="chat-input" className="sr-only">Message the assistant</label>
           <textarea id="chat-input" rows={1} value={text} maxLength={500} onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(text); } }}
-            placeholder="Ask Paya…" className="max-h-28 min-h-[44px] flex-1 resize-none rounded-md border border-line-control bg-canvas px-3 py-2.5 text-body text-fg outline-none placeholder:text-fg-muted focus:border-focus" />
+            placeholder="Ask Rupay…" className="max-h-28 min-h-[44px] flex-1 resize-none rounded-md border border-line-control bg-canvas px-3 py-2.5 text-body text-fg outline-none placeholder:text-fg-muted focus:border-focus" />
           <button type="submit" disabled={!text.trim() || busy} aria-label="Send" className="grid h-11 w-11 shrink-0 place-items-center rounded-md bg-brand text-brand-fg disabled:opacity-40"><SendHorizontal className="h-5 w-5" /></button>
         </form>
-        <p className="py-1.5 text-center text-[11.5px] text-fg-muted">Never share your PIN, OTP or password. Paya will never ask for them.</p>
+        <p className="py-1.5 text-center text-[11.5px] text-fg-muted">Never share your PIN, OTP or password. Rupay will never ask for them.</p>
       </div>
     </div>
   );

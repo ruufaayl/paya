@@ -25,7 +25,7 @@
 | Top residual risks? | Tokens in browser storage (XSS could read one, but it can be revoked at once, ADR-017); unsigned rail callbacks in the mock (T-05); a stolen *owner* DB credential (the app role cannot disable triggers, ADR-015); no MFA recovery codes |
 | What did the dependency audit find? | Vulnerable Starlette (upgraded FastAPI 0.115 → 0.165), react-router highs (6.30.6), pytest (9.0.3). Two moderate react-router advisories are mitigated by UUID-only QR routing |
 
-## Theme 1 and Paya 2.0 additions (also yours)
+## Theme 1 and Rupay 2.0 additions (also yours)
 
 - **Digital onboarding and KYC (Theme 1):** `src/paya/kyc.py`, `kyc_engines.py`, `registry.py`, ADR-010, doc 16, tests K1–K15. Know: machines approve only clear cases, people reject; the two-person rule (service check + DB `CHECK`); no images or face templates stored (K9); licences of YuNet (MIT) and SFace (Apache 2.0).
 - **Operator identity in Mission Control:** every action runs as the signed-in staff member; `/v1/me` returns permissions for display only, and the server enforces them. New permissions: `cases:assign`, `access:read`, `assistant:use`.

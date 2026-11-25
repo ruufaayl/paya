@@ -25,7 +25,7 @@
 | What happens if the server dies between commit and the rail call? | The payment is PENDING with `rail_attempts = 0`. The worker's `dispatch_undispatched` claims and sends it (`test_s9_*`, drill D1) |
 | What would break if you removed the deferred balance trigger? | The app also checks balance in `ledger.post`, but manual SQL or a future bug could then insert one-sided entries. The DB guard is defence in depth |
 
-## Paya 2.0 additions (also yours)
+## Rupay 2.0 additions (also yours)
 
 - **Authoritative payment screens:** `web/src/wallet/Txn.tsx` and `Review.tsx`. The headline comes only from the server status; the idempotency key is kept per payment request in `sessionStorage`, so a reload or retry cannot charge twice.
 - **Customer money trail:** the `money_trail` and `rail_status` fields added to `GET /v1/transactions/{ref}` (`api/main.py`). They are derived from journals, not computed in the browser.

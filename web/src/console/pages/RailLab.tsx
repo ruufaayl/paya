@@ -9,7 +9,7 @@ import { call, newIdempotencyKey } from "../../lib/api";
 import { ago, useAction, useApi } from "../../lib/hooks";
 import { Page, Restricted, useCan, useInspector, useOperator } from "../core";
 
-/** What Paya is designed to do in each scenario (ADR-005/006/007; test ids from tests/test_scenarios.py). */
+/** What Rupay is designed to do in each scenario (ADR-005/006/007; test ids from tests/test_scenarios.py). */
 const EXPECT: Record<string, { label: string; tone: "success" | "warning" | "danger"; expect: string; recover: string; test: string }> = {
   NORMAL: { label: "Healthy", tone: "success", expect: "Rail accepts and acknowledges. Payment goes PENDING → SETTLED in about a second.", recover: "Nothing to recover.", test: "S1" },
   TIMEOUT_AFTER_ACCEPT: { label: "Lost reply", tone: "warning", expect: "Our call times out but the rail did pay. Status stays PENDING (never failed, never refunded).", recover: "Recovery agent asks the rail (5 s backoff) and settles exactly once.", test: "S4" },
@@ -85,7 +85,7 @@ function Inner() {
           <SectionHeader level={3} title="2. Expected behaviour" description={`Covered by automated test ${ex?.test}`} />
           {ex && <div className="mt-3 space-y-3 text-body-sm">
             <div><p className="text-overline uppercase text-fg-muted">What happens</p><p className="text-fg">{ex.expect}</p></div>
-            <div><p className="text-overline uppercase text-fg-muted">How Paya recovers</p><p className="text-fg">{ex.recover}</p></div>
+            <div><p className="text-overline uppercase text-fg-muted">How Rupay recovers</p><p className="text-fg">{ex.recover}</p></div>
           </div>}
           <div className="mt-4 flex flex-wrap gap-2 border-t border-line pt-4">
             <Button disabled={!can("chaos:control") || mode === pick} loading={apply.isPending} icon={<Beaker className="h-4 w-4" />} onClick={() => apply.mutate(pick)}>Apply scenario</Button>
@@ -130,7 +130,7 @@ function Inner() {
         </Card>
         <Card className="p-4">
           <SectionHeader level={3} title="Why this matters" />
-          <p className="mt-2 text-body-sm text-fg-2"><Siren className="mr-1 inline h-4 w-4 text-warning" aria-hidden />A timeout is an unknown outcome. Refunding on timeout is how a customer and a merchant both end up paid. Paya holds the payment as PENDING and asks the rail instead (ADR-006).</p>
+          <p className="mt-2 text-body-sm text-fg-2"><Siren className="mr-1 inline h-4 w-4 text-warning" aria-hidden />A timeout is an unknown outcome. Refunding on timeout is how a customer and a merchant both end up paid. Rupay holds the payment as PENDING and asks the rail instead (ADR-006).</p>
         </Card>
       </div>
     </Page>

@@ -1,4 +1,4 @@
-// One status language for every Paya screen. Tone is never the only signal: every state also has an
+// One status language for every Rupay screen. Tone is never the only signal: every state also has an
 // icon and a word. Green ("success") is reserved for outcomes the ledger has CONFIRMED (settled, reconciled,
 // verified). A payment the rail has merely accepted is still "processing" (blue).
 import {

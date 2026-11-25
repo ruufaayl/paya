@@ -1,4 +1,4 @@
-"""What the migrations describe: every table Paya owns, across the four schemas."""
+"""What the migrations describe: every table Rupay owns, across the four schemas."""
 from paya import models  # noqa: F401  (register tables)
 from paya.chain import ChainBase
 from paya.db import Base

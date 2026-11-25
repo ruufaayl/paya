@@ -13,13 +13,13 @@ Week 3 says that "lane design is an organisational design decision":
 | Pool / lane | Who or what is accountable | Kind of work |
 |---|---|---|
 | Customer (collapsed pool) | Wallet holder | Sends the pay message, receives "Paid" |
-| Paya → Digital channel & gateway | Paya platform | Validation, idempotency |
-| Paya → Risk engine (automated) | Rules owned by Compliance, executed by the system | Business-rule task |
-| Paya → **Compliance officer** | Human | Reviews held payments with the evidence |
-| Paya → Ledger & rail integration (automated) | Paya platform | Postings, send to rail, wait for the rail's answer |
-| Paya → Recovery worker (automated) | Paya platform | Timer, status enquiry, safe resend |
-| Paya → **Operations (maker)** | Human | Requests reversal; owns breaks that are missing on the Raast side |
-| Paya → **Finance (checker & reconciliation)** | Human | Approves reversal; reconciles; owns breaks that involve money mismatches |
+| Rupay → Digital channel & gateway | Rupay platform | Validation, idempotency |
+| Rupay → Risk engine (automated) | Rules owned by Compliance, executed by the system | Business-rule task |
+| Rupay → **Compliance officer** | Human | Reviews held payments with the evidence |
+| Rupay → Ledger & rail integration (automated) | Rupay platform | Postings, send to rail, wait for the rail's answer |
+| Rupay → Recovery worker (automated) | Rupay platform | Timer, status enquiry, safe resend |
+| Rupay → **Operations (maker)** | Human | Requests reversal; owns breaks that are missing on the Raast side |
+| Rupay → **Finance (checker & reconciliation)** | Human | Approves reversal; reconciles; owns breaks that involve money mismatches |
 | Raast P2M rail (collapsed pool) | External, simulated | Message flows only (no sequence flow crosses pools) |
 
 ## Exception paths modelled (none are silently ignored)

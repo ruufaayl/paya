@@ -1,14 +1,14 @@
 ---
-title: "Paya: Architecture and Design Dossier"
+title: "Rupay: Architecture and Design Dossier"
 subtitle: "CS3017 Enterprise Systems & Applications · Fall 2026 · Raast P2M merchant payment with ledger-grade assurance"
-author: "Rufayl Waseem (24i-5660) · Taha Ali (24i-5525) · Harris Safi (24i-5652) · Kanz ur Rehman (24i-5544) · Mudaser Waleed (24i-5681)"
+author: "Rufayl Waseem (24i-5660) · Taha Ali (24i-5525) · Harris Safi (24i-5652) · Kanz ur Rehman (24i-5544) · Mudaser Waleed (24i-5681) · Ateeq Riaz (roll no. to add)"
 ---
 
 ## 1. Executive summary
 
-Pakistan's instant payment system has crossed into everyday commerce. SBP's annual reports show Raast person-to-merchant payments growing from 4.9 million to about 180 million transactions in a year. Yet the moment of truth at a shop counter is still often a cashier glancing at a customer's phone. **Paya** is a payment-assurance platform for that moment. The cashier sees *PAID* only when the rail has confirmed and a double-entry ledger has posted settlement. Every exception that follows (timeouts, duplicates, rejections, missing settlement lines) becomes owned, evidenced work rather than a spreadsheet.
+Pakistan's instant payment system has crossed into everyday commerce. SBP's annual reports show Raast person-to-merchant payments growing from 4.9 million to about 180 million transactions in a year. Yet the moment of truth at a shop counter is still often a cashier glancing at a customer's phone. **Rupay** is a payment-assurance platform for that moment. The cashier sees *PAID* only when the rail has confirmed and a double-entry ledger has posted settlement. Every exception that follows (timeouts, duplicates, rejections, missing settlement lines) becomes owned, evidenced work rather than a spreadsheet.
 
-Paya is designed as a **technology service provider** to a licensed partner EMI, which is synthetic in this prototype. It never holds funds or claims a licence. The implemented journey is the brief's *merchant payment* with its linked *reversal*. It runs from channel to gateway, then identity and AML controls, ledger, rail, posting, settlement, reconciliation, notification and finance reporting.
+Rupay is designed as a **technology service provider** to a licensed partner EMI, which is synthetic in this prototype. It never holds funds or claims a licence. The implemented journey is the brief's *merchant payment* with its linked *reversal*. It runs from channel to gateway, then identity and AML controls, ledger, rail, posting, settlement, reconciliation, notification and finance reporting.
 
 The prototype runs locally with one command. It is covered by 150 automated backend tests (the ten required scenarios plus concurrency, security, AI, migration and theme tests, all run as a data-only database role), by browser acceptance runs, and by GitHub Actions continuous integration. It has been measured:
 
@@ -34,9 +34,9 @@ Week 9's lecture is blunt about the consequence: *"a user-facing success screen 
 
 1. The cashier creates a dynamic QR for an order.
 2. The customer scans it and slides to pay.
-3. Paya validates the request and its idempotency key, screens it against KYC tier limits, velocity and a synthetic watch-list, reserves the funds, and posts a balanced journal that moves the money from the customer's wallet into *payments in transit*.
-4. Paya sends the credit to the Raast rail with a unique end-to-end (E2E) identifier.
-5. When the rail confirms, Paya posts settlement and the merchant fee, the till shows *PAID* and speaks the amount, and both parties are notified.
+3. Rupay validates the request and its idempotency key, screens it against KYC tier limits, velocity and a synthetic watch-list, reserves the funds, and posts a balanced journal that moves the money from the customer's wallet into *payments in transit*.
+4. Rupay sends the credit to the Raast rail with a unique end-to-end (E2E) identifier.
+5. When the rail confirms, Rupay posts settlement and the merchant fee, the till shows *PAID* and speaks the amount, and both parties are notified.
 6. The next day, Finance imports the rail's settlement file and reconciles it against the ledger.
 
 **Scope.** In scope:
@@ -328,7 +328,7 @@ The report names the main error: an omission that settled near cut-off looks lik
 
 ## 11. Product experience and thematic extensions
 
-**Paya 2.0.** A product review found that the first interface used one neon green for everything, so "rail accepted" looked the same as "settled". The console also hid who was acting. Both surfaces were rebuilt on one design system:
+**Rupay 2.0.** A product review found that the first interface used one neon green for everything, so "rail accepted" looked the same as "settled". The console also hid who was acting. Both surfaces were rebuilt on one design system:
 
 - a light, calm wallet and a dark, dense console, built from shared tokens;
 - self-hosted fonts, so the PWA works offline;
@@ -348,13 +348,13 @@ The payment result is driven only by server status. A browser test samples the s
 
 Machines approve only when every check passes; **only people reject**. An unanswered registry call or a missing model becomes a referral, never a decision. Approving a possible sanctions match needs two different compliance officers, enforced by the service and by a database constraint. The applicant is never told that screening caused a referral. Photos and face templates exist only in memory for one request: a test scans every column of the database for image data.
 
-**Theme 3: conversational banking (ADR-011).** The Paya Assistant answers questions about the customer's own wallet in English and Roman Urdu, from the ledger: balance, recent payments, a payment's status and why, limits, and verification. It is deliberately deterministic and read-only. It imports no payment or posting function (a test reads its source), so "send money" or "refund me" returns an explanation and a link into the normal review-and-authorise flow. Card numbers, CNIC-like numbers, IBANs and OTPs are redacted before a message is classified or stored. "Talk to a person" opens an owned support case, and staff reads of a transcript are audited.
+**Theme 3: conversational banking (ADR-011).** The Rupay Assistant answers questions about the customer's own wallet in English and Roman Urdu, from the ledger: balance, recent payments, a payment's status and why, limits, and verification. It is deliberately deterministic and read-only. It imports no payment or posting function (a test reads its source), so "send money" or "refund me" returns an explanation and a link into the normal review-and-authorise flow. Card numbers, CNIC-like numbers, IBANs and OTPs are redacted before a message is classified or stored. "Talk to a person" opens an owned support case, and staff reads of a transcript are audited.
 
 **Theme 2: sustainable and green banking (ADR-012).** The wallet shows a spend-based *estimate* of the carbon linked to the customer's settled payments, with its range, method and factor version (`green.v1`, illustrative). A green pot ring-fences the customer's own money on chart account 2110: each move is one balanced journal against their wallet (2100), under the payment's own row lock, balance checks and idempotency key, and round-ups are capped at what settled payments earned. An offset is an ordinary Raast payment to a synthetic project, so screening, recovery and reconciliation apply unchanged; its certificate exists only after settlement and says no real credit is retired. Staff see aggregates only, and two integrity checks were added.
 
-**Theme 4: the super app (ADR-013).** A Services tab adds bills, mobile top-up, a marketplace with a merchant-funded offer, and monthly micro-takaful from synthetic partners. A partner is just a merchant: checkout creates a server-priced payment request that the customer authorises on the normal review screen, so there is no new money path (a test reads the module's source). Order status ("bill paid", "cover active") is read from that payment, so it cannot run ahead of the ledger. A bill can be paid only once; partners receive only consented fields, recorded on the order and integrity-checked; Compliance can suspend a partner (audited). Investments are not offered.
+**Theme 4: the super app (ADR-013).** A Services tab adds bills, mobile top-up, a marketplace with a merchant-funded offer, and monthly micro-takaful from synthetic partners. A partner is just a merchant: checkout creates a server-priced payment request that the customer authorises on the normal review screen, so there is no new money path (a test reads the module's source). Order status ("bill paid", "cover active") is read from that payment, so it cannot run ahead of the ledger. A bill can be paid only once; partners receive only consented fields, recorded on the order and integrity-checked; Compliance can suspend a partner (audited). Investments are not offered. **Send to a bank (ADR-018)** reuses the same money path; the account-name lookup is a simulated directory of synthetic people, and only a masked number is kept.
 
-**Theme 5: stablecoin sandbox (ADR-014).** PVARA/SBP rules do not permit stablecoin payments for Paya, so this prototype is **off unless a server flag is set**. Verified customers who acknowledge the tokens are worthless get faucet test tokens on a simulated chain (mempool, blocks, reorgs, outages). Transfers are screened, limited, travel-rule-checked and idempotent; they count only at three confirmations and are reconciled against the chain. No token movement can reach the rupee ledger (an integrity check). Savings are not built: yield is not an EMI product.
+**Theme 5: stablecoin sandbox (ADR-014).** PVARA/SBP rules do not permit stablecoin payments for Rupay, so this prototype is **off unless a server flag is set**. Verified customers who acknowledge the tokens are worthless get faucet test tokens on a simulated chain (mempool, blocks, reorgs, outages). Transfers are screened, limited, travel-rule-checked and idempotent; they count only at three confirmations and are reconciled against the chain. No token movement can reach the rupee ledger (an integrity check). Savings are not built: yield is not an EMI product.
 
 All five themes reuse the integrity core: cases, roles, the ledger, the audit chain and the live stream. Themes 1 and 3 move no money; Themes 2 and 4 move it only through the ledger's existing controls and the one payment path; Theme 5 moves only worthless test tokens and is off by default. They add controls, not exceptions to them.
 
@@ -370,7 +370,7 @@ All five themes reuse the integrity core: cases, roles, the ledger, the audit ch
 - the assistant understands a fixed set of intents only;
 - the evidence is synthetic, including the core user problem (A1).
 
-**Reflection.** What the project demonstrates most strongly is the course's central claim: enterprise systems are operating-model architectures. Paya's value is not in any single screen. It is in decisions that connect process, data and control:
+**Reflection.** What the project demonstrates most strongly is the course's central claim: enterprise systems are operating-model architectures. Rupay's value is not in any single screen. It is in decisions that connect process, data and control:
 
 - what counts as paid;
 - who owns a break;
@@ -408,7 +408,7 @@ Met since the review: separate database roles (ADR-015), rate limiting (ADR-016)
 
 - Gate pack: `docs/architecture/00-gate-pack.md`
 - Design documents 01–17: `docs/architecture/` (16 onboarding and KYC, 17 conversational banking)
-- Paya 2.0 product, design system, UX, accessibility and testing: `docs/revamp/`
+- Rupay 2.0 product, design system, UX, accessibility and testing: `docs/revamp/`
 - ADRs: `docs/architecture/adr/`
 - API contract and collection: `api/`
 - Evidence pack: `evidence/README.md`
