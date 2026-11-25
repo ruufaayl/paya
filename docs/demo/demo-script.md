@@ -99,6 +99,14 @@
 | (Only if the server was started with `PAYA_STABLECOIN_SANDBOX=true`) Phone: **Services** → **Stablecoin sandbox** → join → **Get test tokens**; Mission Control → **Stablecoin sandbox** → **reorg** | "Stablecoin payments aren't permitted for us, so this is a switched-off sandbox with worthless test tokens. The point is the engineering: it counts only at three confirmations, a reorg can't fool it, and it's reconciled against the chain. Nothing touches the rupee ledger." | 0/3 → 3/3 confirmations; orphaned block; reconciliation *matched* |
 | (If time) Phone (Sara): **Services** → Indus Power → any 10-digit number → **Pay** → slide | "The super app adds bills, top-up, shopping and takaful, but no new money path: it's the same review, ledger and Raast. The order says *Bill paid* only after settlement, and the same bill can't be paid twice." | My orders: **Done · Bill paid to the biller** |
 
+### Scene 6b: send money to a bank (Speaker F, about 1 minute, if time allows)
+
+| Do | Say | See |
+|---|---|---|
+| Phone (Sara): **Send to a bank** → **Meezan Bank** → type `12345678901234` → **Fetch account title** | "We never look up real accounts. The name lookup is a simulated bank directory, so a real-looking number is simply not found, and nothing is kept." | "No account with this number in the simulated bank directory" |
+| Tap the demo account **99010012345678** | "Before any money moves, you see who you're paying." | **AHMED RAZA**, Meezan Bank •••• 5678 |
+| **2,500** → slide to send | "Same money path as a shop payment: checks, hold, ledger, Raast. No shop fee, and only the masked number is stored." | **Paid** to AHMED RAZA; Mission Control shows the transfer |
+
 ### 9:30 – 10:30 · Evidence and decision (Speaker B)
 
 *Show:* Mission Control **Audit & access** (as Auditor: chain intact, denials listed), then `docs/revamp/TESTING_REPORT.md`.

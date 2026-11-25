@@ -1,4 +1,4 @@
-// Paya 2.0 acceptance run: drives the redesigned wallet and Mission Control against the real backend.
+// Rupay 2.0 acceptance run: drives the redesigned wallet and Mission Control against the real backend.
 // Requires: API on :8000 (fresh database, face models installed) and the web app on :5173 (or PAYA_WEB).
 //   node docs/revamp/tools/revamp_e2e.cjs
 // Every check asserts a backend fact, not just something on screen. Screenshots go to evidence/screenshots/revamp/.
@@ -72,8 +72,8 @@ async function switchOp(p, name) { await p.keyboard.press("Escape"); await p.key
 
 async function onboard(p, who) {
   await p.goto(`${WEB}/app/open`); await p.waitForTimeout(500);
-  await p.getByText("I agree to the Paya prototype terms").click();
-  await p.getByText("I agree to Paya processing my photos").click();
+  await p.getByText("I agree to the Rupay prototype terms").click();
+  await p.getByText("I agree to Rupay processing my photos").click();
   await p.getByRole("button", { name: /Let's go/ }).click();
   await p.getByLabel("Full name").fill(who.name); await p.getByLabel("Date of birth").fill(who.dob);
   await p.getByLabel("Mobile").fill("0300 5550199"); await p.getByLabel("Username").fill(who.username); await p.getByLabel("Password").fill("demo-password-2026");
@@ -107,7 +107,7 @@ async function onboard(p, who) {
   const t1 = await onboard(a, { name: "Hira Qureshi", dob: "1999-05-02", username: uname });
   check("onboarding: clean applicant auto-approved", /wallet is open/i.test(t1));
   await a.screenshot({ path: `${OUT}/wallet-onboarding-approved.png` });
-  await a.getByRole("button", { name: /Start using Paya/ }).click(); await a.waitForTimeout(2000);
+  await a.getByRole("button", { name: /Start using Rupay/ }).click(); await a.waitForTimeout(2000);
   const body = await a.locator("body").innerText();
   check("wallet activation: new wallet shows synthetic Rs 5,000 from the ledger", /Rs 5,000/.test(body));
 

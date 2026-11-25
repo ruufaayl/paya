@@ -136,6 +136,8 @@ The live database is shared and is not reset between demos. That is fine: the le
 | **Ask Rupay** → "mera balance kitna hai", then "send 500 to Ali" | "Roman Urdu, answered from the ledger. It can't move money, however you ask." | Balance card; refusal |
 | Mission Control: **Green banking**, **Partners & services**, **Stablecoin sandbox** | "Staff see aggregates only, can switch off a partner, and the stablecoin sandbox is off on this server by design." | Aggregates; kill switch; "Switched off on this server" |
 
+**Send to a bank (Speaker F, Ateeq):** Home → **Send to a bank** → pick a bank → tap a demo account (for example Meezan `99010012345678`, AHMED RAZA) → the account title appears → **2,500** → slide to send → **Paid**. Say: "The name lookup is a simulated directory of synthetic people; a real number is not found and nothing is kept. The transfer uses the same checks, ledger and Raast path as a shop payment." Demo accounts: Meezan 99010012345678 (Ahmed Raza), HBL 99020045678912 (Fatima Noor), UBL 99030078912345 (Usman Tariq), MCB 99040011223344 (Ayesha Siddiqui), Alfalah 99050055667788 (Hamid Ali Khan), JazzCash 99060099887766 (Sana Iqbal), Easypaisa 99070033445566 (Bilal Mehmood), NayaPay 99080077665544 (Mariam Yousaf). Any number starting with 99 also works.
+
 ### 12:30–13:45 · Digital onboarding with two officers (Speaker D)
 
 | Do | Say | See |

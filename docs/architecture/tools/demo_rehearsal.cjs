@@ -1,4 +1,4 @@
-// Automated rehearsal of the Paya 2.0 technical demo (docs/demo/demo-script.md).
+// Automated rehearsal of the Rupay 2.0 technical demo (docs/demo/demo-script.md).
 // Two emulated iPhones (Ayesha's till, a customer wallet) and Mission Control, driven through every scene in
 // order, against the real backend. Each claim the presenter makes is asserted against the API, each scene is
 // timed, and a screenshot is saved per scene.
@@ -67,6 +67,7 @@ const FAKE_CAMERA = () => {
   const wctx = await browser.newContext({ ...devices["iPhone 13"], permissions: ["geolocation", "camera"], geolocation: { latitude: 31.5204, longitude: 74.3587, accuracy: 40 } });
   await wctx.addInitScript(FAKE_CAMERA);
   const phone = await wctx.newPage(); watch(phone, "wallet");
+  let sp;   // a second phone for the bank-transfer scene
   await api("/v1/chaos/rail", { as: "admin", method: "POST", body: { mode: "NORMAL" } });
 
   const actAs = async (name) => {
@@ -206,11 +207,11 @@ const FAKE_CAMERA = () => {
     check("same settlement file refused", /File already imported|already/i.test(await mc.locator("body").innerText()));
   });
 
-  await scene("6. New themes: onboarding referral → two-person approval; Paya Assistant", () => phone.screenshot({ path: `${OUT}/scene-6-assistant.png` }), async (check) => {
+  await scene("6. New themes: onboarding referral → two-person approval; Rupay Assistant", () => phone.screenshot({ path: `${OUT}/scene-6-assistant.png` }), async (check) => {
     await phone.goto(`${WEB}/app/account`); await sleep(700);
     await phone.getByRole("button", { name: "Sign out" }).click(); await sleep(600);
     await phone.goto(`${WEB}/app/open`); await sleep(500);
-    await phone.getByText("I agree to the Paya prototype terms").click(); await phone.getByText("I agree to Paya processing my photos").click();
+    await phone.getByText("I agree to the Rupay prototype terms").click(); await phone.getByText("I agree to Rupay processing my photos").click();
     await phone.getByRole("button", { name: /Let's go/ }).click();
     const uname = `zarak.k${Date.now() % 100000}`;
     await phone.getByLabel("Full name").fill("Zarak Khanzad"); await phone.getByLabel("Date of birth").fill("1990-02-14");
@@ -244,11 +245,31 @@ const FAKE_CAMERA = () => {
     await approve(/Confirm approval/);
     check("second officer approves", (await api(`/v1/kyc/applications/${app.ref}`)).data.state === "APPROVED");
     check("phone flips to 'wallet is open'", await phone.getByText(/wallet is open/i).waitFor({ timeout: 15000 }).then(() => true).catch(() => false));
-    await phone.getByRole("button", { name: /Start using Paya/ }).click(); await sleep(1500);
+    await phone.getByRole("button", { name: /Start using Rupay/ }).click(); await sleep(1500);
     await phone.goto(`${WEB}/app/assistant`); await sleep(600);
     const ask = async (q) => { await phone.getByLabel("Message the assistant").fill(q); await phone.keyboard.press("Enter"); await sleep(1400); return phone.locator('[role="log"]').innerText(); };
     check("Roman Urdu balance question answered from the ledger", /Rs 5,000 available/.test(await ask("mera balance kitna hai")));
     check("assistant cannot move money", /can't send money from chat/i.test(await ask("send 500 to Ali")));
+  });
+
+  await scene("6b. Send money to a bank: account title from the simulated directory, then settled on the one money path", () => sp.screenshot({ path: `${OUT}/scene-6b-bank-transfer.png` }), async (check) => {
+    sp = await (await browser.newContext({ ...devices["iPhone 13"] })).newPage(); watch(sp, "send");
+    await sp.goto(`${WEB}/app`); await sp.evaluate(() => localStorage.clear()); await sp.goto(`${WEB}/app`);
+    await sp.getByText("Sara Ahmed", { exact: true }).click(); await sleep(1200);
+    await sp.getByRole("button", { name: /Send to a bank/ }).click(); await sleep(800);
+    await sp.getByRole("button", { name: /Meezan Bank/ }).first().click(); await sleep(400);
+    await sp.getByLabel(/Account number or IBAN/).fill("12345678901234"); await sp.getByRole("button", { name: "Fetch account title" }).click(); await sleep(900);
+    check("a real-looking account is not found (nothing real is looked up)", /simulated bank directory/.test(await sp.locator("body").innerText()));
+    await sp.getByRole("button", { name: /99010012345678/ }).click(); await sleep(1200);
+    check("account title shown before sending", /AHMED RAZA/.test(await sp.locator("body").innerText()));
+    await sp.getByRole("button", { name: "2,500" }).click();
+    await sp.getByRole("slider").focus(); await sp.keyboard.press("Enter");
+    await sp.waitForURL(/\/app\/txn\//, { timeout: 15000 });
+    const ref = sp.url().split("/").pop();
+    check("transfer settles", await waitFor(async () => ["SETTLED", "RECONCILED"].includes(await status(ref))), ref);
+    const tx = (await api(`/v1/transactions/${ref}`)).data;
+    check("same money path, no shop fee", tx.type === "TRANSFER" && tx.ledger.map((j) => j.posting_type).join(",") === "AUTH_POST,SETTLE");
+    await sp.locator("h1", { hasText: "Paid" }).waitFor({ timeout: 10000 }).catch(() => {}); await sleep(600);
   });
 
   await scene("7. Evidence: audit chain intact, denials visible (as Auditor)", () => mc.screenshot({ path: `${OUT}/scene-7-audit.png` }), async (check) => {
@@ -265,7 +286,7 @@ const FAKE_CAMERA = () => {
   const total = scenes.reduce((a, s) => a + s.seconds, 0);
   const ok = scenes.every((s) => s.checks.every((c) => c.ok)) && pageErrors.length === 0;
   const date = new Date().toISOString().slice(0, 10);
-  const md = [`# Demo rehearsal (Paya 2.0), ${date}`, "",
+  const md = [`# Demo rehearsal (Rupay 2.0), ${date}`, "",
     `**Result: ${ok ? "PASS" : "FAIL"}** · ${scenes.reduce((a, s) => a + s.checks.length, 0)} checks · automated run time ${total.toFixed(0)} s (the live demo adds narration; script target about 10 min) · page errors: ${pageErrors.length}`, "",
     "Generated by `docs/architecture/tools/demo_rehearsal.cjs` against the real stack on fresh synthetic data. Screenshots: `scene-*.png`.", "",
     ...scenes.flatMap((s) => [`## ${s.name} (${s.seconds.toFixed(1)} s)`, "", ...s.checks.map((c) => `- ${c.ok ? "PASS" : "**FAIL**"} ${c.label}${c.note ? ` (${c.note})` : ""}`), ""]),

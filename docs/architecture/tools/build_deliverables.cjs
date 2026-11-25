@@ -31,7 +31,7 @@ const docs = [
     const pdf = path.join(DIST, `${base}.pdf`);
     await page.pdf({ path: pdf, format: 'A4', printBackground: true, preferCSSPageSize: true,
       displayHeaderFooter: true, headerTemplate: '<span></span>',
-      footerTemplate: `<div style="font-size:7pt;color:#6b7280;width:100%;padding:0 15mm;display:flex;justify-content:space-between"><span>Paya - ${base.replace(/-/g, ' ')}</span><span><span class="pageNumber"></span>/<span class="totalPages"></span></span></div>` });
+      footerTemplate: `<div style="font-size:7pt;color:#6b7280;width:100%;padding:0 15mm;display:flex;justify-content:space-between"><span>Rupay - ${base.replace(/-/g, ' ')}</span><span><span class="pageNumber"></span>/<span class="totalPages"></span></span></div>` });
     const pages = (fs.readFileSync(pdf, 'latin1').match(/\/Type\s*\/Page[^s]/g) || []).length;
     let words = '';
     if (d.cls === 'dossier') {

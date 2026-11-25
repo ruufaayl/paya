@@ -1,4 +1,4 @@
-// Theme 1 browser run for Paya 2.0: digital onboarding with the REAL face models (YuNet + SFace) in an emulated
+// Theme 1 browser run for Rupay 2.0: digital onboarding with the REAL face models (YuNet + SFace) in an emulated
 // iPhone, then the two-person rule in Mission Control. The phone's camera is a canvas drawing an entirely
 // synthetic face (no real person) that turns when the app asks, so real landmarks and a real match are computed.
 // The 1.x version of this run and its screenshots are kept in evidence/kyc/v1/ and evidence/screenshots/kyc/v1/.
@@ -56,8 +56,8 @@ async function onboard(p, who, shots) {
   const snap = async (n) => { if (shots) await p.screenshot({ path: `${OUT}/${shots}-${n}.png` }); };
   await p.goto(`${WEB}/app`); await p.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
   await p.goto(`${WEB}/app/open`); await p.waitForTimeout(600); await snap("1-intro");
-  await p.getByText("I agree to the Paya prototype terms").click();
-  await p.getByText("I agree to Paya processing my photos").click();
+  await p.getByText("I agree to the Rupay prototype terms").click();
+  await p.getByText("I agree to Rupay processing my photos").click();
   await p.getByRole("button", { name: /Let's go/ }).click();
   await p.getByLabel("Full name").fill(who.name); await p.getByLabel("Date of birth").fill(who.dob);
   await p.getByLabel("Mobile").fill("0300 5550199"); await p.getByLabel("Username").fill(who.username); await p.getByLabel("Password").fill("demo-password-2026");
@@ -89,7 +89,7 @@ async function findApp(name) {
 }
 
 (async () => {
-  say(`# Theme 1 browser run (Paya 2.0) - ${new Date().toISOString()}`);
+  say(`# Theme 1 browser run (Rupay 2.0) - ${new Date().toISOString()}`);
   say(`Engine: ${JSON.stringify((await api("mudaser.ops", "/v1/kyc/engine")).body)}`);
   const b = await chromium.launch();
 

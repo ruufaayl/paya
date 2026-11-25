@@ -1,4 +1,4 @@
-// Theme 3 browser run: the Paya Assistant in the wallet, and the handoff in Mission Control. Real backend.
+// Theme 3 browser run: the Rupay Assistant in the wallet, and the handoff in Mission Control. Real backend.
 //   node docs/revamp/tools/assistant_e2e.cjs   (API :8000 fresh DB, web :5173)
 const { chromium, devices } = require("playwright");
 const fs = require("fs");
@@ -25,7 +25,7 @@ async function api(u, p, init = {}) { const t = await token(u); const r = await 
   const p = await (await b.newContext({ ...devices["iPhone 13"], deviceScaleFactor: 2 })).newPage();
   await p.goto(`${WEB}/app`); await p.evaluate(() => { localStorage.clear(); sessionStorage.clear(); }); await p.goto(`${WEB}/app`);
   await p.getByText("Sara Ahmed", { exact: true }).click(); await p.waitForTimeout(1200);
-  await p.getByText("Ask Paya").click(); await p.waitForTimeout(600);
+  await p.getByText("Ask Rupay").click(); await p.waitForTimeout(600);
   await p.screenshot({ path: `${OUT}/1-empty.png` });
   const ask = async (text) => { await p.getByLabel("Message the assistant").fill(text); await p.keyboard.press("Enter"); await p.waitForTimeout(1400); return p.locator('[role="log"]').innerText(); };
   let log = await ask("mera balance kitna hai");
