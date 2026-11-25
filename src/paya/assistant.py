@@ -132,7 +132,7 @@ def tool_recent(s: Session, cid: uuid.UUID, n: int = 5) -> list[Transaction]:
 def tool_find_payment(s: Session, cid: uuid.UUID, text: str, merchants: dict) -> Transaction | None:
     """By reference if one is quoted, else by a merchant the customer named, else the latest payment."""
     m = REF_RX.search(text)
-    q = select(Transaction).where(Transaction.customer_id == cid, Transaction.type == "PAYMENT")
+    q = select(Transaction).where(Transaction.customer_id == cid, Transaction.type.in_(("PAYMENT", "TRANSFER")))
     if m:
         return s.execute(q.where(Transaction.txn_ref == m.group(0).upper())).scalar_one_or_none()
     t = text.lower()

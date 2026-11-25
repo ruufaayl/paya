@@ -76,7 +76,7 @@ export function paymentMeta(status: string): StatusMeta {
 /** Customer-facing steps of a payment, in order. */
 export const JOURNEY = ["CREATED", "VALIDATED", "AUTHORISED", "POSTED", "PENDING", "SETTLED", "RECONCILED"] as const;
 export const STEP_TEXT: Record<string, { title: string; body: string }> = {
-  CREATED: { title: "Request received", body: "Paya received your payment request." },
+  CREATED: { title: "Request received", body: "We received your request." },
   VALIDATED: { title: "Checks passed", body: "Your wallet, limits and screening rules were checked." },
   AUTHORISED: { title: "Funds reserved", body: "The amount was reserved in your wallet." },
   POSTED: { title: "Recorded in the ledger", body: "A balanced double-entry posting was written." },

@@ -18,7 +18,11 @@ def _normalise(name: str) -> str:
     return " ".join(name.lower().replace(".", " ").split())
 
 
-def screen(s: Session, txn: Transaction, customer: Customer, merchant: Merchant) -> ScreeningResult:
+def screen(s: Session, txn: Transaction, customer: Customer, merchant: Merchant | None, *,
+           counterparty: str | None = None, category: str | None = None) -> ScreeningResult:
+    """Screen a shop payment (merchant) or a bank transfer (counterparty = the account holder's name)."""
+    counterparty = counterparty if merchant is None else merchant.trading_name
+    category = category if merchant is None else merchant.category
     cfg = get_settings()
     fired: list[dict] = []
     outcome = "PASS"
@@ -35,7 +39,7 @@ def screen(s: Session, txn: Transaction, customer: Customer, merchant: Merchant)
     window_start = now() - timedelta(seconds=cfg.velocity_window_seconds)
     recent = s.execute(
         select(func.count()).select_from(Transaction).where(
-            Transaction.customer_id == customer.id, Transaction.type == "PAYMENT",
+            Transaction.customer_id == customer.id, Transaction.type.in_(("PAYMENT", "TRANSFER")),
             Transaction.created_at >= window_start, Transaction.id != txn.id,
         )
     ).scalar_one()
@@ -43,7 +47,7 @@ def screen(s: Session, txn: Transaction, customer: Customer, merchant: Merchant)
         fired.append({"rule": "VELOCITY", "count": int(recent), "window_s": cfg.velocity_window_seconds, "action": "HOLD"})
         outcome = "HOLD"
 
-    if (_normalise(customer.full_name) in WATCHLIST or _normalise(merchant.trading_name) in WATCHLIST) and outcome != "REJECT":
+    if (_normalise(customer.full_name) in WATCHLIST or _normalise(counterparty or "") in WATCHLIST) and outcome != "REJECT":
         fired.append({"rule": "WATCHLIST_MATCH", "action": "HOLD"})
         outcome = "HOLD"
 
@@ -55,7 +59,7 @@ def screen(s: Session, txn: Transaction, customer: Customer, merchant: Merchant)
         txn_id=txn.id, outcome=outcome, rules_fired=fired, rule_version=cfg.rules_version,
         data_used={"kyc_status": customer.kyc_status, "kyc_tier": customer.kyc_tier,
                    "risk_rating": customer.risk_rating, "amount_minor": txn.amount_minor,
-                   "recent_payments": int(recent), "merchant_category": merchant.category},
+                   "recent_payments": int(recent), "merchant_category": category},
     )
     s.add(res)
     s.flush()

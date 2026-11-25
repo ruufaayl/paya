@@ -197,8 +197,12 @@ def dispatch(txn_id: uuid.UUID, *, only_first_send: bool = False) -> str:
         txn = _locked(s, txn_id)
         if txn is None or txn.status != "PENDING" or (only_first_send and txn.rail_attempts > 0):
             return "SKIPPED"
-        merchant = s.get(Merchant, txn.merchant_id)
-        e2e, amount, alias, ref = txn.rail_e2e_id, txn.amount_minor, merchant.raast_alias, txn.txn_ref
+        if txn.type == "TRANSFER":
+            from .banks import creditor_alias
+            alias = creditor_alias(s, txn.id)
+        else:
+            alias = s.get(Merchant, txn.merchant_id).raast_alias
+        e2e, amount, ref = txn.rail_e2e_id, txn.amount_minor, txn.txn_ref
         txn.rail_attempts += 1
     events.telemetry("rail", "sending", txn_ref=ref, detail={"e2e_id": e2e, "attempt": "send"})
     try:
@@ -253,7 +257,7 @@ def _settle(s: Session, txn: Transaction, *, actor: str, evidence: dict) -> None
     j = ledger.post(s, txn_id=txn.id, posting_type="SETTLE", reason_code="RAIL_SETTLEMENT_CONFIRMED", actor=actor,
                     correlation_id=txn.correlation_id, initiated_via="WORKER",
                     lines=[Line(in_transit.id, "D", txn.amount_minor), Line(settlement.id, "C", txn.amount_minor)])
-    fee = txn.amount_minor * get_settings().fee_bps // 10_000
+    fee = txn.amount_minor * get_settings().fee_bps // 10_000 if txn.merchant_id else 0   # transfers: no shop fee
     if fee > 0:
         recv = ledger.owned_account(s, "1300", "MERCHANT", txn.merchant_id)
         income = ledger.house_account(s, "4100")
@@ -266,9 +270,14 @@ def _settle(s: Session, txn: Transaction, *, actor: str, evidence: dict) -> None
         pr = s.get(PaymentRequest, txn.payment_request_id)
         pr.status = "PAID"
     m = s.get(Merchant, txn.merchant_id) if txn.merchant_id else None
+    if m is None and txn.type == "TRANSFER":
+        from .banks import counterparties
+        to = counterparties(s, [txn]).get(txn.id)
+    else:
+        to = m.trading_name if m else None
     events.telemetry("ledger", "settled", txn_ref=txn.txn_ref,
                      detail={"journal": "SETTLE", "dr": "2150 in transit", "cr": "1010 settlement", "fee_minor": fee,
-                             "amount_minor": txn.amount_minor, "merchant": m.trading_name if m else None})
+                             "amount_minor": txn.amount_minor, "merchant": to, "kind": txn.type})
 
 
 def _reverse(s: Session, txn: Transaction, *, actor: str, reason: str, initiated_via: str,

@@ -30,6 +30,7 @@ LIMITS = {
     "login_fail": ("login_max_failures", 900),
     "onboard_ip": ("rate_onboarding_per_ip_per_hour", 3600),
     "chat": ("rate_assistant_per_customer_per_minute", 60),
+    "title_fetch": ("rate_title_fetch_per_customer_per_minute", 60),
     "mfa": ("mfa_max_attempts", 300),
 }
 

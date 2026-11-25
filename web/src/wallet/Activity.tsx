@@ -18,7 +18,7 @@ export function ActivityRow({ t }: { t: WalletTxn }) {
   const title = t.type === "TOPUP" ? "Wallet top-up" : t.type === "REVERSAL" ? "Returned to wallet"
     : t.type === "GREEN_POT_IN" ? "Into your green pot" : t.type === "GREEN_POT_OUT" ? "From your green pot" : t.merchant || "Payment";
   const Icon = t.type.startsWith("GREEN_POT") ? PiggyBank : t.type === "REVERSAL" ? RotateCcw : incoming ? ArrowDownLeft : ArrowUpRight;
-  const clickable = t.type === "PAYMENT";
+  const clickable = t.type === "PAYMENT" || t.type === "TRANSFER";
   const Tag: any = clickable ? "button" : "div";
   return (
     <Tag onClick={clickable ? () => nav(`/app/txn/${t.txn_ref}`) : undefined}
@@ -30,7 +30,7 @@ export function ActivityRow({ t }: { t: WalletTxn }) {
       </span>
       <span className="flex flex-col items-end gap-1">
         <Money minor={incoming ? t.amount.minor : -t.amount.minor} sign className={`text-body font-semibold ${incoming ? "text-success" : "text-fg"}`} />
-        {t.type === "PAYMENT" && !["SETTLED", "RECONCILED"].includes(t.status) && <StatusBadge meta={meta} size="sm" />}
+        {(t.type === "PAYMENT" || t.type === "TRANSFER") && !["SETTLED", "RECONCILED"].includes(t.status) && <StatusBadge meta={meta} size="sm" />}
       </span>
     </Tag>
   );

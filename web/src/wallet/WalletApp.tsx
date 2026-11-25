@@ -14,6 +14,7 @@ import Cashier from "./Cashier";
 import Green from "./Green";
 import HomeScreen from "./Home";
 import Onboarding from "./Onboarding";
+import SendMoney from "./SendMoney";
 import Review from "./Review";
 import Scan from "./Scan";
 import Sandbox from "./Sandbox";
@@ -56,6 +57,7 @@ export default function WalletApp() {
               <Route path="scan" element={<Scan user={user} />} />
               <Route path="pay/:prId" element={<Review user={user} />} />
               <Route path="txn/:ref" element={<Txn user={user} />} />
+              <Route path="send" element={<SendMoney user={user} />} />
               <Route path="services" element={<Services user={user} />} />
               <Route path="services/:code" element={<ServiceScreen user={user} />} />
               <Route path="sandbox" element={<Sandbox user={user} />} />

@@ -185,7 +185,7 @@ class Transaction(Base):
     __tablename__ = "transactions"
     id: Mapped[uuid.UUID] = UUIDPK()
     txn_ref: Mapped[str] = mapped_column(String(32), unique=True, nullable=False)  # immutable business reference
-    type: Mapped[str] = mapped_column(String(16), nullable=False)  # PAYMENT | REVERSAL | REFUND | TOPUP
+    type: Mapped[str] = mapped_column(String(16), nullable=False)  # PAYMENT | TRANSFER | REVERSAL | REFUND | TOPUP
     status: Mapped[str] = mapped_column(String(16), nullable=False)
     version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)  # optimistic concurrency
     amount_minor: Mapped[int] = mapped_column(BigInteger, nullable=False)
@@ -207,14 +207,14 @@ class Transaction(Base):
     __table_args__ = (
         CheckConstraint("amount_minor > 0", name="ck_txn_amount"),
         CheckConstraint("currency = 'PKR'", name="ck_txn_currency"),
-        CheckConstraint("type IN ('PAYMENT','REVERSAL','REFUND','TOPUP','ADJUSTMENT','GREEN_POT_IN','GREEN_POT_OUT')",
+        CheckConstraint("type IN ('PAYMENT','TRANSFER','REVERSAL','REFUND','TOPUP','ADJUSTMENT','GREEN_POT_IN','GREEN_POT_OUT')",
                         name="ck_txn_type"),
         CheckConstraint(
             "status IN ('CREATED','VALIDATED','AUTHORISED','POSTED','PENDING','SETTLED','RECONCILED',"
             "'UNDER_REVIEW','REVERSED','REJECTED','FAILED','EXPIRED','COMPLETED')",
             name="ck_txn_status",
         ),
-        CheckConstraint("type IN ('PAYMENT','TOPUP','ADJUSTMENT','GREEN_POT_IN','GREEN_POT_OUT') OR original_txn_id IS NOT NULL",
+        CheckConstraint("type IN ('PAYMENT','TRANSFER','TOPUP','ADJUSTMENT','GREEN_POT_IN','GREEN_POT_OUT') OR original_txn_id IS NOT NULL",
                         name="ck_correction_links_original"),
         Index("ix_txn_status", "status"),
         # business idempotency: one live payment per payment request (QR / order), one reversal per original
@@ -627,3 +627,20 @@ class TelemetryLog(Base):
     at: Mapped[datetime] = TS()
     msg: Mapped[dict] = mapped_column(JSONB, nullable=False)
     __table_args__ = (Index("ix_telemetry_log_at", "at"),)
+
+
+# ---------------------------------------------------------------- Bank transfers (simulated)
+class BankTransfer(Base):
+    """Who a TRANSFER went to. Only the masked account number and a keyed hash are kept, never the full number,
+    and the account holder's name comes from the simulated bank directory (synthetic people only)."""
+    __tablename__ = "bank_transfers"
+    txn_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("transactions.id"), primary_key=True)
+    bank_code: Mapped[str] = mapped_column(String(8), nullable=False)
+    bank_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    account_masked: Mapped[str] = mapped_column(String(32), nullable=False)
+    account_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    title: Mapped[str] = mapped_column(String(64), nullable=False)
+    purpose: Mapped[str] = mapped_column(String(32), nullable=False)
+    title_fetch_ref: Mapped[str] = mapped_column(String(24), nullable=False)
+    created_at: Mapped[datetime] = TS()
+    __table_args__ = (Index("ix_bank_transfers_account", "account_hash"),)

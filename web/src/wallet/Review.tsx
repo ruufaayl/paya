@@ -94,7 +94,7 @@ export default function Review({ user }: { user: string }) {
 }
 
 /** Slide to authorise, with a keyboard/switch alternative (Enter or Space). */
-function SlideToPay({ onConfirm, busy, disabled, amount }: { onConfirm: () => void; busy: boolean; disabled?: boolean; amount: string }) {
+export function SlideToPay({ onConfirm, busy, disabled, amount, verb = "pay" }: { onConfirm: () => void; busy: boolean; disabled?: boolean; amount: string; verb?: string }) {
   const track = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const [max, setMax] = useState(260);
@@ -106,9 +106,9 @@ function SlideToPay({ onConfirm, busy, disabled, amount }: { onConfirm: () => vo
     <div ref={track} className={`relative h-[60px] overflow-hidden rounded-lg border border-line bg-sunken ${disabled && !busy ? "opacity-50" : ""}`}>
       <motion.div style={{ width: fill }} className="absolute inset-y-0 left-0 bg-brand/15" />
       <motion.span style={{ opacity: label }} className="pointer-events-none absolute inset-0 grid place-items-center text-body font-semibold text-fg-2">
-        {busy ? "Sending…" : `Slide to pay ${amount}`}
+        {busy ? "Sending…" : `Slide to ${verb} ${amount}`}
       </motion.span>
-      <motion.button type="button" role="slider" aria-valuemin={0} aria-valuemax={100} aria-valuenow={0} aria-label={`Authorise payment of ${amount}`}
+      <motion.button type="button" role="slider" aria-valuemin={0} aria-valuemax={100} aria-valuenow={0} aria-label={`Authorise ${verb === "pay" ? "payment" : "transfer"} of ${amount}`}
         disabled={disabled || busy} drag={disabled || busy ? false : "x"} dragConstraints={{ left: 0, right: max }} dragElastic={0} style={{ x }}
         onKeyDown={(e) => { if (!disabled && !busy && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); fire(); } }}
         onDragEnd={() => { if (x.get() > max * 0.85) fire(); else animate(x, 0, { type: "spring", stiffness: 420, damping: 32 }); }}

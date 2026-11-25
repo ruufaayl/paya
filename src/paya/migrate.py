@@ -22,7 +22,7 @@ from .config import get_settings
 
 BASELINE = "0001"
 SCHEMAS = ("public", "rail", "registry", "chain")
-APPEND_ONLY = ("ledger_entries", "journals", "audit_log", "transaction_status_history")
+APPEND_ONLY = ("ledger_entries", "journals", "audit_log", "transaction_status_history", "bank_transfers")
 
 
 def owner_url() -> str:

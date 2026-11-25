@@ -69,7 +69,7 @@ export default function Txn({ user }: { user: string }) {
     <div className="safe-top px-5 pb-8">
       <div className="flex items-center gap-2 pt-2">
         <IconButton label="Back to home" onClick={() => nav("/app")}><ArrowLeft className="h-5 w-5" /></IconButton>
-        <span className="text-body-sm text-fg-2">Payment</span>
+        <span className="text-body-sm text-fg-2">{d?.type === "TRANSFER" ? "Bank transfer" : "Payment"}</span>
       </div>
 
       <section aria-live="polite" className="mt-6 flex flex-col items-center text-center">
@@ -139,7 +139,7 @@ export default function Txn({ user }: { user: string }) {
         <div className="rounded-lg border border-dashed border-line-strong p-4">
           <div className="flex items-center justify-between"><Logo size={22} /><StatusBadge meta={meta} size="sm" /></div>
           <Money minor={d.amount.minor} className="mt-4 block font-display text-amount text-fg" />
-          <p className="text-body-sm text-fg-2">paid to {d.merchant}</p>
+          <p className="text-body-sm text-fg-2">{d.type === "TRANSFER" ? "sent to" : "paid to"} {d.merchant}</p>
           <dl className="mt-3 border-t border-line pt-2">
             <KV k="Date" v={fmtDateTime(d.rail_status.confirmed_at || d.updated_at)} />
             <KV k="Reference" v={d.txn_ref} mono />

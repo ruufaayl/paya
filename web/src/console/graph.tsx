@@ -114,6 +114,7 @@ export function effectOf(m: StreamMsg): Effect {
   switch (p) {
     case "merchant:payment_request_created": hop("cashier-gateway", COLORS.flow); node("cashier", "info", `QR for Rs ${(d.amount_minor || 0) / 100}`); break;
     case "gateway:accepted": hop("phone-gateway", COLORS.flow); node("gateway", "info", "request accepted"); break;
+    case "gateway:title_fetch": hop("phone-gateway", COLORS.flow); node("gateway", "info", `account title fetch · ${d.bank} (simulated)`); break;
     case "gateway:idempotent_replay": hop("phone-gateway", COLORS.warn); node("gateway", "warn", "retry replayed - no double debit"); break;
     case "risk:screening": hop("gateway-risk", COLORS.flow); node("risk", "info", "screening"); break;
     case "risk:passed": hop("risk-ledger", COLORS.info); node("risk", "info", "all rules passed"); break;

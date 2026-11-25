@@ -25,15 +25,22 @@ def _fmt(minor: int) -> str:
 def handle(s: Session, env: dict) -> None:
     p = env["payload"]
     txn = s.get(Transaction, p["txn_id"]) if p.get("txn_id") else None
-    if txn is None or txn.type != "PAYMENT":
+    if txn is None or txn.type not in ("PAYMENT", "TRANSFER"):
         return
-    merchant = s.get(Merchant, txn.merchant_id)
-    ctx = {"amt": _fmt(txn.amount_minor), "ref": txn.txn_ref, "merchant": merchant.trading_name if merchant else ""}
+    if txn.type == "TRANSFER":
+        from .banks import counterparties
+        who = counterparties(s, [txn]).get(txn.id, "the account")
+    else:
+        merchant = s.get(Merchant, txn.merchant_id)
+        who = merchant.trading_name if merchant else ""
+    ctx = {"amt": _fmt(txn.amount_minor), "ref": txn.txn_ref, "merchant": who}
     if env["type"] in TEMPLATES:
         rcpt, tpl = TEMPLATES[env["type"]]
+        if txn.type == "TRANSFER" and env["type"] == "payment.settled":
+            tpl = "Sent PKR {amt} to {merchant}. Ref {ref}."
         s.add(Notification(txn_id=txn.id, recipient=rcpt, template=env["type"], body=tpl.format(**ctx),
                            source_event_id=env["event_id"]))
-    if env["type"] in MERCHANT_TEMPLATES:
+    if env["type"] in MERCHANT_TEMPLATES and txn.merchant_id:
         s.add(Notification(txn_id=txn.id, recipient="MERCHANT", template=env["type"],
                            body=MERCHANT_TEMPLATES[env["type"]].format(**ctx), source_event_id=env["event_id"]))
     events.telemetry("notification", "sent", txn_ref=txn.txn_ref, detail={"event": env["type"]})

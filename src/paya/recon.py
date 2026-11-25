@@ -62,7 +62,7 @@ def run(settlement_file: dict, *, actor: str) -> dict:
             # Internal side: every payment that reached the rail on or before this business date.
             internal = s.execute(
                 select(Transaction).where(
-                    Transaction.type == "PAYMENT", Transaction.rail_e2e_id.is_not(None),
+                    Transaction.type.in_(("PAYMENT", "TRANSFER")), Transaction.rail_e2e_id.is_not(None),
                     Transaction.status.in_(["PENDING", "SETTLED", "UNDER_REVIEW", "REVERSED"]),
                     func.date(Transaction.pending_since) <= biz_date,
                 ).with_for_update()

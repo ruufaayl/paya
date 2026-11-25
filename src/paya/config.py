@@ -58,6 +58,7 @@ class Settings(BaseSettings):
     login_max_failures: int = 5                    # per username per 15 minutes, then locked
     rate_onboarding_per_ip_per_hour: int = 10
     rate_assistant_per_customer_per_minute: int = 20
+    rate_title_fetch_per_customer_per_minute: int = 20   # account-name lookups (stops enumerating the directory)
     rate_general_per_client_per_minute: int = 600   # every /v1 call, per signed-in user (else per address)
     trust_forwarded_for: bool = False              # only behind a reverse proxy you control
 

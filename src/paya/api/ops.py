@@ -88,13 +88,15 @@ def search_transactions(
                          .limit(page_size)).scalars().all()
         ids = [t.id for t in rows]
         merchants = {m.id: m.trading_name for m in s.execute(select(Merchant)).scalars()}
+        from .. import banks
+        merchants.update(banks.counterparties(s, rows))
         cust = {c.id: c.full_name for c in s.execute(select(Customer).where(
             Customer.id.in_([t.customer_id for t in rows if t.customer_id]))).scalars()}
         screened = set(s.execute(flagged_ids.where(ScreeningResult.txn_id.in_(ids))).scalars())
         cased = set(s.execute(select(Case.txn_id).where(Case.txn_id.in_(ids))).scalars())
         items = [{
             "txn_ref": t.txn_ref, "type": t.type, "status": t.status, "display_status": CUSTOMER_STATUS[t.status],
-            "amount": money(t.amount_minor), "merchant": merchants.get(t.merchant_id), "customer": cust.get(t.customer_id),
+            "amount": money(t.amount_minor), "merchant": merchants.get(t.merchant_id) or merchants.get(t.id), "customer": cust.get(t.customer_id),
             "rail_e2e_id": t.rail_e2e_id, "rail_attempts": t.rail_attempts, "recon_result": t.recon_result,
             "correlation_id": t.correlation_id, "failure_reason": t.failure_reason,
             "flags": ([FLAG_SCREENING] if t.id in screened else []) + (["CASE"] if t.id in cased else []),
@@ -120,7 +122,7 @@ def timeseries(window_minutes: int = Query(60, ge=5, le=24 * 60), buckets: int =
     width = (end - start) / buckets
     with session_scope() as s:
         txns = s.execute(select(Transaction.id, Transaction.status, Transaction.amount_minor, Transaction.created_at)
-                         .where(Transaction.type == "PAYMENT", Transaction.created_at >= start)).all()
+                         .where(Transaction.type.in_(("PAYMENT", "TRANSFER")), Transaction.created_at >= start)).all()
         settled_at = dict(s.execute(select(TransactionStatusHistory.txn_id, func.min(TransactionStatusHistory.created_at))
                                     .where(TransactionStatusHistory.to_status == "SETTLED",
                                            TransactionStatusHistory.txn_id.in_([t.id for t in txns]))
@@ -158,7 +160,7 @@ def overview(p: Principal = Depends(authorised("backoffice:read"))):
     from ..rail import breaker, chaos
     from ..registry import registry
     with session_scope() as s:
-        by_status = dict(s.execute(select(Transaction.status, func.count()).where(Transaction.type == "PAYMENT")
+        by_status = dict(s.execute(select(Transaction.status, func.count()).where(Transaction.type.in_(("PAYMENT", "TRANSFER")))
                                    .group_by(Transaction.status)).all())
         open_cases = dict(s.execute(select(Case.kind, func.count()).where(Case.state != "RESOLVED")
                                     .group_by(Case.kind)).all())
@@ -171,7 +173,7 @@ def overview(p: Principal = Depends(authorised("backoffice:read"))):
                                  .where(KYCApplication.state == "REFERRED")).scalar_one()
         last_run = s.execute(select(ReconRun).order_by(ReconRun.created_at.desc()).limit(1)).scalar_one_or_none()
         unacked = s.execute(select(func.count()).select_from(Transaction).where(
-            Transaction.type == "PAYMENT", Transaction.status == "PENDING")).scalar_one()
+            Transaction.type.in_(("PAYMENT", "TRANSFER")), Transaction.status == "PENDING")).scalar_one()
         in_transit = ledger.ledger_balance(s, ledger.house_account(s, "2150"))
         checks = integrity.run(s)
     total = sum(by_status.values())

@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 
-from .. import ai_service, audit, events, kyc, ledger, notifications, payments, recon
+from .. import ai_service, audit, banks, events, kyc, ledger, notifications, payments, recon
 from ..config import get_settings, on_vercel
 from ..db import create_schema, session_scope
 from ..errors import Forbidden, LoginLocked, NotFound, PayaError, Unauthenticated, ValidationFailed
@@ -293,6 +293,63 @@ def pay(body: PayIn, request: Request, background: BackgroundTasks,
     return JSONResponse(status_code=code, content=resp, headers={"Idempotent-Replayed": str(replayed).lower()})
 
 
+# ------------------------------------------------------------------ send money to a bank account (simulated)
+class TitleFetchIn(BaseModel):
+    bank_code: str = Field(min_length=4, max_length=8)
+    account: str = Field(min_length=10, max_length=34)
+
+
+class TransferIn(TitleFetchIn):
+    amount_minor: int = Field(gt=0)
+    purpose: str
+
+
+@app.get("/v1/banks", tags=["transfers"])
+def bank_list(p: Principal = Depends(authorised("payment:pay"))):
+    """Banks and wallets the customer can send to, test accounts for the demo, and transfer purposes."""
+    return {"banks": banks.BANKS, "purposes": banks.PURPOSES,
+            "demo_accounts": [{**a, "bank_name": banks.BY_CODE[a["bank"]]["name"]} for a in banks.DEMO_ACCOUNTS],
+            "directory": "simulated: synthetic account holders only; no real bank is contacted"}
+
+
+@app.post("/v1/transfers/title-fetch", tags=["transfers"])
+def title_fetch(body: TitleFetchIn, p: Principal = Depends(authorised("payment:pay"))):
+    """Look up the account holder's name before sending (simulated directory). Rate-limited per customer."""
+    ratelimit.hit("title_fetch", p.user_id)
+    found = banks.lookup(body.bank_code, body.account)
+    events.telemetry("gateway", "title_fetch", detail={"bank": found.bank["code"], "ref": found.fetch_ref})
+    return {"bank_code": found.bank["code"], "bank_name": found.bank["name"], "account_masked": found.masked,
+            "title": found.title, "fetch_ref": found.fetch_ref, "simulated": True}
+
+
+@app.post("/v1/transfers", status_code=202, tags=["transfers"])
+def transfer(body: TransferIn, request: Request, background: BackgroundTasks,
+             p: Principal = Depends(authorised("payment:pay")),
+             idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None):
+    """Send money to a bank account: same money path as a QR payment (screening, hold, ledger, Raast)."""
+    cid = request.state.correlation_id
+
+    def run():
+        txn = banks.initiate_transfer(customer_id=uuid.UUID(p.customer_id), bank_code=body.bank_code,
+                                      account=body.account, amount_minor=body.amount_minor, purpose=body.purpose,
+                                      actor=p.username, correlation_id=cid)
+        return 202, {"txn_ref": txn.txn_ref, "txn_id": str(txn.id), "status": txn.status,
+                     "display_status": CUSTOMER_STATUS[txn.status], "amount": money(txn.amount_minor),
+                     "failure_reason": txn.failure_reason, "correlation_id": cid}
+
+    # The full account number is part of the request only; the idempotency record keeps a hash of the body.
+    code, resp, replayed = idempotent(principal=p.user_id, operation="POST /v1/transfers", key=idempotency_key,
+                                      body=body.model_dump(mode="json"), fn=run)
+    if not replayed and resp.get("status") == "PENDING":
+        if on_vercel():
+            _dispatch_and_relay(uuid.UUID(resp["txn_id"]))
+        else:
+            background.add_task(_dispatch_and_relay, uuid.UUID(resp["txn_id"]))
+    else:
+        background.add_task(_safe_relay)
+    return JSONResponse(status_code=code, content=resp, headers={"Idempotent-Replayed": str(replayed).lower()})
+
+
 def _dispatch_and_relay(txn_id: uuid.UUID) -> None:
     """Runs after the response is sent. It must never raise: an exception here would drop the client's
     keep-alive connection. Anything it fails to do, the recovery worker finishes from the database."""
@@ -320,12 +377,13 @@ def wallet(p: Principal = Depends(authorised("payment:read_own"))):
         txns = s.execute(select(Transaction).where(Transaction.customer_id == cust.id)
                          .order_by(Transaction.created_at.desc()).limit(30)).scalars().all()
         merchants = {m.id: m.trading_name for m in s.execute(select(Merchant)).scalars()}
+        to = banks.counterparties(s, txns)
         return {"customer": {"name": cust.full_name, "kyc_tier": cust.kyc_tier, "kyc_status": cust.kyc_status},
                 "ledger_balance": money(ledger.ledger_balance(s, acc)),
                 "available_balance": money(ledger.available_balance(s, acc)),
                 "transactions": [{"txn_ref": t.txn_ref, "type": t.type, "amount": money(t.amount_minor),
                                   "status": t.status, "display_status": CUSTOMER_STATUS[t.status],
-                                  "merchant": merchants.get(t.merchant_id), "created_at": t.created_at.isoformat()}
+                                  "merchant": merchants.get(t.merchant_id) or to.get(t.id), "created_at": t.created_at.isoformat()}
                                  for t in txns]}
 
 
@@ -349,7 +407,9 @@ def transaction_detail(txn_ref: str, p: Principal = Depends(principal)):
                             .order_by(TransactionStatusHistory.id)).scalars().all()
         detail = {
             "txn_ref": t.txn_ref, "type": t.type, "status": t.status, "display_status": CUSTOMER_STATUS[t.status],
-            "amount": money(t.amount_minor), "currency": t.currency, "merchant": m.trading_name if m else None,
+            "amount": money(t.amount_minor), "currency": t.currency,
+            "merchant": m.trading_name if m else banks.counterparties(s, [t]).get(t.id),
+            "beneficiary": banks.beneficiary(s, t.id) if t.type == "TRANSFER" else None,
             "created_at": t.created_at.isoformat(), "updated_at": t.updated_at.isoformat(),
             "references": {"txn_id": str(t.id), "correlation_id": t.correlation_id, "rail": t.rail,
                            "rail_e2e_id": t.rail_e2e_id,
@@ -387,7 +447,8 @@ def transaction_detail(txn_ref: str, p: Principal = Depends(principal)):
                                for a in s.execute(select(AuditLog).where(AuditLog.object_id == t.txn_ref)
                                                   .order_by(AuditLog.id)).scalars()]
         # Customer-safe money trail: what happened to the customer's money, from the ledger itself.
-        trail_text = {"AUTH_POST": "Taken from your wallet and held in transit", "SETTLE": "Raast confirmed: paid to the shop",
+        trail_text = {"AUTH_POST": "Taken from your wallet and held in transit",
+                      "SETTLE": "Raast confirmed: sent to the bank account" if t.type == "TRANSFER" else "Raast confirmed: paid to the shop",
                       "REVERSAL": "Returned to your wallet",
                       "GREEN_POT_IN": "Moved from your wallet into your green pot",
                       "GREEN_POT_OUT": "Moved from your green pot back to your wallet"}
@@ -585,7 +646,7 @@ def audit_verify(p: Principal = Depends(authorised("audit:read"))):
 @app.get("/v1/metrics/summary", tags=["observability"])
 def metrics_summary(p: Principal = Depends(authorised("backoffice:read"))):
     with session_scope() as s:
-        by_status = dict(s.execute(select(Transaction.status, func.count()).where(Transaction.type == "PAYMENT")
+        by_status = dict(s.execute(select(Transaction.status, func.count()).where(Transaction.type.in_(("PAYMENT", "TRANSFER")))
                                    .group_by(Transaction.status)).all())
         total = sum(by_status.values()) or 1
         in_transit = ledger.ledger_balance(s, ledger.house_account(s, "2150"))
@@ -823,7 +884,7 @@ def healthz():
 @app.get("/metrics", response_class=PlainTextResponse, tags=["observability"])
 def prometheus():
     with session_scope() as s:
-        rows = s.execute(select(Transaction.status, func.count()).where(Transaction.type == "PAYMENT")
+        rows = s.execute(select(Transaction.status, func.count()).where(Transaction.type.in_(("PAYMENT", "TRANSFER")))
                          .group_by(Transaction.status)).all()
         open_cases = s.execute(select(func.count()).select_from(Case).where(Case.state != "RESOLVED")).scalar_one()
         in_transit = ledger.ledger_balance(s, ledger.house_account(s, "2150"))

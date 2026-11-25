@@ -40,7 +40,7 @@ def run(s: Session) -> dict:
                       "PENDING payments the worker has not dispatched (worker down?)"))
 
     # ---- Layer 2: operational
-    paid = select(Transaction.id).where(Transaction.type == "PAYMENT",
+    paid = select(Transaction.id).where(Transaction.type.in_(("PAYMENT", "TRANSFER")),
                                         Transaction.status.in_(["SETTLED", "RECONCILED"]),
                                         Transaction.updated_at < t - timedelta(seconds=30))
     notified = select(Notification.txn_id).where(Notification.template == "payment.settled",
@@ -85,7 +85,7 @@ def run(s: Session) -> dict:
                       "sum of all debits equals sum of all credits"))
     in_transit = ledger.ledger_balance(s, ledger.house_account(s, "2150"))
     expected = s.execute(select(func.coalesce(func.sum(Transaction.amount_minor), 0)).where(
-        Transaction.type == "PAYMENT", Transaction.status.in_(["PENDING", "UNDER_REVIEW"]),
+        Transaction.type.in_(("PAYMENT", "TRANSFER")), Transaction.status.in_(["PENDING", "UNDER_REVIEW"]),
         Transaction.rail_e2e_id.is_not(None))).scalar_one()
     out.append(_check("financial", "in_transit_equals_open_payments", in_transit == expected,
                       {"ledger_2150": in_transit, "open_payments": int(expected)},
@@ -135,7 +135,7 @@ def run(s: Session) -> dict:
     out.append(_check("financial", "sandbox_tokens_never_in_rupee_ledger", leaked == 0, leaked,
                       "test tokens must never be booked as rupees"))
     unreconciled = s.execute(select(func.count()).select_from(Transaction).where(
-        Transaction.type == "PAYMENT", Transaction.status == "SETTLED", Transaction.recon_result.is_(None),
+        Transaction.type.in_(("PAYMENT", "TRANSFER")), Transaction.status == "SETTLED", Transaction.recon_result.is_(None),
         Transaction.updated_at < t - timedelta(hours=36))).scalar_one()
     out.append(_check("financial", "settled_but_unreconciled_after_d1", unreconciled == 0, unreconciled,
                       "settled payments no settlement file has covered after D+1 (a file may be missing or identical "
